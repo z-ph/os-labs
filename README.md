@@ -4,7 +4,7 @@
 
 ## 在线浏览
 
-GitHub Pages 入口：[点击浏览交互式页面](https://username.github.io/repo-name/)
+GitHub Pages: [https://z-ph.github.io/os-labs/](https://z-ph.github.io/os-labs/)
 
 ## 文件说明
 
