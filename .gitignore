@@ -1,0 +1,15 @@
+# 忽略大文件和原始文档
+*.doc
+*.docx
+*.pdf
+
+# 忽略编辑器文件
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# 忽略操作系统文件
+.DS_Store
+Thumbs.db

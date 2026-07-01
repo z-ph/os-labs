@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>操作系统实验与课设 · 要求解析与完成路径规划</title>
+    <style>
+        :root {
+            --primary: #1a56db;
+            --primary-light: #e1effe;
+            --accent: #0e9f6e;
+            --accent-light: #def7ec;
+            --warning: #faca15;
+            --warning-light: #fdf6b2;
+            --danger: #f05252;
+            --danger-light: #fde8e8;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        header {
+            background: linear-gradient(135deg, #1a56db 0%, #0e9f6e 100%);
+            color: white;
+            padding: 48px 24px;
+            text-align: center;
+            border-radius: var(--radius);
+            margin-bottom: 32px;
+            box-shadow: var(--shadow);
+        }
+        header h1 { font-size: 2rem; margin-bottom: 8px; }
+        header p { opacity: 0.9; font-size: 1.1rem; }
+        
+        .grid { display: grid; gap: 24px; }
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .card-title {
+            font-size: 1.25rem; font-weight: 700; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .badge {
+            display: inline-flex; align-items: center; padding: 4px 12px;
+            border-radius: 999px; font-size: 0.75rem; font-weight: 600;
+        }
+        .badge-blue { background: var(--primary-light); color: var(--primary); }
+        .badge-green { background: var(--accent-light); color: var(--accent); }
+        .badge-yellow { background: var(--warning-light); color: #8e6b0f; }
+        .badge-red { background: var(--danger-light); color: var(--danger); }
+        
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; padding: 16px; background: var(--card-bg);
+            border-radius: var(--radius); margin-bottom: 8px;
+            border: 1px solid var(--border); font-weight: 600;
+            transition: background 0.2s;
+        }
+        .section-header:hover { background: var(--primary-light); }
+        .section-header .toggle-icon { transition: transform 0.3s; font-size: 1.2rem; }
+        .section-header.active .toggle-icon { transform: rotate(180deg); }
+        .section-content {
+            max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out;
+            background: var(--card-bg); border-radius: 0 0 var(--radius) var(--radius);
+            border: 1px solid var(--border); border-top: none;
+        }
+        .section-content.open { max-height: 2000px; padding: 16px; margin-bottom: 16px; }
+        
+        .exp-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px; border-radius: 8px; margin-bottom: 8px;
+            border: 1px solid var(--border); cursor: pointer;
+            transition: all 0.2s;
+        }
+        .exp-item:hover { border-color: var(--primary); background: var(--primary-light); }
+        .exp-item.selected {
+            border-color: var(--accent); background: var(--accent-light);
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+        .exp-item input[type="checkbox"] {
+            width: 20px; height: 20px; accent-color: var(--accent); margin-top: 2px; cursor: pointer;
+        }
+        .exp-item .exp-title { font-weight: 600; font-size: 0.95rem; }
+        .exp-item .exp-desc { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
+        
+        .planner {
+            position: sticky; top: 16px;
+            background: var(--card-bg); border-radius: var(--radius);
+            padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border);
+        }
+        .stat-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid var(--border);
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { font-weight: 500; color: var(--text-secondary); }
+        .stat-value { font-weight: 700; font-size: 1.1rem; }
+        .progress-bar {
+            width: 100%; height: 8px; background: var(--border);
+            border-radius: 4px; overflow: hidden; margin-top: 4px;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.5s ease; border-radius: 4px;
+        }
+        
+        .grade-box {
+            text-align: center; padding: 16px; border-radius: var(--radius);
+            margin-top: 16px; font-weight: 700; font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+        .grade-pass { background: var(--warning-light); color: #8e6b0f; }
+        .grade-good { background: #e0f2fe; color: #0369a1; }
+        .grade-excellent { background: var(--accent-light); color: var(--accent); }
+        .grade-incomplete { background: var(--danger-light); color: var(--danger); }
+        
+        .roadmap {
+            background: var(--card-bg); border-radius: var(--radius);
+            padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border);
+            margin-top: 24px;
+        }
+        .roadmap h3 { margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .roadmap-step {
+            display: flex; gap: 16px; margin-bottom: 16px; position: relative;
+        }
+        .roadmap-step::before {
+            content: ''; position: absolute; left: 15px; top: 32px; bottom: -16px;
+            width: 2px; background: var(--border);
+        }
+        .roadmap-step:last-child::before { display: none; }
+        .roadmap-num {
+            width: 32px; height: 32px; border-radius: 50%; background: var(--primary);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.9rem; flex-shrink: 0; z-index: 1;
+        }
+        .roadmap-content { flex: 1; }
+        .roadmap-title { font-weight: 600; margin-bottom: 4px; }
+        .roadmap-desc { font-size: 0.9rem; color: var(--text-secondary); }
+        
+        .course-design {
+            margin-top: 32px;
+        }
+        .course-design .card {
+            border-left: 4px solid var(--primary);
+        }
+        
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 10px 20px; border-radius: 8px; font-weight: 600;
+            border: none; cursor: pointer; transition: all 0.2s; font-size: 0.95rem;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1e429f; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--bg); }
+        
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .tag { padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; background: var(--bg); color: var(--text-secondary); }
+        
+        .hidden { display: none; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .requirement-box {
+            background: var(--primary-light); border: 1px solid #bfdbfe;
+            border-radius: var(--radius); padding: 20px; margin-bottom: 24px;
+        }
+        .requirement-box h2 { color: var(--primary); margin-bottom: 12px; font-size: 1.2rem; }
+        .requirement-box ul { margin-left: 20px; }
+        .requirement-box li { margin-bottom: 8px; }
+        
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>操作系统实验与课设 · 要求解析与完成路径规划</h1>
+    <p>基于 2026 年广东工业大学自编实践教材与企业导师实践要求</p>
+</header>
+
+<div class="container">
+
+    <!-- 总体要求 -->
+    <div class="requirement-box">
+        <h2>📋 总体要求速览</h2>
+        <ul>
+            <li><strong>实验部分：</strong>共 <strong>6 大类</strong>实践内容，<strong>4 个大类（9.1–9.4）</strong>下含 10 个小实验。<br>
+                至少完成 <strong>3 个</strong>且<strong>分属不同大类</strong>的小实验；若要评<strong>良</strong>需完成 <strong>4 个</strong>，评<strong>优</strong>需完成 <strong>5 个以上</strong>。</li>
+            <li><strong>课设部分：</strong>完成 <strong>9.5（银河麒麟适配迁移）</strong>或 <strong>9.6（虚拟化技术与应用）</strong>中任一课题。<br>
+                良/优要求按照“完整项目要求”实现，模板参考《企业导师实践第一课》PDF 中 <strong>“03 系统适配迁移”</strong> 章节。</li>
+        </ul>
+    </div>
+
+    <div class="grid grid-2">
+        <!-- 左侧：实验列表 -->
+        <div>
+            <h2 style="margin-bottom:16px">🧪 实验清单（9.1–9.4）</h2>
+            
+            <!-- 9.1 调度器 -->
+            <div class="section-header" onclick="toggleSection(this, 'sec-9.1')">
+                <span>9.1 调度器（2 个小实验）</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div id="sec-9.1" class="section-content">
+                <div class="exp-item" data-cat="9.1" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-911" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.1.1 基于 Kylin OS 的进程调度与优先级实验</div>
+                        <div class="exp-desc">编写多线程高 CPU 负载程序（nice-exp.c），编译运行后观察 top 中的 CPU 占用；绑定 CPU 核心并调整 nice 值，验证 CFS 调度器的时间片分配比例（约 3:1）。</div>
+                        <div class="tag-list">
+                            <span class="tag">C 语言</span><span class="tag">pthread</span><span class="tag">nice/renice</span><span class="tag">taskset</span><span class="tag">CFS</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="exp-item" data-cat="9.1" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-912" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.1.2 实现 O(1) 调度器算法</div>
+                        <div class="exp-desc">使用查表法（OSUnMapTbl[256]）与位运算实现 O(1) 优先级调度，模拟就绪组 OSRdyGrp 和就绪表 OSRdyTbl，快速定位最高优先级任务（无循环遍历）。</div>
+                        <div class="tag-list">
+                            <span class="tag">C 语言</span><span class="tag">位运算</span><span class="tag">查表法</span><span class="tag">实时调度</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9.2 内存管理 -->
+            <div class="section-header" onclick="toggleSection(this, 'sec-9.2')">
+                <span>9.2 内存管理（3 个小实验，不含 QEMU 安装）</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div id="sec-9.2" class="section-content">
+                <div class="exp-item" data-cat="9.2" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-922" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.2.2 页表快照实验</div>
+                        <div class="exp-desc">在 QEMU 虚拟机中运行 pgd-walk 程序，使用 dump-guest-memory 导出物理内存，在 WSL2 Ubuntu 中用 crash 工具手动分析页表，完成虚拟地址 → 物理地址映射。</div>
+                        <div class="tag-list">
+                            <span class="tag">QEMU</span><span class="tag">WSL2</span><span class="tag">crash</span><span class="tag">MMU</span><span class="tag">页表漫游</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="exp-item" data-cat="9.2" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-923" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.2.3 Slab 内存分配实验</div>
+                        <div class="exp-desc">编写内核模块 slab_test.c，使用 kmem_cache_create 创建 Slab 缓存，kmem_cache_alloc / kmem_cache_free 分配与释放内存，演示链表遍历与安全释放。</div>
+                        <div class="tag-list">
+                            <span class="tag">内核模块</span><span class="tag">Slab 分配器</span><span class="tag">Linux Kernel</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="exp-item" data-cat="9.2" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-924" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.2.4 内存回收实验（OOM）</div>
+                        <div class="exp-desc">编写用户态程序 oom.c，死循环疯狂申请物理内存；关闭 Swap 后观察系统内存下降，直到触发 OOM Killer，通过 dmesg 查看内核日志确认进程被杀。</div>
+                        <div class="tag-list">
+                            <span class="tag">内存管理</span><span class="tag">OOM Killer</span><span class="tag">dmesg</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9.3 文件系统 -->
+            <div class="section-header" onclick="toggleSection(this, 'sec-9.3')">
+                <span>9.3 文件系统（2 个小实验）</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div id="sec-9.3" class="section-content">
+                <div class="exp-item" data-cat="9.3" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-931" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.3.1 文件系统底层存储调试与扇区映射实验</div>
+                        <div class="exp-desc">使用 debugfs、blkcat、blktrace、blkparse 等工具调试 ext 文件系统，掌握 inode ↔ block ↔ sector ↔ content 的映射关系，监控底层 I/O 流程。</div>
+                        <div class="tag-list">
+                            <span class="tag">debugfs</span><span class="tag">blktrace</span><span class="tag">blkcat</span><span class="tag">inode</span><span class="tag">ext4</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="exp-item" data-cat="9.3" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-932" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.3.2 简易文件系统设计实现及高级缓存功能开发</div>
+                        <div class="exp-desc">编写一个简易文件系统（如基于 FUSE 或内核模块），实现基本创建/读写功能；进阶可加入 Page Cache 支持，提升文件读写性能。</div>
+                        <div class="tag-list">
+                            <span class="tag">文件系统</span><span class="tag">FUSE</span><span class="tag">Page Cache</span><span class="tag">内核编程</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9.4 系统管理 -->
+            <div class="section-header" onclick="toggleSection(this, 'sec-9.4')">
+                <span>9.4 银河麒麟高级服务器操作系统管理（3 个小实验）</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div id="sec-9.4" class="section-content">
+                <div class="exp-item" data-cat="9.4" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-941" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.4.1 多用户与权限管理</div>
+                        <div class="exp-desc">设置目录拥有者/组（chown）、权限位（chmod 660）、粘滞位（o+t），以及 ACL 扩展权限（setfacl/getfacl），实现 yinhe/kylin/school 用户组的精细化权限控制。</div>
+                        <div class="tag-list">
+                            <span class="tag">权限管理</span><span class="tag">ACL</span><span class="tag">chmod</span><span class="tag">chown</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="exp-item" data-cat="9.4" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-942" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.4.2 文件快速定位与管理</div>
+                        <div class="exp-desc">熟练使用 find、grep、cat、less、more、head、tail、file、stat 等命令，完成按文件名/类型/大小/内容查找与分页查看。</div>
+                        <div class="tag-list">
+                            <span class="tag">find</span><span class="tag">grep</span><span class="tag">stat</span><span class="tag">文件检索</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="exp-item" data-cat="9.4" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-943" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.4.3 数据检索与处理</div>
+                        <div class="exp-desc">使用 grep 正则过滤、wc 统计、sort 排序等工具，对 /etc/passwd 等系统文件进行多条件检索与数据分析，掌握 -A/-B/-C 上下文显示等高级用法。</div>
+                        <div class="tag-list">
+                            <span class="tag">grep 正则</span><span class="tag">wc</span><span class="tag">文本处理</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 课设部分 -->
+            <h2 style="margin:32px 0 16px">🎓 课程设计（二选一）</h2>
+            <div class="section-header" onclick="toggleSection(this, 'sec-9.5')">
+                <span>9.5 银河麒麟适配迁移</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div id="sec-9.5" class="section-content">
+                <div class="exp-item" data-cat="9.5" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-951" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.5.1 基于 DEB 格式的国产操作系统适配打包规范</div>
+                        <div class="exp-desc">按规范构建 deb 包目录结构（opt/apps/…、usr/share/applications/…），准备 .desktop 文件与图标，完成 PyCharm 等软件的打包与安装测试。</div>
+                        <div class="tag-list">
+                            <span class="tag">DEB 打包</span><span class="tag">desktop</span><span class="tag">适配规范</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="exp-item" data-cat="9.5" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-952" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.5.2 基于 RPM 格式的国产操作系统适配打包规范</div>
+                        <div class="exp-desc">初始化 rpmbuild 目录结构（BUILD/BUILDROOT/RPMS/SOURCES/SPECS/SRPMS），编写 spec 文件，编译 hello 等源码并制作 RPM 包，完成安装/卸载测试。</div>
+                        <div class="tag-list">
+                            <span class="tag">RPM 打包</span><span class="tag">spec 文件</span><span class="tag">编译适配</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header" onclick="toggleSection(this, 'sec-9.6')">
+                <span>9.6 虚拟化技术与应用</span>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div id="sec-9.6" class="section-content">
+                <div class="exp-item" data-cat="9.6" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-961" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.6.1 容器化负载均衡部署实践</div>
+                        <div class="exp-desc">部署 Docker 服务，基于 kylin-server 镜像构建 Nginx + Tomcat 容器，通过 Dockerfile 自动化安装，最终实现 Nginx 负载均衡后端两个 Tomcat 容器。</div>
+                        <div class="tag-list">
+                            <span class="tag">Docker</span><span class="tag">Nginx</span><span class="tag">Tomcat</span><span class="tag">负载均衡</span><span class="tag">Dockerfile</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="exp-item" data-cat="9.6" onclick="toggleExp(this)">
+                    <input type="checkbox" id="exp-962" onchange="updatePlanner()">
+                    <div>
+                        <div class="exp-title">9.6.2 电商 Web 大并发解耦解决方案</div>
+                        <div class="exp-desc">部署 Docker 并导入 kylin 镜像，创建 nginx-1 / nginx-2 容器并配置持久化存储；在本机部署 Nginx 集群，采用轮询算法实现业务服务器负载均衡。</div>
+                        <div class="tag-list">
+                            <span class="tag">Docker</span><span class="tag">LNMP</span><span class="tag">Nginx 集群</span><span class="tag">轮询</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：规划面板 -->
+        <div>
+            <div class="planner">
+                <h2 style="margin-bottom:16px">📊 完成路径规划器</h2>
+                
+                <div class="stat-row">
+                    <span class="stat-label">已选大类数</span>
+                    <span class="stat-value" id="cat-count">0 / 4</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">已选小实验数</span>
+                    <span class="stat-value" id="exp-count">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">是否含课设</span>
+                    <span class="stat-value" id="course-count">否</span>
+                </div>
+                <div style="margin-top:12px">
+                    <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:4px">实验完成进度</div>
+                    <div class="progress-bar"><div class="progress-fill" id="progress-bar" style="width:0%"></div></div>
+                </div>
+
+                <div class="grade-box grade-incomplete" id="grade-box">
+                    尚未满足最低要求<br>
+                    <span style="font-size:0.9rem;font-weight:400">至少选 3 个不同大类的小实验</span>
+                </div>
+
+                <div style="margin-top:20px">
+                    <button class="btn btn-outline" onclick="clearSelection()" style="width:100%;margin-bottom:8px">清空选择</button>
+                    <button class="btn btn-primary" onclick="generateRoadmap()" style="width:100%">生成推荐完成路径</button>
+                </div>
+            </div>
+
+            <!-- 推荐路径 -->
+            <div id="roadmap-panel" class="roadmap hidden">
+                <h3>🗺️ 推荐完成路径</h3>
+                <div id="roadmap-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 课设项目要求说明 -->
+    <div class="course-design">
+        <div class="card" style="border-left-color: var(--accent)">
+            <div class="card-title">🎯 课设项目要求参考</div>
+            <p style="margin-bottom:12px;color:var(--text-secondary)">课设（9.5 或 9.6）要求按照“完整项目要求”实现。依据《企业导师实践第一课》PDF 中 <strong>“03 系统适配迁移”</strong> 章节，完整项目应包含以下阶段：</p>
+            <div class="grid grid-3">
+                <div class="card" style="background:var(--bg);box-shadow:none">
+                    <strong style="color:var(--primary)">01 系统评估</strong>
+                    <p style="font-size:0.9rem;margin-top:8px">全面了解应用系统现状（架构、语言、依赖、用户规模），制定迁移策略与计划。</p>
+                </div>
+                <div class="card" style="background:var(--bg);box-shadow:none">
+                    <strong style="color:var(--primary)">02 适配改造</strong>
+                    <p style="font-size:0.9rem;margin-top:8px">前端兼容性调整、服务端兼容性改造、数据库/中间件/操作系统特性适配、测试优化。</p>
+                </div>
+                <div class="card" style="background:var(--bg);box-shadow:none">
+                    <strong style="color:var(--primary)">03 适配优化</strong>
+                    <p style="font-size:0.9rem;margin-top:8px">联合固件、操作系统、中间件、数据库做深度适配，全方位性能调优。</p>
+                </div>
+                <div class="card" style="background:var(--bg);box-shadow:none">
+                    <strong style="color:var(--primary)">04 实施验证</strong>
+                    <p style="font-size:0.9rem;margin-top:8px">在基础平台软硬件上做联合调试，功能、性能、稳定性、安全性严格测试验证。</p>
+                </div>
+                <div class="card" style="background:var(--bg);box-shadow:none">
+                    <strong style="color:var(--primary)">05 文档与报告</strong>
+                    <p style="font-size:0.9rem;margin-top:8px">编写测试用例、适配测试报告、打包规范文档，形成完整的项目交付物。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center;margin-top:40px;color:var(--text-secondary);font-size:0.85rem">
+        数据来源于 2026 操作系统实验与课设要求文档 & 自编实践教材 · 仅供参考，具体以任课老师最新要求为准
+    </div>
+</div>
+
+<script>
+    const experimentData = {
+        "9.1": { name: "调度器", exps: [{id:"exp-911", title:"9.1.1 基于 Kylin OS 的进程调度与优先级实验", time:1, diff:"低"}, {id:"exp-912", title:"9.1.2 实现 O(1) 调度器算法", time:1, diff:"中"}] },
+        "9.2": { name: "内存管理", exps: [{id:"exp-922", title:"9.2.2 页表快照实验", time:3, diff:"高"}, {id:"exp-923", title:"9.2.3 Slab 内存分配实验", time:2, diff:"中高"}, {id:"exp-924", title:"9.2.4 内存回收实验（OOM）", time:1, diff:"低"}] },
+        "9.3": { name: "文件系统", exps: [{id:"exp-931", title:"9.3.1 文件系统底层存储调试与扇区映射实验", time:2, diff:"中"}, {id:"exp-932", title:"9.3.2 简易文件系统设计实现及高级缓存功能开发", time:4, diff:"高"}] },
+        "9.4": { name: "系统管理", exps: [{id:"exp-941", title:"9.4.1 多用户与权限管理", time:1, diff:"低"}, {id:"exp-942", title:"9.4.2 文件快速定位与管理", time:1, diff:"低"}, {id:"exp-943", title:"9.4.3 数据检索与处理", time:1, diff:"低"}] },
+        "9.5": { name: "适配迁移", exps: [{id:"exp-951", title:"9.5.1 基于 DEB 格式的国产操作系统适配打包规范", time:3, diff:"中"}, {id:"exp-952", title:"9.5.2 基于 RPM 格式的国产操作系统适配打包规范", time:3, diff:"中"}] },
+        "9.6": { name: "虚拟化", exps: [{id:"exp-961", title:"9.6.1 容器化负载均衡部署实践", time:3, diff:"中"}, {id:"exp-962", title:"9.6.2 电商 Web 大并发解耦解决方案", time:3, diff:"中"}] }
+    };
+
+    function toggleSection(header, id) {
+        header.classList.toggle('active');
+        const content = document.getElementById(id);
+        content.classList.toggle('open');
+    }
+
+    function toggleExp(item) {
+        const cb = item.querySelector('input[type="checkbox"]');
+        cb.checked = !cb.checked;
+        item.classList.toggle('selected', cb.checked);
+        updatePlanner();
+    }
+
+    function updatePlanner() {
+        const checkboxes = document.querySelectorAll('.exp-item input[type="checkbox"]');
+        let selectedCats = new Set();
+        let selectedExps = 0;
+        let hasCourse = false;
+        let courseCats = new Set();
+
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                const item = cb.closest('.exp-item');
+                const cat = item.dataset.cat;
+                item.classList.add('selected');
+                selectedCats.add(cat);
+                if (cat.startsWith('9.1') || cat.startsWith('9.2') || cat.startsWith('9.3') || cat.startsWith('9.4')) {
+                    selectedExps++;
+                }
+                if (cat.startsWith('9.5') || cat.startsWith('9.6')) {
+                    hasCourse = true;
+                    courseCats.add(cat);
+                }
+            } else {
+                cb.closest('.exp-item').classList.remove('selected');
+            }
+        });
+
+        const validCats = ['9.1','9.2','9.3','9.4'];
+        let expCatCount = 0;
+        validCats.forEach(c => { if (selectedCats.has(c)) expCatCount++; });
+
+        document.getElementById('cat-count').textContent = expCatCount + ' / 4';
+        document.getElementById('exp-count').textContent = selectedExps;
+        document.getElementById('course-count').textContent = hasCourse ? '是（' + Array.from(courseCats).map(c=>experimentData[c].name).join('、') + '）' : '否';
+
+        const progress = Math.min((selectedExps / 5) * 100, 100);
+        document.getElementById('progress-bar').style.width = progress + '%';
+
+        const gradeBox = document.getElementById('grade-box');
+        if (expCatCount >= 3 && selectedExps >= 3) {
+            if (selectedExps >= 5) {
+                gradeBox.className = 'grade-box grade-excellent';
+                gradeBox.innerHTML = '当前等级：<strong>优</strong><br><span style="font-size:0.9rem;font-weight:400">已完成 ' + selectedExps + ' 个小实验，覆盖 ' + expCatCount + ' 个大类</span>';
+            } else if (selectedExps >= 4) {
+                gradeBox.className = 'grade-box grade-good';
+                gradeBox.innerHTML = '当前等级：<strong>良</strong><br><span style="font-size:0.9rem;font-weight:400">已完成 ' + selectedExps + ' 个小实验，覆盖 ' + expCatCount + ' 个大类</span>';
+            } else {
+                gradeBox.className = 'grade-box grade-pass';
+                gradeBox.innerHTML = '当前等级：<strong>及格</strong><br><span style="font-size:0.9rem;font-weight:400">已完成 ' + selectedExps + ' 个小实验，覆盖 ' + expCatCount + ' 个大类</span>';
+            }
+        } else {
+            gradeBox.className = 'grade-box grade-incomplete';
+            let msg = '尚未满足最低要求<br><span style="font-size:0.9rem;font-weight:400">';
+            if (expCatCount < 3) msg += '需至少覆盖 3 个不同大类（当前 ' + expCatCount + ' 个）；';
+            if (selectedExps < 3) msg += '需至少完成 3 个小实验（当前 ' + selectedExps + ' 个）';
+            msg += '</span>';
+            gradeBox.innerHTML = msg;
+        }
+    }
+
+    function clearSelection() {
+        document.querySelectorAll('.exp-item input[type="checkbox"]').forEach(cb => {
+            cb.checked = false;
+            cb.closest('.exp-item').classList.remove('selected');
+        });
+        updatePlanner();
+        document.getElementById('roadmap-panel').classList.add('hidden');
+    }
+
+    function generateRoadmap() {
+        const selected = [];
+        document.querySelectorAll('.exp-item input[type="checkbox"]').forEach(cb => {
+            if (cb.checked) {
+                selected.push({id: cb.id, cat: cb.closest('.exp-item').dataset.cat, title: cb.closest('.exp-item').querySelector('.exp-title').textContent});
+            }
+        });
+        
+        if (selected.length === 0) {
+            alert('请先在左侧选择至少一个实验，再生成路径。');
+            return;
+        }
+
+        const panel = document.getElementById('roadmap-panel');
+        const content = document.getElementById('roadmap-content');
+        panel.classList.remove('hidden');
+        panel.classList.add('fade-in');
+
+        // Sort by difficulty and category
+        const order = [];
+        const catOrder = ['9.4','9.1','9.2','9.3','9.5','9.6'];
+        catOrder.forEach(c => {
+            selected.filter(s => s.cat === c).forEach(s => order.push(s));
+        });
+
+        let html = '';
+        let step = 1;
+        
+        // Preparations
+        const cats = new Set(selected.map(s => s.cat));
+        const needsVM = cats.has('9.2') || cats.has('9.3') || cats.has('9.5') || cats.has('9.6');
+        const needsDocker = cats.has('9.5') || cats.has('9.6');
+        
+        if (needsVM) {
+            html += `<div class="roadmap-step"><div class="roadmap-num">${step++}</div><div class="roadmap-content"><div class="roadmap-title">环境准备：搭建虚拟机</div><div class="roadmap-desc">安装 QEMU 或 VirtualBox，部署银河麒麟高级服务器操作系统 V10（工业版）。配置网络、yum/dnf 源，确保能安装 e2fsprogs、docker 等工具。</div></div></div>`;
+        }
+        if (needsDocker) {
+            html += `<div class="roadmap-step"><div class="roadmap-num">${step++}</div><div class="roadmap-content"><div class="roadmap-title">环境准备：安装 Docker 服务</div><div class="roadmap-desc">在麒麟系统内安装 Docker（yum install docker），拉取 kylin-server 基础镜像（cr.kylinos.cn/kylin/kylin-server-init:v10sp1），配置镜像标签。</div></div></div>`;
+        }
+        if (cats.has('9.2')) {
+            html += `<div class="roadmap-step"><div class="roadmap-num">${step++}</div><div class="roadmap-content"><div class="roadmap-title">环境准备：WSL2 + crash 调试工具</div><div class="roadmap-desc">在 Windows 宿主机安装 WSL2 和 Ubuntu，安装 crash 工具，用于后续页表快照离线分析。</div></div></div>`;
+        }
+        
+        order.forEach(item => {
+            let desc = '';
+            if (item.id === 'exp-911') desc = '编写 nice-exp.c → 编译运行 → top 观察 → 绑定同一 CPU → renice 调整优先级 → 记录时间片比例（约 3:1）。';
+            else if (item.id === 'exp-912') desc = '编写 scheduler.c，构造 OSUnMapTbl[256] 查表 → 设置 OSRdyGrp/OSRdyTbl → 查表得到最高优先级 → 验证 O(1) 复杂度。';
+            else if (item.id === 'exp-922') desc = '在 QEMU 虚拟机运行 pgd-walk → 打印 PID 和虚拟地址 → 通过 QEMU Monitor dump-guest-memory → 在 WSL2 用 crash 加载 vmlinux 和内存转储 → 手动页表漫游完成虚拟地址到物理地址转换。';
+            else if (item.id === 'exp-923') desc = '编写 slab_test.c 内核模块 → 使用 kmem_cache_create 创建缓存 → kmem_cache_alloc 分配内存并加入链表 → kmem_cache_free 安全释放 → 编译加载/卸载模块。';
+            else if (item.id === 'exp-924') desc = '关闭 swap（swapoff -a）→ 编写 oom.c 死循环申请内存 → 运行并 watch -n 1 free -m 观察 → 触发 OOM Killer → dmesg | tail 查看内核日志。';
+            else if (item.id === 'exp-931') desc = '安装 e2fsprogs、blktrace、sleuthkit → 创建测试文件 → 使用 debugfs 查看 inode/block 号 → blkcat 直接读取磁盘内容 → blktrace+blkparse 监控 I/O。';
+            else if (item.id === 'exp-932') desc = '设计简易文件系统数据结构（inode、data block、superblock）→ 实现 mount/lookup/read/write → 进阶加入 Page Cache 提升性能。';
+            else if (item.id === 'exp-941') desc = '创建用户 yinhe、kylin 和组 school → 设置 /root/network 目录权限（chown、chmod 660）→ 设置粘滞位（chmod o+t）→ 使用 ACL 给 kylin 用户赋予 file1 读写权限（setfacl/getfacl）。';
+            else if (item.id === 'exp-942') desc = '使用 find /usr -name "*pass*"、find /dev -name "vd*" -type b、find /etc -type f -size 0 -exec ls -l {} \\; 等命令完成文件查找；使用 grep "nologin$" /etc/passwd 过滤；file、stat 查看文件属性。';
+            else if (item.id === 'exp-943') desc = 'grep -A 2 root /etc/passwd 等上下文过滤；grep -v 反向选择；grep -n 显示行号；wc -l / -c / -w 统计文件信息。';
+            else if (item.id === 'exp-951') desc = '构建 deb 包目录（pycharm-professional-2022.3/）→ 按规范放置 opt/apps/…、usr/share/applications/…、图标 → 编写 pycharm.desktop → 构建 deb 并安装测试。';
+            else if (item.id === 'exp-952') desc = '初始化 rpmbuild 目录 → 下载 hello-2.10.tar.gz 到 SOURCES → 编写 hello.spec → rpmbuild -ba 制作 RPM → 安装/卸载测试。';
+            else if (item.id === 'exp-961') desc = 'Docker 安装并启动 → 导入 kylin 镜像 → 编写 Dockerfile 构建 Nginx 与 Tomcat → 创建 1 个 Nginx + 2 个 Tomcat 容器 → 配置 Nginx 反向代理与负载均衡。';
+            else if (item.id === 'exp-962') desc = 'Docker 安装并启动 → 创建 nginx-1、nginx-2 容器并挂载持久化目录 → 分别配置 LNMP 环境 → 在本机部署 Nginx 集群，配置 upstream 轮询算法。';
+            
+            html += `<div class="roadmap-step"><div class="roadmap-num">${step++}</div><div class="roadmap-content"><div class="roadmap-title">${item.title}</div><div class="roadmap-desc">${desc}</div></div></div>`;
+        });
+        
+        html += `<div class="roadmap-step"><div class="roadmap-num">${step++}</div><div class="roadmap-content"><div class="roadmap-title">实验报告撰写与提交</div><div class="roadmap-desc">按照 2026 实验报告模板撰写，包含实验目的、环境、步骤、现象截图、结果分析与心得体会。课设需额外编写项目文档（适配/测试报告、打包规范）。</div></div></div>`;
+        
+        content.innerHTML = html;
+        panel.scrollIntoView({behavior: 'smooth'});
+    }
+</script>
+
+</body>
+</html>

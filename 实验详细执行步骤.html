@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>操作系统实验与课设 · 详细执行步骤</title>
+    <style>
+        :root {
+            --primary: #1a56db;
+            --primary-light: #e1effe;
+            --accent: #0e9f6e;
+            --accent-light: #def7ec;
+            --warning: #faca15;
+            --warning-light: #fdf6b2;
+            --danger: #f05252;
+            --danger-light: #fde8e8;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        header {
+            background: linear-gradient(135deg, #1a56db 0%, #0e9f6e 100%);
+            color: white;
+            padding: 48px 24px;
+            text-align: center;
+            border-radius: var(--radius);
+            margin-bottom: 32px;
+            box-shadow: var(--shadow);
+        }
+        header h1 { font-size: 2rem; margin-bottom: 8px; }
+        header p { opacity: 0.9; font-size: 1.1rem; }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .nav-tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .nav-tab:hover { background: var(--primary-light); border-color: var(--primary); }
+        .nav-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .exp-panel { display: none; }
+        .exp-panel.active { display: block; animation: fadeIn 0.4s ease; }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .card-title {
+            font-size: 1.25rem; font-weight: 700; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+            color: var(--primary);
+        }
+        .card-subtitle {
+            font-size: 1rem; font-weight: 600; margin: 20px 0 12px;
+            color: var(--text);
+            border-left: 4px solid var(--accent);
+            padding-left: 12px;
+        }
+        
+        .step {
+            display: flex; gap: 16px; margin-bottom: 16px; position: relative;
+        }
+        .step::before {
+            content: ''; position: absolute; left: 15px; top: 32px; bottom: -16px;
+            width: 2px; background: var(--border);
+        }
+        .step:last-child::before { display: none; }
+        .step-num {
+            width: 32px; height: 32px; border-radius: 50%; background: var(--primary);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.9rem; flex-shrink: 0; z-index: 1;
+        }
+        .step-content { flex: 1; }
+        .step-title { font-weight: 600; margin-bottom: 4px; }
+        .step-desc { font-size: 0.95rem; color: var(--text-secondary); }
+        
+        code, pre {
+            background: #1f2937; color: #e5e7eb;
+            border-radius: 6px; font-family: "Consolas", "Monaco", "Courier New", monospace;
+            font-size: 0.9rem;
+        }
+        code { padding: 2px 6px; }
+        pre {
+            padding: 16px; overflow-x: auto; margin: 12px 0;
+            white-space: pre-wrap; word-wrap: break-word;
+        }
+        pre code { background: transparent; padding: 0; }
+        
+        .note {
+            background: var(--warning-light); border: 1px solid #fde047;
+            border-radius: 8px; padding: 12px 16px; margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        .note::before { content: "💡 "; font-weight: 700; }
+        
+        .warn {
+            background: var(--danger-light); border: 1px solid #fca5a5;
+            border-radius: 8px; padding: 12px 16px; margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        .warn::before { content: "⚠️ "; font-weight: 700; }
+        
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .tag { padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; background: var(--bg); color: var(--text-secondary); }
+        
+        .toggle-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 8px; background: var(--primary-light);
+            color: var(--primary); font-weight: 600; cursor: pointer;
+            border: none; font-size: 0.9rem; margin-bottom: 12px;
+        }
+        .toggle-btn:hover { background: #bfdbfe; }
+        
+        .collapsible { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .collapsible.open { max-height: 3000px; }
+        
+        table {
+            width: 100%; border-collapse: collapse; margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        th, td { padding: 10px 12px; text-align: left; border: 1px solid var(--border); }
+        th { background: var(--bg); font-weight: 600; }
+        tr:nth-child(even) { background: #f9fafb; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.5rem; }
+            .nav-tabs { overflow-x: auto; flex-wrap: nowrap; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>操作系统实验与课设 · 详细执行步骤</h1>
+    <p>每个实验的完整命令、代码、预期现象与注意事项</p>
+</header>
+
+<div class="container">
+
+<div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('exp-911')">9.1.1 CFS调度</button>
+    <button class="nav-tab" onclick="showTab('exp-912')">9.1.2 O(1)调度</button>
+    <button class="nav-tab" onclick="showTab('exp-922')">9.2.2 页表快照</button>
+    <button class="nav-tab" onclick="showTab('exp-923')">9.2.3 Slab</button>
+    <button class="nav-tab" onclick="showTab('exp-924')">9.2.4 OOM</button>
+    <button class="nav-tab" onclick="showTab('exp-931')">9.3.1 文件系统</button>
+    <button class="nav-tab" onclick="showTab('exp-932')">9.3.2 简易FS</button>
+    <button class="nav-tab" onclick="showTab('exp-94')">9.4 系统管理</button>
+    <button class="nav-tab" onclick="showTab('exp-95')">9.5 适配迁移</button>
+    <button class="nav-tab" onclick="showTab('exp-96')">9.6 虚拟化</button>
+</div>
+
+<!-- ==================== 9.1.1 CFS调度 ==================== -->
+<div id="exp-911" class="exp-panel active">
+    <div class="card">
+        <div class="card-title">📋 9.1.1 基于 Kylin OS 的进程调度与优先级实验</div>
+        <div class="tag-list">
+            <span class="tag">C 语言</span><span class="tag">pthread</span><span class="tag">nice/renice</span><span class="tag">taskset</span><span class="tag">CFS</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">实验目的</div>
+        <p>通过编写高 CPU 负载的多线程程序，观察 CFS（完全公平调度器）在不同 nice 值下的时间片分配比例。</p>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">详细执行步骤</div>
+        
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">创建实验目录</div>
+                <div class="step-desc">在终端中创建并进入实验目录。</div>
+                <pre><code>mkdir -p ~/labs/cfs_experiment
+cd ~/labs/cfs_experiment</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">编写测试程序 nice-exp.c</div>
+                <div class="step-desc">使用 nano 编辑器创建死循环的多线程程序。</div>
+                <pre><code>nano nice-exp.c</code></pre>
+                <div class="step-desc">输入以下代码：</div>
+                <pre><code>#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+
+void *thread_fun(void *param)
+{
+    printf("thread pid:%d, tid:%lu\n", getpid(), pthread_self());
+    while (1) ;
+    return NULL;
+}
+
+int main(void)
+{
+    pthread_t tid;
+    int ret;
+    printf("main pid:%d, tid:%lu\n", getpid(), pthread_self());
+    ret = pthread_create(&tid, NULL, thread_fun, NULL);
+    if (ret == -1) {
+        perror("cannot create new thread");
+        return 1;
+    }
+    if (pthread_join(tid, NULL) != 0) {
+        perror("call pthread_join function fail");
+        return 1;
+    }
+    return 0;
+}</code></pre>
+                <div class="note">保存方法：Ctrl+O 回车确认，Ctrl+X 退出。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">编译程序</div>
+                <div class="step-desc">使用 gcc 编译，需要链接 pthread 线程库。</div>
+                <pre><code>gcc nice-exp.c -o nice-exp -pthread</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">初始运行与观察（第一阶段）</div>
+                <div class="step-desc">在终端后台运行第一个进程，保持该终端不关闭。</div>
+                <pre><code>./nice-exp &</code></pre>
+                <div class="step-desc">重新打开一个新终端，运行第二个进程：</div>
+                <pre><code>cd ~/labs/cfs_experiment
+./nice-exp &</code></pre>
+                <div class="step-desc">再打开第三个终端，使用 top 查看 CPU 占用：</div>
+                <pre><code>top</code></pre>
+                <div class="step-desc">在 top 界面按 <code>f</code> 键，用方向键找到 <code>P = Last Used Cpu (SMP)</code>，按空格选中使其前面出现 <code>*</code> 号，按 Esc 退出。</div>
+                <div class="note">现象：两个 nice-exp 进程各占用约 100% CPU，且通常运行在不同 CPU 核心上（P 列值不同）。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+                <div class="step-title">绑定同一 CPU 核心并观察（第二阶段）</div>
+                <div class="step-desc">先杀掉之前的进程，然后用 taskset 强制绑定到同一核心（如 CPU 3）。</div>
+                <pre><code>killall nice-exp
+taskset -c 3 ./nice-exp &</code></pre>
+                <div class="step-desc">在另一个终端同样绑定到 CPU 3：</div>
+                <pre><code>taskset -c 3 ./nice-exp &</code></pre>
+                <div class="step-desc">top 查看，确认两个进程都在 CPU 3 上，且各占约 50% CPU。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-content">
+                <div class="step-title">调整 nice 优先级并观察（第三阶段）</div>
+                <div class="step-desc">使用 renice 将其中一个进程的 nice 值调高（值越小优先级越高）。</div>
+                <pre><code>sudo renice -n -5 -g &lt;PID&gt;</code></pre>
+                <div class="step-desc">其中 &lt;PID&gt; 替换为 top 中显示的 nice-exp 进程号。</div>
+                <div class="note">现象：nice 值为 -5 的进程占用约 75% CPU，nice 值为 0 的进程占用约 25% CPU。权重比例约为 3:1。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">7</div>
+            <div class="step-content">
+                <div class="step-title">截图与记录</div>
+                <div class="step-desc">记录以下关键截图：</div>
+                <ul style="margin-left:20px">
+                    <li>top 中两进程分别在不同 CPU 运行（各占 100%）</li>
+                    <li>绑定同一 CPU 后两进程各占约 50%</li>
+                    <li>renice 调整后 nice=-5 占 75%，nice=0 占 25%</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">预期现象汇总</div>
+        <table>
+            <tr><th>阶段</th><th>预期现象</th><th>原理</th></tr>
+            <tr><td>初始运行</td><td>两进程各占 100% CPU，在不同核心</td><td>CFS 跨核心负载均衡</td></tr>
+            <tr><td>绑定同一 CPU</td><td>两进程各占约 50% CPU</td><td>同一核心公平分配时间片</td></tr>
+            <tr><td>renice -5</td><td>高优先级进程占 75%，低优先级占 25%</td><td>nice 值影响权重，比例约 3:1</td></tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">注意事项</div>
+        <div class="warn">运行死循环程序会导致 CPU 占用率飙升，实验结束后务必使用 <code>killall nice-exp</code> 清理进程。</div>
+        <div class="note">renice 需要 sudo 权限。如果系统提示权限不足，请确认当前用户有 sudo 权限。</div>
+    </div>
+</div>
+
+<!-- ==================== 9.1.2 O(1)调度 ==================== -->
+<div id="exp-912" class="exp-panel">
+    <div class="card">
+        <div class="card-title">📋 9.1.2 实现 O(1) 调度器算法</div>
+        <div class="tag-list">
+            <span class="tag">C 语言</span><span class="tag">位运算</span><span class="tag">查表法</span><span class="tag">实时调度</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">实验目的</div>
+        <p>通过查表法（OSUnMapTbl）和位运算实现 O(1) 复杂度调度器，验证无需循环即可找到最高优先级任务。</p>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">详细执行步骤</div>
+        
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">创建实验目录</div>
+                <pre><code>mkdir -p ~/labs/scheduler_experiment
+cd ~/labs/scheduler_experiment</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">编写 scheduler.c</div>
+                <pre><code>nano scheduler.c</code></pre>
+                <div class="step-desc">输入以下代码：</div>
+                <pre><code>#include &lt;stdio.h&gt;
+
+// 定义无符号8位整型
+typedef unsigned char INT8U;
+
+// 优先级查找表：给定8位二进制数，返回从低位到高位第一个为1的位的位置(0-7)
+INT8U const OSUnMapTbl[256] = {
+    0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    7, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0
+};
+
+// 就绪组和就绪表
+INT8U OSRdyGrp = 0;
+INT8U OSRdyTbl[8] = {0};
+
+// 辅助函数：将某个优先级的任务设为就绪状态
+void make_task_ready(INT8U prio) {
+    OSRdyGrp |= (1 << (prio >> 3));        // 设置组位
+    OSRdyTbl[prio >> 3] |= (1 << (prio & 0x07)); // 设置表位
+}
+
+int main() {
+    INT8U y, x, highest_prio;
+    
+    // 假设三个任务就绪，优先级分别是 45, 12, 27
+    make_task_ready(45);
+    make_task_ready(12);
+    make_task_ready(27);
+    
+    // 核心算法：通过查表快速找到最高优先级
+    y = OSUnMapTbl[OSRdyGrp];        // 找到有任务就绪的最高优先级组
+    x = OSUnMapTbl[OSRdyTbl[y]];     // 在该组中找到最高优先级的具体位置
+    highest_prio = (y << 3) + x;     // 拼接得到真实最高优先级
+    
+    printf("Ready tasks added: 45, 12, 27\n");
+    printf("The highest priority ready task is: %d\n", highest_prio);
+    return 0;
+}</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">编译并运行</div>
+                <pre><code>gcc scheduler.c -o scheduler
+./scheduler</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">验证结果</div>
+                <div class="step-desc">预期输出：</div>
+                <pre><code>Ready tasks added: 45, 12, 27
+The highest priority ready task is: 12</code></pre>
+                <div class="note">结果分析：通过查表法和位运算，在没有使用循环遍历的情况下，瞬间锁定了最高优先级任务（12）。这体现了 O(1) 算法在实时操作系统中高效且执行时间可预测的优势。</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">原理图解</div>
+        <table>
+            <tr><th>变量/操作</th><th>含义</th><th>本例计算</th></tr>
+            <tr><td>prio >> 3</td><td>优先级所在组号（y）</td><td>12 >> 3 = 1</td></tr>
+            <tr><td>prio & 0x07</td><td>优先级在组内位置（x）</td><td>12 & 7 = 4</td></tr>
+            <tr><td>OSRdyGrp</td><td>哪些组有就绪任务</td><td>bit1=1, bit5=1 → 0x22</td></tr>
+            <tr><td>OSUnMapTbl[OSRdyGrp]</td><td>查表得最低有就绪位的组</td><td>OSUnMapTbl[0x22] = 1</td></tr>
+            <tr><td>OSUnMapTbl[OSRdyTbl[1]]</td><td>查表得组内最低就绪位</td><td>OSRdyTbl[1] = 0x10 → OSUnMapTbl[0x10] = 4</td></tr>
+            <tr><td>highest_prio = (y<<3)+x</td><td>组合得到最高优先级</td><td>(1<<3)+4 = 12</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- ==================== 9.2.2 页表快照 ==================== -->
+<div id="exp-922" class="exp-panel">
+    <div class="card">
+        <div class="card-title">📋 9.2.2 页表快照实验</div>
+        <div class="tag-list">
+            <span class="tag">QEMU</span><span class="tag">WSL2</span><span class="tag">crash</span><span class="tag">MMU</span><span class="tag">页表漫游</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">实验架构</div>
+        <p><strong>Win10 宿主机</strong>（底座）→ <strong>QEMU 虚拟机</strong>（靶机，运行 Kylin OS）→ <strong>WSL2 Ubuntu</strong>（离线分析工作站，运行 crash）</p>
+        <div class="note">整体流程：在 QEMU 虚拟机运行 pgd-walk 打印虚拟地址 → 通过 QEMU Monitor dump 内存 → 在 WSL2 用 crash 加载 vmlinux 和内存转储 → 手动计算虚拟地址→物理地址。</div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">第一阶段：WSL2 环境准备</div>
+        
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">安装 WSL2 和 Ubuntu</div>
+                <div class="step-desc">在 Windows CMD 中执行：</div>
+                <pre><code>wsl --install -d Ubuntu</code></pre>
+                <div class="step-desc">（若需安装到非系统盘，先创建 D:\WSL_Ubuntu 目录，cd 进入后执行上述命令）</div>
+                <div class="note">重启电脑后，从开始菜单打开 Ubuntu，按提示设置用户名和密码（密码输入时屏幕不显示，直接盲打后回车）。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">在 WSL2 Ubuntu 中安装 crash 工具</div>
+                <pre><code>sudo apt update
+sudo apt install crash -y</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">第二阶段：QEMU 虚拟机运行 pgd-walk</div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">启动 QEMU 虚拟机</div>
+                <div class="step-desc">使用已安装好的 Kylin OS 虚拟机（参考 9.2.1 环境搭建）。在宿主机 CMD 中启动：</div>
+                <pre><code>qemu-system-x86_64 -m 1024 -smp 4 -drive file=d:\QiLin\kylin_test.qcow2,format=qcow2 -cdrom d:\QiLin\Kylin-Server-V10-SP3.iso -boot d -vga virtio -display gtk -netdev user,id=net0,hostfwd=tcp::22222-:22 -device e1000,netdev=net0</code></pre>
+                <div class="note">如虚拟机已安装完成，可去掉 -cdrom 和 -boot d 参数，直接从硬盘启动。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">在虚拟机中编写 pgd-walk.c</div>
+                <div class="step-desc">登录虚拟机后，创建测试程序：</div>
+                <pre><code>nano pgd-walk.c</code></pre>
+                <div class="step-desc">输入以下代码（示例，实际以教材为准）：</div>
+                <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    char *p = malloc(4096);
+    printf("PID: %d\n", getpid());
+    printf("Virtual Address: %p\n", (void*)p);
+    printf("Press Enter to exit...\n");
+    getchar();
+    free(p);
+    return 0;
+}</code></pre>
+                <pre><code>gcc pgd-walk.c -o pgd-walk
+./pgd-walk</code></pre>
+                <div class="note">记录终端输出的 PID 和 Virtual Address（如 0x7f1234567000），这是后续分析的起点。</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">第三阶段：内存转储与离线分析</div>
+        
+        <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+                <div class="step-title">通过 QEMU Monitor 导出内存转储</div>
+                <div class="step-desc">在 QEMU 窗口中按 <code>Ctrl+Alt+2</code> 切换到 Monitor 控制台，执行：</div>
+                <pre><code>(qemu) dump-guest-memory -p D:\QiLin\memory.dump</code></pre>
+                <div class="step-desc">等待 dump 完成后，按 <code>Ctrl+Alt+1</code> 切换回虚拟机界面。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-content">
+                <div class="step-title">提取虚拟机内核镜像 vmlinux</div>
+                <div class="step-desc">在虚拟机中执行：</div>
+                <pre><code>cp /boot/vmlinuz-$(uname -r) /tmp/vmlinuz
+cp /boot/System.map-$(uname -r) /tmp/System.map</code></pre>
+                <div class="step-desc">将 vmlinuz 和 System.map 从虚拟机复制到宿主机（可用 scp 或共享文件夹）。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">7</div>
+            <div class="step-content">
+                <div class="step-title">在 WSL2 中加载内存转储进行分析</div>
+                <div class="step-desc">将 memory.dump 复制到 WSL2 可访问的目录（如 /mnt/d/QiLin/），然后在 WSL2 中：</div>
+                <pre><code>cd /mnt/d/QiLin
+crash /tmp/vmlinux memory.dump</code></pre>
+                <div class="step-desc">在 crash 环境中使用以下命令分析页表：</div>
+                <pre><code>crash&gt; vm &lt;PID&gt;
+crash&gt; vtop &lt;Virtual_Address&gt;</code></pre>
+                <div class="step-desc">例如：</div>
+                <pre><code>crash&gt; vm 1234
+crash&gt; vtop 0x7f1234567000</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">8</div>
+            <div class="step-content">
+                <div class="step-title">手动页表漫游（验证 MMU 过程）</div>
+                <div class="step-desc">使用 crash 的 <code>ptov</code>、<code>vtop</code> 命令，或手动读取 /proc/&lt;PID&gt;/pagemap 获取 PFN，计算物理地址：</div>
+                <pre><code>物理地址 = PFN × PAGE_SIZE + 页内偏移</code></pre>
+                <div class="step-desc">其中页内偏移 = 虚拟地址 & 0xFFF（取低 12 位）。</div>
+                <div class="note">vtop 命令会显示 PGD → PUD → PMD → PTE 的每一级地址转换，这正是 MMU 硬件的工作过程。</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">第四阶段：记录与报告</div>
+        <div class="step">
+            <div class="step-num">9</div>
+            <div class="step-content">
+                <div class="step-title">截图与记录</div>
+                <div class="step-desc">记录以下关键信息：</div>
+                <ul style="margin-left:20px">
+                    <li>pgd-walk 输出的 PID 和 Virtual Address</li>
+                    <li>QEMU Monitor 中 dump-guest-memory 的执行过程</li>
+                    <li>crash 中 vm 命令显示的进程信息</li>
+                    <li>vtop 命令显示的 PGD → PUD → PMD → PTE → 物理地址 的完整转换链</li>
+                    <li>手动计算物理地址的过程与最终验证结果</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 9.2.3 Slab ==================== -->
+<div id="exp-923" class="exp-panel">
+    <div class="card">
+        <div class="card-title">📋 9.2.3 Slab 内存分配实验</div>
+        <div class="tag-list">
+            <span class="tag">内核模块</span><span class="tag">Slab 分配器</span><span class="tag">Linux Kernel</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">实验目的</div>
+        <p>使用内核 Slab 分配器进行内存分配与释放，掌握 kmem_cache_create / kmem_cache_alloc / kmem_cache_free 的用法。</p>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">详细执行步骤</div>
+        
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">创建实验目录</div>
+                <pre><code>mkdir -p ~/labs/slab_experiment
+cd ~/labs/slab_experiment</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">编写 slab_test.c</div>
+                <pre><code>nano slab_test.c</code></pre>
+                <pre><code>#include &lt;linux/module.h&gt;
+#include &lt;linux/version.h&gt;
+#include &lt;linux/init.h&gt;
+#include &lt;linux/kernel.h&gt;
+#include &lt;linux/types.h&gt;
+#include &lt;linux/list.h&gt;
+#include &lt;linux/slab.h&gt;
+
+#define ALLOC_SIZE 8
+
+struct kmem_cache *kcp;
+
+// 定义包含缓冲区和链表节点的数据结构
+struct slab_test_buf {
+    char buf[64];
+    struct list_head list;
+};
+
+struct list_head stp_head;
+
+static void print_stp(void)
+{
+    struct slab_test_buf *stp = NULL;
+    list_for_each_entry(stp, &stp_head, list) {
+        printk("%s\n", stp->buf);
+    }
+}
+
+static void free_stp(void)
+{
+    struct slab_test_buf *stp = NULL;
+    struct slab_test_buf *next = NULL;
+    // 使用 safe 遍历以安全释放内存
+    list_for_each_entry_safe(stp, next, &stp_head, list) {
+        list_del(&stp->list);
+        kmem_cache_free(kcp, stp);
+    }
+}
+
+static int __init slab_test_init(void)
+{
+    int i;
+    struct slab_test_buf *stp = NULL;
+    
+    printk("slab test module init\n");
+    INIT_LIST_HEAD(&stp_head);
+    
+    // 创建 Slab 缓存
+    kcp = kmem_cache_create("slab_test_buf", sizeof(struct slab_test_buf), 0, SLAB_HWCACHE_ALIGN, NULL);
+    if (!kcp) {
+        printk("kmem_cache_create failed\n");
+        return -ENOMEM;
+    }
+    
+    // 分配并初始化多个对象
+    for (i = 0; i < ALLOC_SIZE; i++) {
+        stp = kmem_cache_alloc(kcp, GFP_KERNEL);
+        if (!stp) {
+            printk("kmem_cache_alloc failed\n");
+            free_stp();
+            kmem_cache_destroy(kcp);
+            return -ENOMEM;
+        }
+        sprintf(stp->buf, "hello slab %d", i);
+        list_add(&stp->list, &stp_head);
+    }
+    
+    printk("Allocated %d objects:\n", ALLOC_SIZE);
+    print_stp();
+    return 0;
+}
+
+static void __exit slab_test_exit(void)
+{
+    printk("slab test module exit\n");
+    free_stp();
+    kmem_cache_destroy(kcp);
+}
+
+module_init(slab_test_init);
+module_exit(slab_test_exit);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Student");
+MODULE_DESCRIPTION("Slab allocator test module");</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">编写 Makefile</div>
+                <pre><code>nano Makefile</code></pre>
+                <pre><code>obj-m := slab_test.o
+
+all:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+
+clean:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean</code></pre>
+                <div class="note">注意：Makefile 中的缩进必须是 Tab 键，不能是空格。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">编译内核模块</div>
+                <pre><code>make</code></pre>
+                <div class="step-desc">编译成功后，会生成 <code>slab_test.ko</code> 文件。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+                <div class="step-title">加载模块并查看日志</div>
+                <pre><code>sudo insmod slab_test.ko
+sudo dmesg | tail -n 20</code></pre>
+                <div class="note">预期现象：dmesg 中显示 "Allocated 8 objects:" 以及 8 行 "hello slab X"。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-content">
+                <div class="step-title">卸载模块并清理</div>
+                <pre><code>sudo rmmod slab_test
+sudo dmesg | tail -n 5</code></pre>
+                <div class="step-desc">预期看到 "slab test module exit"。</div>
+                <pre><code>make clean</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">关键函数说明</div>
+        <table>
+            <tr><th>函数</th><th>作用</th><th>对应释放</th></tr>
+            <tr><td>kmem_cache_create()</td><td>创建指定大小的 Slab 缓存</td><td>kmem_cache_destroy()</td></tr>
+            <tr><td>kmem_cache_alloc()</td><td>从缓存中分配一个对象</td><td>kmem_cache_free()</td></tr>
+            <tr><td>list_add()</td><td>将对象加入链表</td><td>list_del()</td></tr>
+            <tr><td>list_for_each_entry_safe()</td><td>安全遍历并释放（支持删除）</td><td>—</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- ==================== 9.2.4 OOM ==================== -->
+<div id="exp-924" class="exp-panel">
+    <div class="card">
+        <div class="card-title">📋 9.2.4 内存回收实验（OOM Killer）</div>
+        <div class="tag-list">
+            <span class="tag">内存管理</span><span class="tag">OOM Killer</span><span class="tag">dmesg</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">实验目的</div>
+        <p>通过用户态程序疯狂申请物理内存，触发内核 OOM Killer，观察系统的内存回收机制。</p>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">详细执行步骤</div>
+        
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">关闭 Swap（切断系统"后路"）</div>
+                <div class="step-desc">为了让实验更快触发 OOM，先关闭虚拟内存：</div>
+                <pre><code>sudo swapon --show</code></pre>
+                <div class="step-desc">如有输出，表示已开启 Swap：</div>
+                <pre><code>sudo swapoff -a</code></pre>
+                <div class="note">swapoff 是临时关闭，重启后会恢复。实验结束后可执行 <code>sudo swapon -a</code> 重新开启。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">创建实验目录并编写 oom.c</div>
+                <pre><code>mkdir -p ~/labs/oom_experiment
+cd ~/labs/oom_experiment
+nano oom.c</code></pre>
+                <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+
+#define PAGE_SIZE 4096
+
+int main() {
+    int i = 0;
+    char *p;
+    
+    while (1) {
+        p = malloc(PAGE_SIZE);
+        if (!p) {
+            printf("malloc failed at %d pages\n", i);
+            break;
+        }
+        // 写入数据，确保内存真正被分配（非 overcommit）
+        memset(p, 0xAB, PAGE_SIZE);
+        i++;
+        
+        if (i % 1000 == 0) {
+            printf("Allocated %d pages (%d MB)\n", i, i * PAGE_SIZE / 1024 / 1024);
+        }
+    }
+    
+    printf("Total allocated: %d pages, sleeping...\n", i);
+    while (1) sleep(1);
+    return 0;
+}</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">编译并运行</div>
+                <pre><code>gcc oom.c -o oom
+./oom</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">观察内存下降（另开终端）</div>
+                <pre><code>watch -n 1 free -m</code></pre>
+                <div class="note">现象：available 栏位数值疯狂下降。按 Ctrl+C 退出观察。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+                <div class="step-title">观察 OOM Killer 触发</div>
+                <div class="step-desc">当系统内存被彻底榨干时，运行 oom 的终端会显示类似：</div>
+                <pre><code>[1]+  Killed                  ./oom</code></pre>
+                <div class="step-desc">立即查看内核日志：</div>
+                <pre><code>dmesg | tail -n 15</code></pre>
+                <div class="note">预期现象：看到 <code>Out of memory: Killed process xxxxx (oom) total-vm:xxx...</code> 这证明 OOM Killer 成功被触发并精准击毙了贪婪程序。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-content">
+                <div class="step-title">恢复 Swap（可选）</div>
+                <pre><code>sudo swapon -a</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">关键观察点</div>
+        <table>
+            <tr><th>观察项</th><th>命令/方法</th><th>预期结果</th></tr>
+            <tr><td>内存实时下降</td><td>watch -n 1 free -m</td><td>available 从高位降到接近 0</td></tr>
+            <tr><td>进程被杀</td><td>终端输出</td><td>[1]+ Killed ./oom</td></tr>
+            <tr><td>OOM 日志</td><td>dmesg | tail -n 15</td><td>Out of memory: Killed process...</td></tr>
+            <tr><td>进程评分</td><td>dmesg | grep oom_score</td><td>oom_score_adj 值</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- ==================== 9.3.1 文件系统 ==================== -->
+<div id="exp-931" class="exp-panel">
+    <div class="card">
+        <div class="card-title">📋 9.3.1 文件系统底层存储调试与扇区映射实验</div>
+        <div class="tag-list">
+            <span class="tag">debugfs</span><span class="tag">blktrace</span><span class="tag">blkcat</span><span class="tag">inode</span><span class="tag">ext4</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">实验目的</div>
+        <p>使用 debugfs、blkcat、blktrace、blkparse 等工具调试 ext 文件系统，掌握 inode ↔ block ↔ sector ↔ content 的映射关系。</p>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">环境准备</div>
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">安装必要工具</div>
+                <pre><code>sudo nmcli connection up enp0s3
+sudo nmcli connection modify enp0s3 connection.autoconnect yes
+sudo yum install -y e2fsprogs blktrace util-linux</code></pre>
+                <div class="step-desc">安装 sleuthkit（用于 blkcat）：</div>
+                <pre><code>sudo dnf install -y sleuthkit</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">详细执行步骤</div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">创建测试文件</div>
+                <pre><code>cd ~
+echo "KylinOS filesystem lab: inode -> block -> sector -> content" > fs_test.txt</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">确认文件系统所在设备</div>
+                <pre><code>df -h .</code></pre>
+                <div class="note">记录输出的设备名，例如 <code>/dev/mapper/klasi-root</code>（你的可能不同）。以下步骤以 <code>/dev/mapper/klasi-root</code> 为例，请替换为你的实际设备。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">使用 debugfs 查看文件信息（inode & block）</div>
+                <pre><code>sudo debugfs -R 'stat root/fs_test.txt' /dev/mapper/klasi-root</code></pre>
+                <div class="note">关键信息：记录返回的 inode number（如 827121）和 block number（如 3283834）。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+                <div class="step-title">通过 block number 反查 inode（icheck）</div>
+                <pre><code>sudo debugfs -R 'icheck 3283834' /dev/mapper/klasi-root</code></pre>
+                <div class="note">验证：应返回与上一步相同的 inode number，证明 block → inode 映射正确。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-content">
+                <div class="step-title">通过 inode 查找文件路径（ncheck）</div>
+                <pre><code>sudo debugfs -R 'ncheck 827121' /dev/mapper/klasi-root</code></pre>
+                <div class="note">验证：应返回文件路径 root/fs_test.txt，证明 inode → 路径 映射正确。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">7</div>
+            <div class="step-content">
+                <div class="step-title">使用 blkcat 直接从磁盘读取文件内容</div>
+                <pre><code>sudo blkcat /dev/mapper/klasi-root 3283834</code></pre>
+                <div class="note">预期：直接显示文件内容 "KylinOS filesystem lab: inode -> block -> sector -> content"，证明 block → content 映射正确。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">8</div>
+            <div class="step-content">
+                <div class="step-title">使用 blktrace + blkparse 监控 I/O</div>
+                <div class="step-desc">在一个终端执行监控命令：</div>
+                <pre><code>sudo blktrace -d /dev/mapper/klasi-root -o - | blkparse -i -</code></pre>
+                <div class="step-desc">在另一个终端对文件进行操作（如读写），观察 blkparse 输出的 I/O 事件。</div>
+                <div class="note">按 Ctrl+C 停止监控。</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">映射关系验证总结</div>
+        <table>
+            <tr><th>映射方向</th><th>工具/命令</th><th>验证结果</th></tr>
+            <tr><td>文件 → inode</td><td>debugfs -R 'stat'</td><td>获取 inode number</td></tr>
+            <tr><td>block → inode</td><td>debugfs -R 'icheck'</td><td>验证 block 属于哪个 inode</td></tr>
+            <tr><td>inode → 路径</td><td>debugfs -R 'ncheck'</td><td>验证 inode 对应哪个文件</td></tr>
+            <tr><td>block → content</td><td>blkcat</td><td>直接读取 block 内容</td></tr>
+            <tr><td>I/O 监控</td><td>blktrace + blkparse</td><td>监控文件系统底层 I/O 流程</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- ==================== 9.3.2 简易FS ==================== -->
+<div id="exp-932" class="exp-panel">
+    <div class="card">
+        <div class="card-title">📋 9.3.2 简易文件系统设计实现及高级缓存功能开发</div>
+        <div class="tag-list">
+            <span class="tag">文件系统</span><span class="tag">FUSE</span><span class="tag">Page Cache</span><span class="tag">内核编程</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">实验说明</div>
+        <p>编写一个简易文件系统（基于 FUSE 或内核模块），实现基本的创建/读写功能；进阶可加入 Page Cache 支持。</p>
+        <div class="note">本实验为设计型实验，教材未提供完整代码。以下为推荐实现路径与核心框架。</div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">推荐实现路径 A：基于 FUSE（用户态，较简单）</div>
+        
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">安装 FUSE 开发库</div>
+                <pre><code>sudo yum install -y fuse fuse-devel</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">编写简易 FUSE 文件系统</div>
+                <div class="step-desc">核心需要实现以下回调函数：</div>
+                <pre><code>static struct fuse_operations myfs_ops = {
+    .getattr = myfs_getattr,    // 获取文件属性
+    .readdir = myfs_readdir,    // 读取目录
+    .open    = myfs_open,       // 打开文件
+    .read    = myfs_read,       // 读取文件
+    .write   = myfs_write,      // 写入文件
+    .create  = myfs_create,    // 创建文件
+    .mkdir   = myfs_mkdir,     // 创建目录
+};</code></pre>
+                <div class="step-desc">文件数据结构（内存存储）：</div>
+                <pre><code>struct myfs_node {
+    char name[256];
+    char *data;
+    size_t size;
+    int is_dir;
+    struct myfs_node *children;
+    int child_count;
+};</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">编译与挂载</div>
+                <pre><code>gcc -Wall myfs.c `pkg-config --cflags --libs fuse` -o myfs
+mkdir -p /tmp/myfs_mount
+./myfs /tmp/myfs_mount</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">测试文件操作</div>
+                <pre><code>echo "hello" > /tmp/myfs_mount/test.txt
+cat /tmp/myfs_mount/test.txt
+ls /tmp/myfs_mount/</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">推荐实现路径 B：进阶 Page Cache（基于内核模块）</div>
+        <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+                <div class="step-title">Page Cache 核心思路</div>
+                <div class="step-desc">在内核文件系统中使用 address_space 结构管理页缓存：</div>
+                <pre><code>struct address_space *mapping = inode->i_mapping;
+struct page *page = find_get_page(mapping, index);  // 查找缓存页
+if (!page) {
+    page = read_cache_page(mapping, index, filler, data);  // 读取到缓存
+}</code></pre>
+                <div class="note">Page Cache 可显著提升重复读取性能，通过 <code>free -m</code> 或 <code>cat /proc/meminfo | grep Cached</code> 观察缓存命中效果。</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 9.4 系统管理 ==================== -->
+<div id="exp-94" class="exp-panel">
+    <div class="card">
+        <div class="card-title">📋 9.4 银河麒麟高级服务器操作系统管理</div>
+        <div class="tag-list">
+            <span class="tag">权限管理</span><span class="tag">ACL</span><span class="tag">find/grep</span><span class="tag">文件检索</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">9.4.1 多用户与权限管理</div>
+        
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">创建用户和组</div>
+                <pre><code>sudo useradd yinhe
+sudo groupadd school
+sudo useradd kylin</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">创建目录并设置基础权限</div>
+                <pre><code>sudo mkdir /root/network
+sudo chown yinhe.school /root/network
+sudo chmod 660 /root/network
+ll /root/network</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">设置粘滞位（防止非拥有者删除他人文件）</div>
+                <pre><code>sudo chmod o+t /root/network
+ll -d /root/network</code></pre>
+                <div class="note">权限位显示应为 drwxrw-r-t 或类似，t 表示粘滞位已设置。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">设置 ACL 扩展权限</div>
+                <pre><code>sudo touch /root/network/file1
+sudo getfacl /root/network/file1
+sudo setfacl -m u:kylin:rw /root/network/file1
+sudo getfacl /root/network/file1</code></pre>
+                <div class="note">验证：getfacl 输出中应包含 user:kylin:rw- 一行。</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">9.4.2 文件快速定位与管理</div>
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">find 命令查找</div>
+                <pre><code># 查找文件名含 pass 的文件
+find /usr -name "*pass*"
+
+# 查找 /dev 下 sd 开头的块设备
+find /dev -name "vd*" -type b
+
+# 查找 /etc 下长度为 0 的普通文件
+find /etc -type f -size 0 -exec ls -l {} \;</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">grep 与文件查看</div>
+                <pre><code># 显示以 nologin 结尾的行
+grep "nologin$" /etc/passwd
+
+# 查看最近系统日志
+tail /var/log/messages
+
+# 查看文件类型和系统信息
+file /etc/passwd
+stat /etc/passwd</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">9.4.3 数据检索与处理</div>
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">grep 上下文与反向选择</div>
+                <pre><code># 显示匹配行及下 2 行
+grep -A 2 root /etc/passwd
+
+# 显示匹配行及上 2 行
+grep -B 2 root /etc/passwd
+
+# 显示匹配行及上下 2 行
+grep -C 2 root /etc/passwd
+
+# 反向选择（不包含 nologin 的行）
+grep -v "nologin" /etc/passwd
+
+# 显示行号
+grep -n "root" /etc/passwd
+
+# 不区分大小写
+grep -i "ROOT" /etc/passwd</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">wc 统计</div>
+                <pre><code># 统计行数
+wc -l /etc/passwd
+
+# 统计字节数
+wc -c /etc/passwd
+
+# 统计单词数
+wc -w /etc/passwd</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 9.5 适配迁移 ==================== -->
+<div id="exp-95" class="exp-panel">
+    <div class="card">
+        <div class="card-title">📋 9.5 银河麒麟适配迁移</div>
+        <div class="tag-list">
+            <span class="tag">DEB 打包</span><span class="tag">RPM 打包</span><span class="tag">适配规范</span><span class="tag">软件测试</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">9.5.1 基于 DEB 格式的国产操作系统适配打包规范</div>
+        
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">创建构建目录</div>
+                <pre><code>cd /
+sudo mkdir pycharm-professional-2022.3
+cd pycharm-professional-2022.3</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">构建规范目录结构</div>
+                <pre><code>sudo mkdir -p opt/apps/pycharm \
+    usr/share/applications \
+    usr/share/icons/hicolor/{128x128,16x16,24x24,256x256,32x32,48x48,512x512,64x64,96x96,scalable}/apps</code></pre>
+                <div class="step-desc">安装 tree 查看结构：</div>
+                <pre><code>sudo apt-get install -y tree
+tree</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">解压软件包到规范目录</div>
+                <div class="step-desc">假设已下载 pycharm-professional-2022.3-aarch64.tar.gz：</div>
+                <pre><code>cd /
+sudo tar -zxvf pycharm-professional-2022.3-aarch64.tar.gz
+sudo mv pycharm-2022.3/* /pycharm-professional-2022.3/opt/apps/pycharm/</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">放置图标文件</div>
+                <pre><code>cd /pycharm-professional-2022.3/opt/apps/pycharm/bin
+sudo cp pycharm.svg /pycharm-professional-2022.3/usr/share/icons/hicolor/scalable/apps/
+sudo cp pycharm.png /pycharm-professional-2022.3/usr/share/icons/hicolor/scalable/apps/
+sudo chmod 777 /pycharm-professional-2022.3/usr/share/icons/hicolor/scalable/apps/pycharm.png</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+                <div class="step-title">创建 .desktop 文件</div>
+                <pre><code>sudo vim /pycharm-professional-2022.3/usr/share/applications/pycharm.desktop</code></pre>
+                <pre><code>[Desktop Entry]
+Version=2022.3
+Name=PyCharm Professional Edition
+Comment=Python IDE for Professional Developers
+Icon=/pycharm-professional-2022.3/usr/share/icons/hicolor/scalable/apps/pycharm.png
+Exec=/opt/apps/pycharm/bin/pycharm.sh
+Type=Application
+Categories=Development;IDE;</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-content">
+                <div class="step-title">构建 deb 包</div>
+                <pre><code>cd /pycharm-professional-2022.3
+sudo dpkg-deb --build . ../pycharm-professional-2022.3.deb</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">7</div>
+            <div class="step-content">
+                <div class="step-title">安装测试</div>
+                <pre><code>sudo dpkg -i pycharm-professional-2022.3.deb
+sudo apt-get install -f  # 修复依赖
+</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">9.5.2 基于 RPM 格式的国产操作系统适配打包规范</div>
+        
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">安装打包工具</div>
+                <pre><code>sudo yum install -y rpm-build rpmdevtools</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">初始化 rpmbuild 目录</div>
+                <pre><code>mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+# 或自动创建
+rpmdev-setuptree</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">准备源码</div>
+                <pre><code>cd ~/rpmbuild/SOURCES
+wget http://ftp.gnu.org/gnu/hello/hello-2.10.tar.gz</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">编写 spec 文件</div>
+                <pre><code>cd ~/rpmbuild/SPECS
+vim hello.spec</code></pre>
+                <pre><code>Name: hello
+Version: 2.10
+Release: 1
+Summary: The "Hello World" program from GNU
+Summary(zh_CN): GNU "Hello World" 程序
+License: GPL
+URL: http://ftp.gnu.org/gnu/hello
+Source: %{name}-%{version}.tar.gz
+
+%description
+The "Hello World" program, done with all bells and whistles of a proper FOSS project.
+
+%prep
+%setup -q
+
+%build
+%configure
+make %{?_smp_mflags}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=%{buildroot}
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/hello
+%{_datadir}/locale/*
+%{_mandir}/man1/hello.1*
+
+%changelog</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+                <div class="step-title">构建 RPM 包</div>
+                <pre><code>rpmbuild -ba ~/rpmbuild/SPECS/hello.spec</code></pre>
+                <div class="note">构建成功后，RPM 包位于 ~/rpmbuild/RPMS/x86_64/ 目录。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-content">
+                <div class="step-title">安装与卸载测试</div>
+                <pre><code>sudo rpm -ivh ~/rpmbuild/RPMS/x86_64/hello-2.10-1.x86_64.rpm
+hello
+sudo rpm -e hello</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 9.6 虚拟化 ==================== -->
+<div id="exp-96" class="exp-panel">
+    <div class="card">
+        <div class="card-title">📋 9.6 虚拟化技术与应用</div>
+        <div class="tag-list">
+            <span class="tag">Docker</span><span class="tag">Nginx</span><span class="tag">Tomcat</span><span class="tag">负载均衡</span><span class="tag">LNMP</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">9.6.1 容器化负载均衡部署实践</div>
+        
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">部署 Docker 服务</div>
+                <pre><code>sudo yum install -y docker
+sudo systemctl restart docker
+sudo systemctl enable docker
+sudo systemctl status docker</code></pre>
+                <div class="note">按 "q" 退出 status 查看。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">导入基础镜像</div>
+                <pre><code>sudo docker pull cr.kylinos.cn/kylin/kylin-server-init:v10sp1
+sudo docker tag cr.kylinos.cn/kylin/kylin-server-init:v10sp1 kylin-base:v10sp1
+sudo docker run --rm -it kylin-base:v10sp1 uname -m</code></pre>
+                <div class="note">应显示 x86_64。验证成功后查看镜像：<code>sudo docker images</code></div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">编写 Dockerfile 构建 Nginx</div>
+                <div class="step-desc">创建 Dockerfile 目录：</div>
+                <pre><code>mkdir ~/docker-nginx && cd ~/docker-nginx
+vim Dockerfile</code></pre>
+                <pre><code>FROM kylin-base:v10sp1
+RUN yum -y install gcc make pcre-devel zlib-devel tar zlib
+ADD nginx-1.15.2.tar.gz /usr/src/
+RUN cd /usr/src/nginx-1.15.2 && mkdir -p /usr/local/nginx && \
+    ./configure --prefix=/usr/local/nginx && \
+    make && make install && \
+    ln -s /usr/local/nginx/sbin/nginx /usr/local/sbin/
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]</code></pre>
+                <div class="step-desc">构建镜像：</div>
+                <pre><code>sudo docker build -t nginx-kylin:v1 .</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">构建 Tomcat 镜像</div>
+                <div class="step-desc">类似地，编写 Dockerfile 安装 JDK 和 Tomcat，构建 tomcat-kylin:v1 镜像。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+                <div class="step-title">创建容器</div>
+                <pre><code># 创建 Nginx 容器（负载均衡器）
+sudo docker run -d --name nginx-lb -p 80:80 nginx-kylin:v1
+
+# 创建两个 Tomcat 容器（后端服务）
+sudo docker run -d --name tomcat-1 tomcat-kylin:v1
+sudo docker run -d --name tomcat-2 tomcat-kylin:v1</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">6</div>
+            <div class="step-content">
+                <div class="step-title">配置 Nginx 负载均衡</div>
+                <div class="step-desc">进入 Nginx 容器，修改 nginx.conf：</div>
+                <pre><code>sudo docker exec -it nginx-lb /bin/bash
+vim /usr/local/nginx/conf/nginx.conf</code></pre>
+                <pre><code>http {
+    upstream tomcat_backend {
+        server tomcat-1:8080;
+        server tomcat-2:8080;
+    }
+    server {
+        listen 80;
+        location / {
+            proxy_pass http://tomcat_backend;
+        }
+    }
+}</code></pre>
+                <div class="step-desc">重启 Nginx：</div>
+                <pre><code>/usr/local/nginx/sbin/nginx -s reload</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">7</div>
+            <div class="step-content">
+                <div class="step-title">验证负载均衡</div>
+                <div class="step-desc">在宿主机浏览器访问 <code>http://宿主机IP</code>，多次刷新，观察请求被分发到不同 Tomcat 容器。</div>
+                <div class="note">也可使用 curl 命令多次请求：<code>curl http://localhost</code></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-subtitle">9.6.2 电商 Web 大并发解耦解决方案</div>
+        
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-title">Docker 安装与基础镜像导入</div>
+                <pre><code>sudo yum install -y docker
+sudo systemctl restart docker && sudo systemctl enable docker
+sudo docker pull cr.kylinos.cn/kylin/kylin-server-init:v10sp1
+sudo docker tag cr.kylinos.cn/kylin/kylin-server-init:v10sp1 kylin-base:v10sp1</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-title">创建 nginx-1 和 nginx-2 容器（带持久化存储）</div>
+                <pre><code>sudo mkdir -p /data/storage/docker/{nginx_1,nginx_2}/{conf,html}
+
+sudo docker run -it -p 81:80 -d --name nginx-1 \
+    -v /data/storage/docker/nginx_1/conf:/usr/local/nginx/conf \
+    -v /data/storage/docker/nginx_1/html:/usr/local/nginx/html \
+    kylin-base:v10sp1
+
+sudo docker run -it -p 82:80 -d --name nginx-2 \
+    -v /data/storage/docker/nginx_2/conf:/usr/local/nginx/conf \
+    -v /data/storage/docker/nginx_2/html:/usr/local/nginx/html \
+    kylin-base:v10sp1</code></pre>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-title">为两个容器配置 LNMP 环境</div>
+                <div class="step-desc">分别进入 nginx-1 和 nginx-2 容器，安装 Nginx、MySQL、PHP：</div>
+                <pre><code>sudo docker exec -it nginx-1 /bin/bash
+yum install -y nginx mariadb-server php php-fpm
+# 配置 nginx.conf 支持 PHP
+# 启动服务：systemctl start nginx mariadb php-fpm</code></pre>
+                <div class="step-desc">对 nginx-2 重复相同操作。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-title">在本机部署 Nginx 集群（轮询）</div>
+                <div class="step-desc">在宿主机（或另一个容器）安装 Nginx，配置 upstream：</div>
+                <pre><code>upstream backend {
+    server 宿主机IP:81;
+    server 宿主机IP:82;
+}
+
+server {
+    listen 80;
+    location / {
+        proxy_pass http://backend;
+    }
+}</code></pre>
+                <div class="note">默认使用轮询算法（round-robin），请求依次分发到 nginx-1 和 nginx-2。</div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+                <div class="step-title">验证集群</div>
+                <div class="step-desc">在 nginx-1 和 nginx-2 的 html 目录中放置不同内容的 index.html，通过浏览器访问宿主机 80 端口，多次刷新，确认轮询效果。</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script>
+    function showTab(id) {
+        document.querySelectorAll('.exp-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.target.classList.add('active');
+    }
+</script>
+
+</body>
+</html>
