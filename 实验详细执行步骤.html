@@ -183,13 +183,13 @@
     <div class="card">
         <div class="card-title">📋 9.1.1 基于 Kylin OS 的进程调度与优先级实验</div>
         <div class="tag-list">
-            <span class="tag">C 语言</span><span class="tag">pthread</span><span class="tag">nice/renice</span><span class="tag">taskset</span><span class="tag">CFS</span>
+            <span class="tag">C 语言</span><span class="tag">进程调度</span><span class="tag">nice/renice</span><span class="tag">taskset</span><span class="tag">CFS</span>
         </div>
     </div>
 
     <div class="card">
         <div class="card-subtitle">实验目的</div>
-        <p>通过编写高 CPU 负载的多线程程序，观察 CFS（完全公平调度器）在不同 nice 值下的时间片分配比例。</p>
+        <p>通过编写单线程 CPU 密集型程序，启动两个独立进程并绑定到同一 CPU 核心，观察 CFS 在不同 nice 值下的 CPU 时间分配现象。</p>
     </div>
 
     <div class="card">
@@ -198,111 +198,86 @@
         <div class="step">
             <div class="step-num">1</div>
             <div class="step-content">
-                <div class="step-title">创建实验目录</div>
-                <div class="step-desc">在终端中创建并进入实验目录。</div>
+                <div class="step-title">创建并编译程序</div>
+                <div class="step-desc">程序本身只做一件事：在一个进程中持续执行空循环，形成 CPU 密集型负载。</div>
                 <pre><code>mkdir -p ~/labs/cfs_experiment
-cd ~/labs/cfs_experiment</code></pre>
+cd ~/labs/cfs_experiment
+cat &gt; nice-exp.c &lt;&lt;'EOF'
+#include &lt;stdio.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+
+int main(void)
+{
+    printf("pid:%d\n", getpid());
+    while (1) {
+    }
+    return 0;
+}
+EOF
+gcc nice-exp.c -o nice-exp
+ls -l nice-exp</code></pre>
+                <div class="note">截图：能看到 <code>nice-exp</code> 文件生成。</div>
             </div>
         </div>
         
         <div class="step">
             <div class="step-num">2</div>
             <div class="step-content">
-                <div class="step-title">编写测试程序 nice-exp.c</div>
-                <div class="step-desc">使用 nano 编辑器创建死循环的多线程程序。</div>
-                <pre><code>nano nice-exp.c</code></pre>
-                <div class="step-desc">输入以下代码：</div>
-                <pre><code>#include &lt;stdio.h&gt;
-#include &lt;pthread.h&gt;
-#include &lt;sys/types.h&gt;
-#include &lt;unistd.h&gt;
+                <div class="step-title">启动两个独立进程并绑定同一 CPU</div>
+                <div class="step-desc">两个进程都绑定到 CPU 0，保证它们竞争同一个核心的 CPU 时间。</div>
+                <pre><code>cd ~/labs/cfs_experiment
+pkill nice-exp 2&gt;/dev/null
 
-void *thread_fun(void *param)
-{
-    printf("thread pid:%d, tid:%lu\n", getpid(), pthread_self());
-    while (1) ;
-    return NULL;
-}
+taskset -c 0 ./nice-exp &gt;/dev/null &amp;
+PID_A=$!
 
-int main(void)
-{
-    pthread_t tid;
-    int ret;
-    printf("main pid:%d, tid:%lu\n", getpid(), pthread_self());
-    ret = pthread_create(&tid, NULL, thread_fun, NULL);
-    if (ret == -1) {
-        perror("cannot create new thread");
-        return 1;
-    }
-    if (pthread_join(tid, NULL) != 0) {
-        perror("call pthread_join function fail");
-        return 1;
-    }
-    return 0;
-}</code></pre>
-                <div class="note">保存方法：Ctrl+O 回车确认，Ctrl+X 退出。</div>
+taskset -c 0 ./nice-exp &gt;/dev/null &amp;
+PID_B=$!
+
+echo "PID_A=$PID_A PID_B=$PID_B"</code></pre>
+                <div class="note">后续命令保持在同一个终端执行，因为 <code>$PID_A</code> 和 <code>$PID_B</code> 只在当前终端有效。</div>
             </div>
         </div>
         
         <div class="step">
             <div class="step-num">3</div>
             <div class="step-content">
-                <div class="step-title">编译程序</div>
-                <div class="step-desc">使用 gcc 编译，需要链接 pthread 线程库。</div>
-                <pre><code>gcc nice-exp.c -o nice-exp -pthread</code></pre>
+                <div class="step-title">确认两个进程处于同一核心</div>
+                <pre><code>taskset -cp $PID_A
+taskset -cp $PID_B
+ps -o pid,stat,ni,psr,pcpu,comm -p $PID_A,$PID_B</code></pre>
+                <div class="note">确认两个进程的 CPU affinity 都是 0，且 <code>PSR</code> 相同。</div>
             </div>
         </div>
         
         <div class="step">
             <div class="step-num">4</div>
             <div class="step-content">
-                <div class="step-title">初始运行与观察（第一阶段）</div>
-                <div class="step-desc">在终端后台运行第一个进程，保持该终端不关闭。</div>
-                <pre><code>./nice-exp &</code></pre>
-                <div class="step-desc">重新打开一个新终端，运行第二个进程：</div>
-                <pre><code>cd ~/labs/cfs_experiment
-./nice-exp &</code></pre>
-                <div class="step-desc">再打开第三个终端，使用 top 查看 CPU 占用：</div>
-                <pre><code>top</code></pre>
-                <div class="step-desc">在 top 界面按 <code>f</code> 键，用方向键找到 <code>P = Last Used Cpu (SMP)</code>，按空格选中使其前面出现 <code>*</code> 号，按 Esc 退出。</div>
-                <div class="note">现象：两个 nice-exp 进程各占用约 100% CPU，且通常运行在不同 CPU 核心上（P 列值不同）。</div>
+                <div class="step-title">降低其中一个进程优先级</div>
+                <div class="step-desc">将 PID_B 的 nice 值调大到 19，使它的调度权重明显降低。</div>
+                <pre><code>renice -n 19 -p $PID_B
+sleep 8
+ps -o pid,stat,ni,psr,pcpu,comm -p $PID_A,$PID_B</code></pre>
+                <div class="note">确认 <code>PID_B</code> 的 <code>NI</code> 为 19 后再截图。</div>
             </div>
         </div>
         
         <div class="step">
             <div class="step-num">5</div>
             <div class="step-content">
-                <div class="step-title">绑定同一 CPU 核心并观察（第二阶段）</div>
-                <div class="step-desc">先杀掉之前的进程，然后用 taskset 强制绑定到同一核心（如 CPU 3）。</div>
-                <pre><code>killall nice-exp
-taskset -c 3 ./nice-exp &</code></pre>
-                <div class="step-desc">在另一个终端同样绑定到 CPU 3：</div>
-                <pre><code>taskset -c 3 ./nice-exp &</code></pre>
-                <div class="step-desc">top 查看，确认两个进程都在 CPU 3 上，且各占约 50% CPU。</div>
+                <div class="step-title">使用 top 观察 CPU 占比</div>
+                <pre><code>top -p $PID_A,$PID_B</code></pre>
+                <div class="note">进入 top 后等待 5 到 10 秒。预期现象是 <code>NI=0</code> 的进程占用更多 CPU，<code>NI=19</code> 的进程占用更少 CPU。</div>
             </div>
         </div>
         
         <div class="step">
             <div class="step-num">6</div>
             <div class="step-content">
-                <div class="step-title">调整 nice 优先级并观察（第三阶段）</div>
-                <div class="step-desc">使用 renice 将其中一个进程的 nice 值调高（值越小优先级越高）。</div>
-                <pre><code>sudo renice -n -5 -g &lt;PID&gt;</code></pre>
-                <div class="step-desc">其中 &lt;PID&gt; 替换为 top 中显示的 nice-exp 进程号。</div>
-                <div class="note">现象：nice 值为 -5 的进程占用约 75% CPU，nice 值为 0 的进程占用约 25% CPU。权重比例约为 3:1。</div>
-            </div>
-        </div>
-        
-        <div class="step">
-            <div class="step-num">7</div>
-            <div class="step-content">
-                <div class="step-title">截图与记录</div>
-                <div class="step-desc">记录以下关键截图：</div>
-                <ul style="margin-left:20px">
-                    <li>top 中两进程分别在不同 CPU 运行（各占 100%）</li>
-                    <li>绑定同一 CPU 后两进程各占约 50%</li>
-                    <li>renice 调整后 nice=-5 占 75%，nice=0 占 25%</li>
-                </ul>
+                <div class="step-title">结束实验进程</div>
+                <pre><code>kill $PID_A $PID_B
+pkill nice-exp 2&gt;/dev/null</code></pre>
             </div>
         </div>
     </div>
@@ -311,18 +286,19 @@ taskset -c 3 ./nice-exp &</code></pre>
         <div class="card-subtitle">预期现象汇总</div>
         <table>
             <tr><th>阶段</th><th>预期现象</th><th>原理</th></tr>
-            <tr><td>初始运行</td><td>两进程各占 100% CPU，在不同核心</td><td>CFS 跨核心负载均衡</td></tr>
-            <tr><td>绑定同一 CPU</td><td>两进程各占约 50% CPU</td><td>同一核心公平分配时间片</td></tr>
-            <tr><td>renice -5</td><td>高优先级进程占 75%，低优先级占 25%</td><td>nice 值影响权重，比例约 3:1</td></tr>
+            <tr><td>调整前</td><td>两个进程 PSR 相同，NI 均为 0，CPU 占比接近</td><td>同一核心上权重相同，CFS 近似公平分配</td></tr>
+            <tr><td>renice 后</td><td>PID_B 的 NI 为 19，CPU 占比明显降低</td><td>nice 值变大，调度权重降低</td></tr>
+            <tr><td>top 观察</td><td>NI=0 的进程占用更多 CPU，NI=19 的进程占用更少 CPU</td><td>CFS 根据权重分配运行时间</td></tr>
         </table>
     </div>
 
     <div class="card">
         <div class="card-subtitle">注意事项</div>
-        <div class="warn">运行死循环程序会导致 CPU 占用率飙升，实验结束后务必使用 <code>killall nice-exp</code> 清理进程。</div>
-        <div class="note">renice 需要 sudo 权限。如果系统提示权限不足，请确认当前用户有 sudo 权限。</div>
+        <div class="warn">运行死循环程序会导致 CPU 占用率升高，实验结束后务必使用 <code>kill $PID_A $PID_B</code> 或 <code>pkill nice-exp</code> 清理进程。</div>
+        <div class="note">如果刚进入 top 时 CPU 占比仍接近，可以等待几秒再截图；<code>ps</code> 的 <code>%CPU</code> 受平均值影响，刚调整后不一定马上明显。</div>
     </div>
 </div>
+
 
 <!-- ==================== 9.1.2 O(1)调度 ==================== -->
 <div id="exp-912" class="exp-panel">
