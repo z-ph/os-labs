@@ -232,7 +232,7 @@ int main(void)
 EOF
 gcc nice-exp.c -o nice-exp -pthread
 ls -l nice-exp</code></pre>
-                <div class="note">截图：能看到 <code>nice-exp</code> 文件生成，编译命令包含 <code>-pthread</code>。</div>
+                <div class="note">本步骤用于准备测试程序，通常不作为截图重点；如果编译失败，再记录报错信息用于排查。</div>
             </div>
         </div>
         <div class="step">
@@ -258,6 +258,7 @@ echo "PID_A=$PID_A PID_B=$PID_B"</code></pre>
                 <pre><code>taskset -cp $PID_A
 taskset -cp $PID_B
 ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B</code></pre>
+                <div class="note">截图：截取 <code>taskset -cp</code> 与 <code>ps</code> 输出，重点证明两个进程处于同一 CPU 核心，且调整前 <code>NI</code> 均为 0。</div>
             </div>
         </div>
         <div class="step">
@@ -267,7 +268,7 @@ ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B</code></pre>
                 <pre><code>sudo renice -n -5 -p $PID_A
 sleep 8
 ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B</code></pre>
-                <div class="note">确认 <code>PID_A</code> 的 <code>NI</code> 为 -5 后再截图。</div>
+                <div class="note">截图：截取 <code>renice</code> 返回结果和 <code>ps</code> 输出，重点证明 <code>PID_A</code> 的 <code>NI</code> 为 -5，<code>PID_B</code> 仍为 0。</div>
             </div>
         </div>
         <div class="step">
@@ -284,6 +285,7 @@ ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B</code></pre>
                 <div class="step-title">结束实验进程</div>
                 <pre><code>kill $PID_A $PID_B
 pkill nice-exp 2&gt;/dev/null</code></pre>
+                <div class="note">本步骤用于释放 CPU 资源，不作为截图重点。</div>
             </div>
         </div>
     </div>

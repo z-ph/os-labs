@@ -45,7 +45,7 @@ gcc nice-exp.c -o nice-exp -pthread
 ls -l nice-exp
 ```
 
-记录内容：能看到 `nice-exp` 文件生成。
+记录内容：本步骤只用于准备测试程序，通常不作为截图重点；如果编译失败，再记录报错信息用于排查。
 
 ## 第 2 步：启动两个 nice-exp 进程并绑定到同一 CPU
 
@@ -81,7 +81,7 @@ ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B
 - `taskset -cp` 输出里两个进程的 CPU affinity 都是 `0`。
 - `ps` 输出里两个进程的 `PSR` 都是 `0`，说明两个进程在同一个 CPU 核心竞争。
 
-记录内容：这一阶段证明两个进程绑定到了同一个 CPU 核心。
+截图内容：截取 `taskset -cp` 与 `ps` 输出，重点证明两个进程绑定到同一个 CPU 核心，且调整前 `NI` 均为 0。
 
 ## 第 4 步：把其中一个进程 nice 值调为 -5
 
@@ -98,7 +98,7 @@ ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B
 - `PID_A` 应该变成 `-5`。
 - `PID_B` 应该还是 `0`。
 
-如果 `NI` 没有变成 `-5`，说明 `renice` 没成功，先不要截图。
+截图内容：截取 `renice` 返回结果和 `ps` 输出，重点证明 `PID_A` 的 `NI` 已经变成 `-5`，`PID_B` 仍为 `0`。如果 `NI` 没有变成 `-5`，说明 `renice` 没成功，先不要截图。
 
 ## 第 5 步：用 top 观察 CPU 占用变化
 
@@ -117,7 +117,7 @@ top -p $PID_A,$PID_B
 
 如果刚进入 `top` 还是差不多，就再等几秒；也可以按 `f` 打开字段选择，显示 `P = Last Used Cpu (SMP)`，确认两个进程在同一个 CPU 核心。
 
-记录内容：这一阶段证明 nice 值改变后 CPU 分配发生变化。
+截图内容：截取 `top` 中两个 nice-exp 进程的 `NI` 和 `%CPU`，重点证明 nice 值改变后 CPU 分配发生变化。
 
 ## 第 6 步：结束实验进程
 
@@ -127,6 +127,8 @@ top -p $PID_A,$PID_B
 kill $PID_A $PID_B
 pkill nice-exp 2>/dev/null
 ```
+
+本步骤用于释放 CPU 资源，不作为截图重点。
 
 ## 报告里怎么写结果
 

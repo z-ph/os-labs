@@ -34,7 +34,9 @@
 
 ## 9.1.1 进程调度与优先级
 
-### 阶段一：创建并编译 pthread 测试程序
+本实验的截图只保留调度验证证据：调整前确认两个进程处于同一 CPU 核心且 NI 相同，调整后确认 NI 发生变化并观察 CPU 占用差异。创建文件、编译程序、启动进程和清理进程属于准备或善后步骤，不作为截图重点。
+
+### 阶段一：准备 pthread 测试程序
 
 ```bash
 mkdir -p ~/labs/cfs_experiment
@@ -73,6 +75,8 @@ gcc nice-exp.c -o nice-exp -pthread
 ls -l nice-exp
 ```
 
+本阶段用于准备测试程序，通常不需要截图；如果出现编译报错，再记录错误信息用于排查。
+
 命令与参数解释：
 
 - `mkdir -p ~/labs/cfs_experiment`：创建实验目录；`-p` 表示父目录不存在时一起创建，目录已存在也不报错；`~` 表示当前用户主目录。
@@ -99,6 +103,8 @@ PID_B=$!
 echo "PID_A=$PID_A PID_B=$PID_B"
 ```
 
+本阶段只用于得到后续观察所需的 `PID_A` 和 `PID_B`，截图从下一阶段的验证输出开始。
+
 命令与参数解释：
 
 - `cd ~/labs/cfs_experiment`：确保当前目录中存在 `nice-exp` 可执行文件。
@@ -115,6 +121,8 @@ taskset -cp $PID_A
 taskset -cp $PID_B
 ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B
 ```
+
+截图内容：截取 `taskset -cp` 和 `ps` 的输出，重点包含两个进程处于同一 CPU 核心、`NI` 均为 0、CPU 占用接近。
 
 命令与参数解释：
 
@@ -134,8 +142,9 @@ sudo renice -n -5 -p $PID_A
 sleep 8
 ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B
 top -p $PID_A,$PID_B
-pkill nice-exp 2>/dev/null
 ```
+
+截图内容：截取 `renice` 返回结果以及 `ps` 或 `top` 的输出，重点包含 `PID_A` 的 `NI=-5`、`PID_B` 的 `NI=0`，并观察 `PID_A` 的 CPU 占用更高或随时间更稳定地占优。
 
 命令与参数解释：
 
@@ -143,12 +152,24 @@ pkill nice-exp 2>/dev/null
 - `sleep 8`：等待 8 秒，让调度器有时间重新分配 CPU 时间。
 - `ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B`：再次查看两个进程的 `NI` 和 CPU 占用。
 - `top -p $PID_A,$PID_B`：动态观察指定进程；`-p` 指定 PID 列表，只显示这两个进程。
-- `pkill nice-exp 2>/dev/null`：实验结束后清理测试进程；`2>/dev/null` 隐藏非关键错误提示。
 
 答辩说明：
 
 - Linux CFS 调度器会根据进程权重分配 CPU 时间，nice 值越小权重越高。
 - `renice -n -5` 后，`PID_A` 的 `NI` 变为 `-5`，理论上会比 `NI=0` 的进程获得更多 CPU 时间。
+- 如果 `top` 的瞬时数值仍然接近，可以继续观察数秒或多次执行 `ps`；重点是对比调整前后的 `NI` 和 CPU 时间分配趋势。
+
+### 阶段五：清理测试进程
+
+```bash
+pkill nice-exp 2>/dev/null
+```
+
+本阶段用于释放 CPU 资源，不作为截图重点。
+
+命令与参数解释：
+
+- `pkill nice-exp 2>/dev/null`：实验结束后清理测试进程；`pkill` 按进程名匹配；`2>/dev/null` 隐藏没有匹配进程时的非关键提示。
 
 ## 9.2.4 内存回收实验
 
