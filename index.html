@@ -369,13 +369,20 @@
                 <span class="toggle-icon">▼</span>
             </div>
             <div id="sec-9.5" class="section-content">
+                <div style="background:var(--accent-light);border:1px solid #b7ead2;border-radius:8px;padding:14px;margin-bottom:12px">
+                    <strong style="color:var(--accent)">推荐课设项目：</strong>
+                    将 <code>cc switch</code> 命令行工具适配打包为 DEB 与 RPM，按“构建、安装、查询、运行、卸载”形成完整验证闭环。
+                    <div style="margin-top:10px">
+                        <a class="btn btn-primary" href="course-9.5-cc-switch-packaging.html" style="text-decoration:none">打开 9.5 cc switch 打包指导页</a>
+                    </div>
+                </div>
                 <div class="exp-item" data-cat="9.5" onclick="toggleExp(this)">
                     <input type="checkbox" id="exp-951" onchange="updatePlanner()">
                     <div>
                         <div class="exp-title">9.5.1 基于 DEB 格式的国产操作系统适配打包规范</div>
-                        <div class="exp-desc">按规范构建 deb 包目录结构（opt/apps/…、usr/share/applications/…），准备 .desktop 文件与图标，完成 PyCharm 等软件的打包与安装测试。</div>
+                        <div class="exp-desc">以 cc switch CLI 工具为对象，构建 DEB 包目录结构，编写 DEBIAN/control，完成 dpkg-deb 构建、安装、命令运行和卸载验证。</div>
                         <div class="tag-list">
-                            <span class="tag">DEB 打包</span><span class="tag">desktop</span><span class="tag">适配规范</span>
+                            <span class="tag">DEB 打包</span><span class="tag">control 文件</span><span class="tag">CLI 适配</span><span class="tag">dpkg</span>
                         </div>
                     </div>
                 </div>
@@ -383,9 +390,9 @@
                     <input type="checkbox" id="exp-952" onchange="updatePlanner()">
                     <div>
                         <div class="exp-title">9.5.2 基于 RPM 格式的国产操作系统适配打包规范</div>
-                        <div class="exp-desc">初始化 rpmbuild 目录结构（BUILD/BUILDROOT/RPMS/SOURCES/SPECS/SRPMS），编写 spec 文件，编译 hello 等源码并制作 RPM 包，完成安装/卸载测试。</div>
+                        <div class="exp-desc">以同一个 cc switch CLI 工具为对象，初始化 rpmbuild 目录，准备 SOURCES 源码包，编写 spec 文件，完成 RPM 构建、安装、查询和卸载验证。</div>
                         <div class="tag-list">
-                            <span class="tag">RPM 打包</span><span class="tag">spec 文件</span><span class="tag">编译适配</span>
+                            <span class="tag">RPM 打包</span><span class="tag">spec 文件</span><span class="tag">rpmbuild</span><span class="tag">适配验证</span>
                         </div>
                     </div>
                 </div>

@@ -8,6 +8,8 @@ GitHub Pages: [https://z-ph.github.io/os-labs/](https://z-ph.github.io/os-labs/)
 
 分阶段执行清单: [https://z-ph.github.io/os-labs/quick-submit.html](https://z-ph.github.io/os-labs/quick-submit.html)
 
+9.5 cc switch 打包指导页: [https://z-ph.github.io/os-labs/course-9.5-cc-switch-packaging.html](https://z-ph.github.io/os-labs/course-9.5-cc-switch-packaging.html)
+
 ## 文件说明
 
 | 文件 | 说明 |
@@ -19,6 +21,7 @@ GitHub Pages: [https://z-ph.github.io/os-labs/](https://z-ph.github.io/os-labs/)
 | `quick-submit.md` | 分阶段执行清单的英文文件名 Markdown 版，方便在 Kylin 终端打开 |
 | `exp-9.1.1-step-by-step.md` | 9.1.1 进程调度实验分步操作与 renice 现象排查 |
 | `操作系统实验与课设执行清单.md` | 分阶段执行清单的 Markdown 版 |
+| `course-9.5-cc-switch-packaging.html` | 9.5 cc switch 的 DEB 与 RPM 适配打包指导页 |
 | `course-9.6-lb-project/` | 9.6.1 容器化负载均衡完整项目源码与部署脚本 |
 
 ## 总体要求

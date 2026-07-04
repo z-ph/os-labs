@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>9.5 课程设计：cc switch 的 DEB 与 RPM 适配打包</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --ink: #1f2937;
+      --muted: #5b6678;
+      --line: #d8e0ea;
+      --blue: #1f5fbf;
+      --green: #166a4f;
+      --amber: #8a5a00;
+      --red: #b42318;
+      --code-bg: #101827;
+      --code-ink: #e5e7eb;
+      --soft-blue: #edf4ff;
+      --soft-green: #eaf7f1;
+      --soft-amber: #fff7df;
+      --soft-red: #fff0ed;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.72;
+    }
+    header {
+      background: linear-gradient(135deg, #123f7a 0%, #166a4f 100%);
+      color: #fff;
+      padding: 34px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.2);
+    }
+    header .inner, main { max-width: 1080px; margin: 0 auto; }
+    main { padding: 24px 18px 70px; }
+    h1 { margin: 0 0 8px; font-size: 30px; line-height: 1.25; }
+    header p { margin: 0; opacity: .92; }
+    h2 {
+      margin: 34px 0 14px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--blue);
+      font-size: 23px;
+      line-height: 1.3;
+    }
+    h3 { margin: 24px 0 8px; color: var(--green); font-size: 18px; line-height: 1.3; }
+    p { margin: 10px 0; }
+    a { color: var(--blue); }
+    ul, ol { padding-left: 25px; }
+    li { margin: 5px 0; }
+    code { font-family: Consolas, "Courier New", monospace; font-size: .94em; }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-ink);
+      padding: 14px 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 12px 0 16px;
+      border: 1px solid #253145;
+    }
+    pre code { color: inherit; font-size: 13px; line-height: 1.55; }
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .nav a {
+      color: #fff;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,.45);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+    .lead {
+      background: var(--soft-blue);
+      border-left: 4px solid var(--blue);
+      padding: 13px 15px;
+      border-radius: 0 8px 8px 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+      margin: 14px 0;
+    }
+    .box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .box strong { color: var(--blue); }
+    .shot {
+      background: var(--soft-amber);
+      border-left: 4px solid var(--amber);
+      padding: 12px 14px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+    }
+    .result {
+      background: var(--soft-green);
+      border-left: 4px solid var(--green);
+      padding: 12px 14px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+    }
+    .warn {
+      background: var(--soft-red);
+      border-left: 4px solid var(--red);
+      padding: 12px 14px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+    }
+    .placeholder {
+      min-height: 155px;
+      border: 2px dashed #9aa7b8;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #526174;
+      background: repeating-linear-gradient(45deg, #fff, #fff 12px, #f1f5f9 12px, #f1f5f9 24px);
+      font-weight: 700;
+      margin: 12px 0;
+      padding: 18px;
+    }
+    .toc {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 18px 0 24px;
+    }
+    .toc a { display: inline-block; margin: 3px 14px 3px 0; text-decoration: none; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      margin: 12px 0 18px;
+    }
+    th, td { border: 1px solid var(--line); padding: 9px 10px; text-align: left; vertical-align: top; }
+    th { background: #eef3f8; }
+    @media (max-width: 640px) {
+      h1 { font-size: 23px; }
+      h2 { font-size: 20px; }
+      main { padding-inline: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="inner">
+      <h1>9.5 课程设计：cc switch 的 DEB 与 RPM 适配打包</h1>
+      <p>把一个命令行工具整理为国产操作系统可安装、可验证、可卸载的软件包，并形成报告截图证据链。</p>
+      <div class="nav">
+        <a href="index.html">返回首页</a>
+        <a href="quick-submit.html">执行清单</a>
+        <a href="#deb">DEB 打包</a>
+        <a href="#rpm">RPM 打包</a>
+        <a href="#screenshots">截图清单</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <p class="lead">本页用于完成教材 9.5“银河麒麟适配迁移”课程设计。教材示例分别演示 DEB 与 RPM 打包规范；这里把对象换成 <code>cc switch</code> 命令行工具，目标是在 Kylin 环境中同时产出 <code>.deb</code> 和 <code>.rpm</code>，并通过安装、命令调用、包查询、卸载验证来证明适配成功。</p>
+
+    <div class="toc">
+      <strong>页面使用顺序：</strong>
+      <a href="#target">项目目标</a>
+      <a href="#prepare">环境准备</a>
+      <a href="#source">准备 cc switch 文件</a>
+      <a href="#deb">9.5.1 DEB</a>
+      <a href="#rpm">9.5.2 RPM</a>
+      <a href="#report">报告写法</a>
+    </div>
+
+    <h2 id="target">一、项目目标与交付物</h2>
+    <div class="grid">
+      <div class="box"><strong>课设对应关系</strong><br>9.5.1 完成 DEB 格式打包；9.5.2 完成 RPM 格式打包；最终形成同一工具在两种包管理体系下的适配验证。</div>
+      <div class="box"><strong>打包对象</strong><br><code>cc switch</code> 命令行工具。报告中可描述为“用于切换命令行工作模式或环境配置的轻量级 CLI 工具”。</div>
+      <div class="box"><strong>核心验收</strong><br>安装后能执行 <code>cc-switch --version</code>，能通过 <code>dpkg/rpm</code> 查询包信息，卸载后命令不可用或包记录消失。</div>
+      <div class="box"><strong>报告材料</strong><br>项目结构截图、控制文件截图、构建成功截图、安装验证截图、卸载验证截图。</div>
+    </div>
+
+    <h2 id="prepare">二、环境准备</h2>
+    <p>建议在银河麒麟高级服务器操作系统或课程虚拟机中执行。若当前系统只支持其中一种包管理器，也可以先完成对应格式；报告中说明另一种格式是在兼容环境中验证。</p>
+    <pre><code>mkdir -p ~/os-course/cc-switch-packaging
+cd ~/os-course/cc-switch-packaging
+cat /etc/os-release
+uname -m
+which dpkg-deb || true
+which rpmbuild || true</code></pre>
+    <p>命令与参数解释：</p>
+    <ul>
+      <li><code>mkdir -p</code> 创建课程设计工作目录，目录已存在时不报错。</li>
+      <li><code>cat /etc/os-release</code> 查看系统发行版信息，用于证明实验环境。</li>
+      <li><code>uname -m</code> 查看 CPU 架构，例如 <code>x86_64</code>、<code>aarch64</code>。</li>
+      <li><code>which dpkg-deb</code> 和 <code>which rpmbuild</code> 检查打包工具是否存在；<code>|| true</code> 表示不存在也继续执行。</li>
+    </ul>
+    <div class="shot">截图内容：截取系统版本、架构和打包工具检查结果，证明课程设计是在目标 Linux 环境中完成。</div>
+    <div class="placeholder">图片占位符：环境准备截图<br>需要包含 /etc/os-release、uname -m、dpkg-deb 或 rpmbuild 检查结果</div>
+    <div class="result">报告结论：本项目已完成基础环境确认，系统架构与包管理工具满足 cc switch 适配打包验证要求。</div>
+
+    <h2 id="source">三、准备 cc switch 源文件</h2>
+    <p>如果你已经有真实的 <code>cc switch</code> 可执行文件，把它复制为 <code>source/cc-switch</code>。如果暂时没有，可以先用下面的脚本版命令行工具完成打包流程，后续再替换为真实二进制。</p>
+    <pre><code>cd ~/os-course/cc-switch-packaging
+mkdir -p source
+cat &gt; source/cc-switch &lt;&lt;'EOF'
+#!/usr/bin/env bash
+set -e
+
+case "${1:-}" in
+  --version)
+    echo "cc-switch 1.0.0"
+    ;;
+  current)
+    echo "current profile: default"
+    ;;
+  switch)
+    profile="${2:-default}"
+    mkdir -p "$HOME/.config/cc-switch"
+    echo "$profile" &gt; "$HOME/.config/cc-switch/profile"
+    echo "switched to profile: $profile"
+    ;;
+  *)
+    echo "Usage: cc-switch --version | current | switch &lt;profile&gt;"
+    ;;
+esac
+EOF
+chmod +x source/cc-switch
+./source/cc-switch --version
+./source/cc-switch switch kylin
+./source/cc-switch current</code></pre>
+    <p>命令与参数解释：</p>
+    <ul>
+      <li><code>cat &gt; source/cc-switch &lt;&lt;'EOF'</code> 将脚本内容写入文件。</li>
+      <li><code>chmod +x</code> 增加可执行权限。</li>
+      <li><code>--version</code>、<code>switch</code>、<code>current</code> 是后续安装验证要使用的功能点。</li>
+    </ul>
+    <div class="shot">截图内容：截取 <code>source/cc-switch</code> 的执行结果，证明打包对象本身可运行。</div>
+    <div class="placeholder">图片占位符：cc switch 源文件验证截图<br>需要包含 --version、switch kylin、current 的输出</div>
+    <div class="result">报告结论：cc switch 在打包前能够正常执行，具备进入 DEB/RPM 适配打包流程的基础条件。</div>
+
+    <h2 id="deb">四、9.5.1 基于 DEB 格式的适配打包</h2>
+    <h3>阶段 1：创建 DEB 包目录结构</h3>
+    <pre><code>cd ~/os-course/cc-switch-packaging
+rm -rf deb-root
+mkdir -p deb-root/DEBIAN
+mkdir -p deb-root/usr/local/bin
+mkdir -p deb-root/usr/share/doc/cc-switch
+install -m 0755 source/cc-switch deb-root/usr/local/bin/cc-switch
+cat &gt; deb-root/usr/share/doc/cc-switch/README.txt &lt;&lt;'EOF'
+cc-switch is a course-design CLI packaged for Kylin OS adaptation testing.
+EOF
+find deb-root -maxdepth 4 -type f -o -type d</code></pre>
+    <p>命令与参数解释：</p>
+    <ul>
+      <li><code>DEBIAN</code> 保存 DEB 包控制文件。</li>
+      <li><code>usr/local/bin</code> 保存安装后的命令文件，安装后可直接运行 <code>cc-switch</code>。</li>
+      <li><code>install -m 0755</code> 复制文件并设置可执行权限。</li>
+      <li><code>find</code> 展示打包目录结构，是报告中非常重要的截图证据。</li>
+    </ul>
+    <div class="shot">截图内容：截取 <code>find deb-root</code> 的目录结构，证明 DEB 包按规范组织了控制文件和程序文件。</div>
+    <div class="placeholder">图片占位符：DEB 目录结构截图<br>需要看到 DEBIAN、usr/local/bin/cc-switch、usr/share/doc/cc-switch</div>
+    <div class="result">报告结论：DEB 打包目录已按 Linux 文件系统层次和 Debian 包规范完成组织。</div>
+
+    <h3>阶段 2：编写 DEB 控制文件</h3>
+    <pre><code>cat &gt; deb-root/DEBIAN/control &lt;&lt;'EOF'
+Package: cc-switch
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: zph &lt;zph@example.com&gt;
+Depends: bash
+Description: cc switch command-line tool for Kylin adaptation packaging
+ This package installs the cc-switch command for operating system course design.
+ It is used to verify DEB packaging, installation, command execution and removal.
+EOF
+cat deb-root/DEBIAN/control</code></pre>
+    <p>命令与参数解释：</p>
+    <ul>
+      <li><code>Package</code> 是软件包名称，安装和卸载时使用。</li>
+      <li><code>Version</code> 是版本号，报告中可用于说明适配版本。</li>
+      <li><code>Architecture: all</code> 表示脚本包与 CPU 架构无关；如果换成二进制文件，应改成对应架构。</li>
+      <li><code>Depends: bash</code> 表示运行依赖。</li>
+    </ul>
+    <div class="shot">截图内容：截取 <code>control</code> 文件内容，证明 DEB 元数据完整。</div>
+    <div class="placeholder">图片占位符：DEB control 文件截图<br>需要包含 Package、Version、Architecture、Depends、Description</div>
+    <div class="result">报告结论：DEB 控制文件已定义软件包名称、版本、架构、依赖和说明信息，满足包管理器识别要求。</div>
+
+    <h3>阶段 3：构建、安装与验证 DEB 包</h3>
+    <pre><code>dpkg-deb --build deb-root cc-switch_1.0.0_all.deb
+ls -lh cc-switch_1.0.0_all.deb
+sudo dpkg -i cc-switch_1.0.0_all.deb
+dpkg -l | grep cc-switch
+which cc-switch
+cc-switch --version
+cc-switch switch deb-test
+cc-switch current</code></pre>
+    <p>命令与参数解释：</p>
+    <ul>
+      <li><code>dpkg-deb --build</code> 将目录构建为 <code>.deb</code> 文件。</li>
+      <li><code>sudo dpkg -i</code> 安装 DEB 包。</li>
+      <li><code>dpkg -l | grep cc-switch</code> 查询包是否已安装。</li>
+      <li><code>which cc-switch</code> 确认命令已进入系统 PATH。</li>
+    </ul>
+    <div class="shot">截图内容：截取构建成功、安装成功、包查询和命令运行输出。</div>
+    <div class="placeholder">图片占位符：DEB 构建与安装验证截图<br>需要包含 .deb 文件、dpkg -i、dpkg -l、cc-switch --version 输出</div>
+    <div class="result">报告结论：cc switch 已成功构建为 DEB 软件包并完成安装验证，安装后命令可被系统识别并正常运行。</div>
+
+    <h3>阶段 4：卸载 DEB 包</h3>
+    <pre><code>sudo dpkg -r cc-switch
+dpkg -l | grep cc-switch || echo "cc-switch deb package removed"
+which cc-switch || echo "cc-switch command removed from PATH"</code></pre>
+    <div class="shot">截图内容：截取卸载命令和卸载后的查询结果，证明软件包可被干净移除。</div>
+    <div class="placeholder">图片占位符：DEB 卸载验证截图<br>需要包含 dpkg -r 和 removed 相关输出</div>
+    <div class="result">报告结论：DEB 包卸载后，包管理记录和系统命令入口均已清除，说明安装与卸载流程完整可控。</div>
+
+    <h2 id="rpm">五、9.5.2 基于 RPM 格式的适配打包</h2>
+    <h3>阶段 1：安装工具并初始化 rpmbuild 目录</h3>
+    <pre><code>sudo yum install -y rpm-build rpmdevtools || sudo dnf install -y rpm-build rpmdevtools
+rpmdev-setuptree || mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+find ~/rpmbuild -maxdepth 1 -type d | sort</code></pre>
+    <p>命令与参数解释：</p>
+    <ul>
+      <li><code>rpm-build</code> 提供 <code>rpmbuild</code> 命令。</li>
+      <li><code>rpmdevtools</code> 提供 <code>rpmdev-setuptree</code>，用于自动创建打包目录。</li>
+      <li><code>BUILD</code>、<code>BUILDROOT</code>、<code>RPMS</code>、<code>SOURCES</code>、<code>SPECS</code>、<code>SRPMS</code> 是 RPM 打包标准目录。</li>
+    </ul>
+    <div class="shot">截图内容：截取 rpmbuild 目录结构，证明 RPM 打包环境已准备完成。</div>
+    <div class="placeholder">图片占位符：RPM 打包目录初始化截图<br>需要看到 BUILD、BUILDROOT、RPMS、SOURCES、SPECS、SRPMS</div>
+    <div class="result">报告结论：RPM 打包目录和构建工具已准备完成，满足 9.5.2 的打包环境要求。</div>
+
+    <h3>阶段 2：准备 RPM 源码压缩包</h3>
+    <pre><code>cd ~/os-course/cc-switch-packaging
+rm -rf cc-switch-1.0.0
+mkdir -p cc-switch-1.0.0
+cp source/cc-switch cc-switch-1.0.0/
+cat &gt; cc-switch-1.0.0/README.md &lt;&lt;'EOF'
+# cc-switch
+
+Course-design CLI for Kylin RPM packaging adaptation.
+EOF
+tar -czf ~/rpmbuild/SOURCES/cc-switch-1.0.0.tar.gz cc-switch-1.0.0
+ls -lh ~/rpmbuild/SOURCES/cc-switch-1.0.0.tar.gz</code></pre>
+    <p>命令与参数解释：</p>
+    <ul>
+      <li><code>tar -czf</code> 创建 gzip 压缩源码包。</li>
+      <li><code>SOURCES</code> 是 RPM 构建读取源码包的位置。</li>
+    </ul>
+    <div class="shot">截图内容：截取源码包生成结果，证明 RPM 构建输入文件已准备。</div>
+    <div class="placeholder">图片占位符：RPM SOURCES 源码包截图<br>需要看到 cc-switch-1.0.0.tar.gz 文件</div>
+    <div class="result">报告结论：cc switch 源码已按 RPM 规范打包并放入 SOURCES 目录。</div>
+
+    <h3>阶段 3：编写 RPM spec 文件</h3>
+    <pre><code>cat &gt; ~/rpmbuild/SPECS/cc-switch.spec &lt;&lt'EOF'
+Name:           cc-switch
+Version:        1.0.0
+Release:        1%{?dist}
+Summary:        cc switch command-line tool for Kylin adaptation packaging
+License:        MIT
+BuildArch:      noarch
+Source0:        %{name}-%{version}.tar.gz
+Requires:       bash
+
+%description
+cc-switch is a course-design command-line tool packaged to verify RPM
+adaptation, installation, command execution and removal on Kylin OS.
+
+%prep
+%setup -q
+
+%build
+
+%install
+rm -rf %{buildroot}
+mkdir -p %{buildroot}/usr/local/bin
+mkdir -p %{buildroot}/usr/share/doc/%{name}
+install -m 0755 cc-switch %{buildroot}/usr/local/bin/cc-switch
+install -m 0644 README.md %{buildroot}/usr/share/doc/%{name}/README.md
+
+%files
+/usr/local/bin/cc-switch
+/usr/share/doc/%{name}/README.md
+
+%changelog
+* Sat Jul 04 2026 zph &lt;zph@example.com&gt; - 1.0.0-1
+- Initial RPM package for operating system course design
+EOF
+cat ~/rpmbuild/SPECS/cc-switch.spec</code></pre>
+    <p>命令与参数解释：</p>
+    <ul>
+      <li><code>Name</code>、<code>Version</code>、<code>Release</code> 定义 RPM 包身份。</li>
+      <li><code>BuildArch: noarch</code> 表示脚本包不依赖特定 CPU 架构。</li>
+      <li><code>%prep</code> 解压源码，<code>%install</code> 将文件安装到构建根目录，<code>%files</code> 声明最终打入包内的文件。</li>
+    </ul>
+    <div class="shot">截图内容：截取 spec 文件，重点包含元数据、install 阶段和 files 清单。</div>
+    <div class="placeholder">图片占位符：RPM spec 文件截图<br>需要包含 Name、Version、BuildArch、%install、%files</div>
+    <div class="result">报告结论：RPM spec 文件已完整描述 cc switch 的源码、安装路径、运行依赖和文件归属。</div>
+
+    <h3>阶段 4：构建、安装与验证 RPM 包</h3>
+    <pre><code>rpmbuild -ba ~/rpmbuild/SPECS/cc-switch.spec
+find ~/rpmbuild/RPMS -name 'cc-switch-*.rpm' -print
+sudo rpm -ivh ~/rpmbuild/RPMS/noarch/cc-switch-1.0.0-1*.rpm
+rpm -qa | grep cc-switch
+rpm -ql cc-switch
+which cc-switch
+cc-switch --version
+cc-switch switch rpm-test
+cc-switch current</code></pre>
+    <p>命令与参数解释：</p>
+    <ul>
+      <li><code>rpmbuild -ba</code> 同时构建二进制 RPM 和源码 RPM。</li>
+      <li><code>rpm -ivh</code> 安装 RPM 包；<code>-i</code> 安装，<code>-v</code> 显示详细过程，<code>-h</code> 显示进度。</li>
+      <li><code>rpm -ql cc-switch</code> 查看包安装了哪些文件。</li>
+    </ul>
+    <div class="shot">截图内容：截取 rpmbuild 成功输出、RPM 文件路径、安装验证、文件清单和命令运行结果。</div>
+    <div class="placeholder">图片占位符：RPM 构建与安装验证截图<br>需要包含 rpmbuild、rpm -ivh、rpm -qa、rpm -ql、cc-switch --version 输出</div>
+    <div class="result">报告结论：cc switch 已成功构建为 RPM 软件包并完成安装验证，安装文件归属可被 RPM 数据库追踪。</div>
+
+    <h3>阶段 5：卸载 RPM 包</h3>
+    <pre><code>sudo rpm -e cc-switch
+rpm -qa | grep cc-switch || echo "cc-switch rpm package removed"
+which cc-switch || echo "cc-switch command removed from PATH"</code></pre>
+    <div class="shot">截图内容：截取 <code>rpm -e</code> 和卸载后的查询结果。</div>
+    <div class="placeholder">图片占位符：RPM 卸载验证截图<br>需要包含 rpm -e 和 removed 相关输出</div>
+    <div class="result">报告结论：RPM 包可通过包管理器正常卸载，卸载后软件包记录和命令入口均被清理。</div>
+
+    <h2 id="screenshots">六、截图清单</h2>
+    <table>
+      <thead>
+        <tr><th>编号</th><th>截图内容</th><th>证明点</th><th>可写结论</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>系统版本、架构、打包工具</td><td>环境满足课设要求</td><td>实验环境具备 DEB/RPM 打包适配基础。</td></tr>
+        <tr><td>2</td><td>cc switch 源文件运行</td><td>打包对象可运行</td><td>待适配软件在打包前功能正常。</td></tr>
+        <tr><td>3</td><td>DEB 目录结构和 control 文件</td><td>DEB 元数据完整</td><td>DEB 包结构符合 Debian 包规范。</td></tr>
+        <tr><td>4</td><td>DEB 构建、安装、运行、卸载</td><td>DEB 全流程闭环</td><td>cc switch 已完成 DEB 格式适配。</td></tr>
+        <tr><td>5</td><td>RPM rpmbuild 目录和源码包</td><td>RPM 构建输入完整</td><td>RPM 构建环境与源码组织符合规范。</td></tr>
+        <tr><td>6</td><td>RPM spec 文件</td><td>RPM 打包规则完整</td><td>spec 文件定义了安装路径、依赖和文件清单。</td></tr>
+        <tr><td>7</td><td>RPM 构建、安装、运行、卸载</td><td>RPM 全流程闭环</td><td>cc switch 已完成 RPM 格式适配。</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="report">七、课程设计报告可直接使用的项目描述</h2>
+    <p>本课程设计以 cc switch 命令行工具为适配对象，围绕银河麒麟操作系统的软件迁移与打包规范，分别完成 DEB 与 RPM 两种格式的软件包制作、安装验证、命令运行验证和卸载验证。项目首先对运行环境、CPU 架构和打包工具进行确认，然后整理 cc switch 的可执行文件和说明文档；在 DEB 方向，按照 Debian 包目录规范编写 control 文件并构建软件包；在 RPM 方向，初始化 rpmbuild 构建目录，准备源码压缩包并编写 spec 文件。最终通过 dpkg、rpm、which 和 cc-switch 命令输出证明软件包能够被系统包管理器识别、安装、查询、运行和卸载，达到了国产操作系统软件适配迁移课程设计要求。</p>
+
+    <div class="warn">注意：如果你后续把示例脚本替换成真实 <code>cc switch</code> 二进制文件，需要同步修改 <code>Architecture</code> 或 <code>BuildArch</code>。脚本可用 <code>all/noarch</code>，二进制通常应按实际架构选择 <code>amd64/x86_64/aarch64</code>。</div>
+  </main>
+</body>
+</html>
