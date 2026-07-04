@@ -132,76 +132,21 @@ ls -l /root/network
 
 ## 9.1.1 进程调度与优先级
 
-复制执行：
+这个实验不要一次性粘贴所有命令。请打开单独的分步版，按步骤确认现象后再继续：
 
 ```bash
-mkdir -p ~/labs/cfs_experiment
-cd ~/labs/cfs_experiment
-cat > nice-exp.c <<'EOF'
-#include <stdio.h>
-#include <pthread.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-void *thread_fun(void *param)
-{
-    printf("thread pid:%d, tid:%lu\n", getpid(), pthread_self());
-    while (1) ;
-    return NULL;
-}
-
-int main(void)
-{
-    pthread_t tid;
-    int ret;
-    printf("main pid:%d, tid:%lu\n", getpid(), pthread_self());
-    ret = pthread_create(&tid, NULL, thread_fun, NULL);
-    if (ret == -1) {
-        perror("cannot create new thread");
-        return 1;
-    }
-    if (pthread_join(tid, NULL) != 0) {
-        perror("call pthread_join function fail");
-        return 1;
-    }
-    return 0;
-}
-EOF
-gcc nice-exp.c -o nice-exp -pthread
-ls -l nice-exp
+curl -L https://raw.githubusercontent.com/z-ph/os-labs/main/exp-9.1.1-step-by-step.md | less
 ```
 
-截图 1：编译成功和 `nice-exp` 文件。
+浏览器链接：
 
-继续复制执行：
+https://github.com/z-ph/os-labs/blob/main/exp-9.1.1-step-by-step.md
 
-```bash
-cd ~/labs/cfs_experiment
-taskset -c 0 ./nice-exp &
-PID1=$!
-taskset -c 0 ./nice-exp &
-PID2=$!
-sleep 5
-ps -o pid,ni,psr,pcpu,comm -p $PID1,$PID2
-sudo renice -n -5 -p $PID1
-sleep 10
-ps -o pid,ni,psr,pcpu,comm -p $PID1,$PID2
-top -p $PID1,$PID2
-```
+截图放入实验报告第 1 个实验的“7、程序运行结果”：
 
-截图：
-
-1. 调整前两个进程 `PSR` 相同，CPU 占比接近。
-2. `renice` 后其中一个进程 `NI=-5`，CPU 占比更高。
-
-结束进程：
-
-```bash
-kill $PID1 $PID2
-pkill nice-exp
-```
-
-贴到实验报告第 1 个实验的“7、程序运行结果”。
+1. 编译成功和 `nice-exp` 文件。
+2. 两个进程绑定在同一个 CPU 核心上竞争。
+3. `renice` 后 `NI` 值变化，`top` 中 CPU 占比出现差异。
 
 ## 9.2.4 内存回收实验
 

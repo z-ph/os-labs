@@ -17,6 +17,7 @@ GitHub Pages: [https://z-ph.github.io/os-labs/](https://z-ph.github.io/os-labs/)
 | `实验详细执行步骤.html` | 每个实验的详细命令、代码与预期现象 |
 | `quick-submit.html` | 明天提交用的最短实验路线、命令、代码和截图清单 |
 | `quick-submit.md` | 快速提交清单的英文文件名 Markdown 版，方便在 Kylin 终端打开 |
+| `exp-9.1.1-step-by-step.md` | 9.1.1 进程调度实验分步操作与 renice 现象排查 |
 | `明天提交-操作系统实验与课设速查清单.md` | 快速提交清单的 Markdown 版 |
 
 ## 总体要求
