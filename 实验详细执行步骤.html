@@ -183,49 +183,62 @@
     <div class="card">
         <div class="card-title">📋 9.1.1 基于 Kylin OS 的进程调度与优先级实验</div>
         <div class="tag-list">
-            <span class="tag">C 语言</span><span class="tag">进程调度</span><span class="tag">nice/renice</span><span class="tag">taskset</span><span class="tag">CFS</span>
+            <span class="tag">C 语言</span><span class="tag">pthread</span><span class="tag">nice/renice</span><span class="tag">taskset</span><span class="tag">CFS</span>
         </div>
     </div>
 
     <div class="card">
         <div class="card-subtitle">实验目的</div>
-        <p>通过编写单线程 CPU 密集型程序，启动两个独立进程并绑定到同一 CPU 核心，观察 CFS 在不同 nice 值下的 CPU 时间分配现象。</p>
+        <p>通过编写高 CPU 负载的 pthread 多线程程序，观察 CFS 在不同 nice 值下的 CPU 时间分配现象。</p>
     </div>
 
     <div class="card">
         <div class="card-subtitle">详细执行步骤</div>
-        
         <div class="step">
             <div class="step-num">1</div>
             <div class="step-content">
-                <div class="step-title">创建并编译程序</div>
-                <div class="step-desc">程序本身只做一件事：在一个进程中持续执行空循环，形成 CPU 密集型负载。</div>
+                <div class="step-title">创建并编译 pthread 程序</div>
                 <pre><code>mkdir -p ~/labs/cfs_experiment
 cd ~/labs/cfs_experiment
 cat &gt; nice-exp.c &lt;&lt;'EOF'
 #include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
 #include &lt;sys/types.h&gt;
 #include &lt;unistd.h&gt;
 
+void *thread_fun(void *param)
+{
+    printf("thread pid:%d, tid:%lu\n", getpid(), pthread_self());
+    while (1) ;
+    return NULL;
+}
+
 int main(void)
 {
-    printf("pid:%d\n", getpid());
-    while (1) {
+    pthread_t tid;
+    int ret;
+    printf("main pid:%d, tid:%lu\n", getpid(), pthread_self());
+    ret = pthread_create(&amp;tid, NULL, thread_fun, NULL);
+    if (ret == -1) {
+        perror("cannot create new thread");
+        return 1;
+    }
+    if (pthread_join(tid, NULL) != 0) {
+        perror("call pthread_join function fail");
+        return 1;
     }
     return 0;
 }
 EOF
-gcc nice-exp.c -o nice-exp
+gcc nice-exp.c -o nice-exp -pthread
 ls -l nice-exp</code></pre>
-                <div class="note">截图：能看到 <code>nice-exp</code> 文件生成。</div>
+                <div class="note">截图：能看到 <code>nice-exp</code> 文件生成，编译命令包含 <code>-pthread</code>。</div>
             </div>
         </div>
-        
         <div class="step">
             <div class="step-num">2</div>
             <div class="step-content">
-                <div class="step-title">启动两个独立进程并绑定同一 CPU</div>
-                <div class="step-desc">两个进程都绑定到 CPU 0，保证它们竞争同一个核心的 CPU 时间。</div>
+                <div class="step-title">启动两个进程并绑定同一 CPU</div>
                 <pre><code>cd ~/labs/cfs_experiment
 pkill nice-exp 2&gt;/dev/null
 
@@ -236,42 +249,35 @@ taskset -c 0 ./nice-exp &gt;/dev/null &amp;
 PID_B=$!
 
 echo "PID_A=$PID_A PID_B=$PID_B"</code></pre>
-                <div class="note">后续命令保持在同一个终端执行，因为 <code>$PID_A</code> 和 <code>$PID_B</code> 只在当前终端有效。</div>
             </div>
         </div>
-        
         <div class="step">
             <div class="step-num">3</div>
             <div class="step-content">
                 <div class="step-title">确认两个进程处于同一核心</div>
                 <pre><code>taskset -cp $PID_A
 taskset -cp $PID_B
-ps -o pid,stat,ni,psr,pcpu,comm -p $PID_A,$PID_B</code></pre>
-                <div class="note">确认两个进程的 CPU affinity 都是 0，且 <code>PSR</code> 相同。</div>
+ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B</code></pre>
             </div>
         </div>
-        
         <div class="step">
             <div class="step-num">4</div>
             <div class="step-content">
-                <div class="step-title">降低其中一个进程优先级</div>
-                <div class="step-desc">将 PID_B 的 nice 值调大到 19，使它的调度权重明显降低。</div>
-                <pre><code>renice -n 19 -p $PID_B
+                <div class="step-title">提高其中一个进程优先级</div>
+                <pre><code>sudo renice -n -5 -p $PID_A
 sleep 8
-ps -o pid,stat,ni,psr,pcpu,comm -p $PID_A,$PID_B</code></pre>
-                <div class="note">确认 <code>PID_B</code> 的 <code>NI</code> 为 19 后再截图。</div>
+ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B</code></pre>
+                <div class="note">确认 <code>PID_A</code> 的 <code>NI</code> 为 -5 后再截图。</div>
             </div>
         </div>
-        
         <div class="step">
             <div class="step-num">5</div>
             <div class="step-content">
                 <div class="step-title">使用 top 观察 CPU 占比</div>
                 <pre><code>top -p $PID_A,$PID_B</code></pre>
-                <div class="note">进入 top 后等待 5 到 10 秒。预期现象是 <code>NI=0</code> 的进程占用更多 CPU，<code>NI=19</code> 的进程占用更少 CPU。</div>
+                <div class="note">进入 top 后等待 5 到 10 秒。预期现象是 <code>NI=-5</code> 的进程占用更多 CPU，<code>NI=0</code> 的进程占用更少 CPU。</div>
             </div>
         </div>
-        
         <div class="step">
             <div class="step-num">6</div>
             <div class="step-content">
@@ -286,16 +292,16 @@ pkill nice-exp 2&gt;/dev/null</code></pre>
         <div class="card-subtitle">预期现象汇总</div>
         <table>
             <tr><th>阶段</th><th>预期现象</th><th>原理</th></tr>
-            <tr><td>调整前</td><td>两个进程 PSR 相同，NI 均为 0，CPU 占比接近</td><td>同一核心上权重相同，CFS 近似公平分配</td></tr>
-            <tr><td>renice 后</td><td>PID_B 的 NI 为 19，CPU 占比明显降低</td><td>nice 值变大，调度权重降低</td></tr>
-            <tr><td>top 观察</td><td>NI=0 的进程占用更多 CPU，NI=19 的进程占用更少 CPU</td><td>CFS 根据权重分配运行时间</td></tr>
+            <tr><td>绑定同一 CPU</td><td>两个 nice-exp 进程 PSR 相同，NI 均为 0，CPU 占比接近</td><td>同一核心上权重相同，CFS 近似公平分配</td></tr>
+            <tr><td>renice 后</td><td>PID_A 的 NI 为 -5，CPU 占比更高</td><td>nice 值变小，调度权重提高</td></tr>
+            <tr><td>top 观察</td><td>NI=-5 的进程占用更多 CPU，NI=0 的进程占用更少 CPU</td><td>CFS 根据权重分配运行时间</td></tr>
         </table>
     </div>
 
     <div class="card">
         <div class="card-subtitle">注意事项</div>
         <div class="warn">运行死循环程序会导致 CPU 占用率升高，实验结束后务必使用 <code>kill $PID_A $PID_B</code> 或 <code>pkill nice-exp</code> 清理进程。</div>
-        <div class="note">如果刚进入 top 时 CPU 占比仍接近，可以等待几秒再截图；<code>ps</code> 的 <code>%CPU</code> 受平均值影响，刚调整后不一定马上明显。</div>
+        <div class="note"><code>renice -n -5</code> 通常需要 sudo 权限。如果 top 中占比短时间内仍接近，等待几秒后再截图。</div>
     </div>
 </div>
 

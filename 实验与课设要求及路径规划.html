@@ -240,9 +240,9 @@
                     <input type="checkbox" id="exp-911" onchange="updatePlanner()">
                     <div>
                         <div class="exp-title">9.1.1 基于 Kylin OS 的进程调度与优先级实验</div>
-                        <div class="exp-desc">编写单线程 CPU 密集型程序（nice-exp.c），启动两个独立进程并绑定到同一 CPU 核心；调整其中一个进程的 nice 值，观察 CFS 调度器按权重分配 CPU 时间。</div>
+                        <div class="exp-desc">编写 pthread 多线程高 CPU 负载程序（nice-exp.c），编译运行后观察 top 中的 CPU 占用；绑定 CPU 核心并调整 nice 值，验证 CFS 调度器的时间片分配比例。</div>
                         <div class="tag-list">
-                            <span class="tag">C 语言</span><span class="tag">进程调度</span><span class="tag">nice/renice</span><span class="tag">taskset</span><span class="tag">CFS</span>
+                            <span class="tag">C 语言</span><span class="tag">pthread</span><span class="tag">nice/renice</span><span class="tag">taskset</span><span class="tag">CFS</span>
                         </div>
                     </div>
                 </div>

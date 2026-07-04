@@ -209,24 +209,41 @@ ls -l /root/network</code></pre>
     </ul>
 
     <h2>9.1.1 进程调度与优先级</h2>
-    <p>这个实验使用单线程 CPU 密集型程序，启动两个独立进程并绑定到同一个 CPU 核心。</p>
+    <p>这个实验严格按教材使用 pthread 多线程测试程序，启动两个 nice-exp 进程并绑定到同一个 CPU 核心。</p>
     <h3>创建并编译程序</h3>
     <pre><code>mkdir -p ~/labs/cfs_experiment
 cd ~/labs/cfs_experiment
 cat &gt; nice-exp.c &lt;&lt;'EOF'
 #include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
 #include &lt;sys/types.h&gt;
 #include &lt;unistd.h&gt;
 
+void *thread_fun(void *param)
+{
+    printf("thread pid:%d, tid:%lu\n", getpid(), pthread_self());
+    while (1) ;
+    return NULL;
+}
+
 int main(void)
 {
-    printf("pid:%d\n", getpid());
-    while (1) {
+    pthread_t tid;
+    int ret;
+    printf("main pid:%d, tid:%lu\n", getpid(), pthread_self());
+    ret = pthread_create(&amp;tid, NULL, thread_fun, NULL);
+    if (ret == -1) {
+        perror("cannot create new thread");
+        return 1;
+    }
+    if (pthread_join(tid, NULL) != 0) {
+        perror("call pthread_join function fail");
+        return 1;
     }
     return 0;
 }
 EOF
-gcc nice-exp.c -o nice-exp
+gcc nice-exp.c -o nice-exp -pthread
 ls -l nice-exp</code></pre>
     <p>截图 1：编译成功和 <code>nice-exp</code> 文件。</p>
     <h3>运行与观察</h3>
@@ -239,14 +256,14 @@ PID_B=$!
 echo "PID_A=$PID_A PID_B=$PID_B"
 taskset -cp $PID_A
 taskset -cp $PID_B
-ps -o pid,stat,ni,psr,pcpu,comm -p $PID_A,$PID_B
-renice -n 19 -p $PID_B
+ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B
+sudo renice -n -5 -p $PID_A
 sleep 8
-ps -o pid,stat,ni,psr,pcpu,comm -p $PID_A,$PID_B
+ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B
 top -p $PID_A,$PID_B</code></pre>
     <ul class="todo">
-      <li>截图 2：两个进程 <code>PSR</code> 相同，说明绑定在同一个 CPU 核心上竞争。</li>
-      <li>截图 3：<code>renice</code> 后 <code>PID_B</code> 的 <code>NI=19</code>，<code>top</code> 中 CPU 占比出现差异。</li>
+      <li>截图 2：两个进程 <code>PSR</code> 相同，说明绑定在同一个 CPU 核心上竞争，CPU 占比接近。</li>
+      <li>截图 3：<code>sudo renice -n -5</code> 后其中一个进程 <code>NI=-5</code>，<code>top</code> 中 CPU 占比更高。</li>
       <li>结束进程：<code>kill $PID_A $PID_B; pkill nice-exp</code>。</li>
       <li>贴到实验报告第 1 个实验的“7、程序运行结果”。</li>
     </ul>

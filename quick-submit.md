@@ -132,7 +132,7 @@ ls -l /root/network
 
 ## 9.1.1 进程调度与优先级
 
-这个实验不要一次性粘贴所有命令。请打开单独的分步版，按步骤确认现象后再继续：
+这个实验严格按教材的 pthread 多线程程序做。请打开单独的分步版，按步骤确认现象后再继续：
 
 ```bash
 curl -L https://raw.githubusercontent.com/z-ph/os-labs/main/exp-9.1.1-step-by-step.md | less
@@ -144,9 +144,9 @@ https://github.com/z-ph/os-labs/blob/main/exp-9.1.1-step-by-step.md
 
 截图放入实验报告第 1 个实验的“7、程序运行结果”：
 
-1. 编译成功和 `nice-exp` 文件。
-2. 两个进程绑定在同一个 CPU 核心上竞争。
-3. `renice` 后 `NI` 值变化，`top` 中 CPU 占比出现差异。
+1. 编译成功和 `nice-exp` 文件，编译命令包含 `-pthread`。
+2. 两个 `nice-exp` 进程绑定在同一个 CPU 核心上竞争，CPU 占比接近。
+3. `sudo renice -n -5` 后其中一个进程 `NI=-5`，`top` 中 CPU 占比更高。
 
 ## 9.2.4 内存回收实验
 
