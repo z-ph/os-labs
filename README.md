@@ -19,6 +19,7 @@ GitHub Pages: [https://z-ph.github.io/os-labs/](https://z-ph.github.io/os-labs/)
 | `quick-submit.md` | 分阶段执行清单的英文文件名 Markdown 版，方便在 Kylin 终端打开 |
 | `exp-9.1.1-step-by-step.md` | 9.1.1 进程调度实验分步操作与 renice 现象排查 |
 | `操作系统实验与课设执行清单.md` | 分阶段执行清单的 Markdown 版 |
+| `course-9.6-lb-project/` | 9.6.1 容器化负载均衡完整项目源码与部署脚本 |
 
 ## 总体要求
 

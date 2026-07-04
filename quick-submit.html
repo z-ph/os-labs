@@ -29,7 +29,7 @@
   <header><div class="inner"><h1>操作系统实验与课设执行清单（答辩版）</h1><p>按阶段执行，只截有验证价值的输出，并解释每条命令和参数。</p></div></header>
   <main>
 <p class="lead">本清单用于在 Kylin 系统中按阶段完成实验与课程设计验证。每个命令块后均补充“命令与参数解释”，答辩时可直接说明命令作用、关键参数含义和实验现象。</p>
-<p>截图原则：配置类命令成功时可能没有输出，不要求截图；截图优先截验证命令的输出，例如 <code>id</code>、<code>ls</code>、<code>getfacl</code>、<code>ps</code>、<code>free</code>、<code>docker ps</code>、<code>curl</code> 等。</p>
+<p class="lead">截图原则：配置类命令成功时可能没有输出，不要求截图；截图优先截验证命令的输出，例如 <code>id</code>、<code>ls</code>、<code>getfacl</code>、<code>ps</code>、<code>free</code>、<code>docker ps</code>、<code>curl</code> 等。</p>
 <h2>通用符号说明</h2>
 <ul>
 <li><code>sudo</code>：以管理员权限执行命令，涉及系统服务、用户管理、Docker、ACL、swap 等操作时需要使用。</li>
@@ -450,191 +450,156 @@ echo &#x27;AaBbCc&#x27; | grep --color=always -i -E &#x27;A|b|c&#x27;</code></pr
 <li><code>echo &#x27;AaBbCc&#x27; | grep --color=always -i -E &#x27;A|b|c&#x27;</code>：输出字符串并匹配；<code>echo</code> 输出文本；<code>|</code> 管道；<code>-i</code> 忽略大小写；<code>-E</code> 启用扩展正则；<code>A|b|c</code> 表示匹配 <code>A</code> 或 <code>b</code> 或 <code>c</code>。</li>
 </ul>
 <h2>9.6.1 课程设计：容器化负载均衡</h2>
-<h3>阶段一：启动 Docker 服务</h3>
+<p>本课程设计按完整 Web 项目进行验收。项目应用为“操作系统实验课程服务门户”，功能包括课程首页、实验资料索引、项目验收清单、健康检查接口和状态 API；再通过 Nginx 将请求负载均衡到两个 Tomcat 后端。报告中说明项目结构、部署流程、验证结果和截图证据即可，不需要粘贴应用源码。</p>
+<h3>阶段一：取得项目源码并查看结构</h3>
+<pre><code>cd ~
+git clone https://github.com/z-ph/os-labs.git 2&gt;/dev/null || (cd os-labs &amp;&amp; git pull)
+cd ~/os-labs/course-9.6-lb-project
+find . -maxdepth 3 -type f | sort</code></pre>
+<p>截图内容：截取项目目录结构，重点能看到 <code>nginx/</code>、<code>tomcat/</code>、<code>tomcat-app/ROOT/</code>、<code>scripts/</code>，证明课程设计不是临时端口验证，而是具有应用源码、镜像构建和部署脚本的完整项目。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>cd ~</code>：进入当前用户主目录，便于统一放置项目代码。</li>
+<li><code>git clone https://github.com/z-ph/os-labs.git</code>：从 GitHub 下载项目仓库。</li>
+<li><code>2&gt;/dev/null</code>：隐藏仓库已存在等非关键错误提示。</li>
+<li><code>||</code>：前一个命令失败时执行后一个命令，这里用于仓库已存在时改为更新仓库。</li>
+<li><code>(cd os-labs &amp;&amp; git pull)</code>：在子 shell 中进入已有仓库并执行更新；<code>&amp;&amp;</code> 表示进入目录成功后才执行 <code>git pull</code>。</li>
+<li><code>cd ~/os-labs/course-9.6-lb-project</code>：进入 9.6 课程设计项目目录。</li>
+<li><code>find . -maxdepth 3 -type f</code>：列出当前目录下最多 3 层深度的普通文件；<code>.</code> 表示当前目录；<code>-maxdepth 3</code> 限制深度；<code>-type f</code> 只显示文件。</li>
+<li><code>| sort</code>：把文件列表通过管道交给 <code>sort</code> 排序，便于截图展示。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li><code>tomcat-app/ROOT/</code> 是 Web 应用源码目录。</li>
+<li><code>nginx/</code> 和 <code>tomcat/</code> 中保存镜像构建材料。</li>
+<li><code>scripts/</code> 保存部署、验收和清理脚本，便于重复实验。</li>
+</ul>
+<h3>阶段二：启动 Docker 服务</h3>
 <pre><code>sudo yum install -y docker || sudo dnf install -y docker
 sudo systemctl enable --now docker
 sudo systemctl status docker
 sudo docker version</code></pre>
+<p>截图内容：截取 <code>systemctl status docker</code> 中的 <code>active (running)</code>，以及 <code>docker version</code> 能显示 Client/Server 信息。</p>
 <p>命令与参数解释：</p>
 <ul>
-<li><code>sudo yum install -y docker || sudo dnf install -y docker</code>：安装 Docker；<code>yum install</code> 和 <code>dnf install</code> 都是包管理安装命令；<code>-y</code> 自动确认安装；<code>||</code> 表示如果 <code>yum</code> 不可用或失败，则尝试 <code>dnf</code>。</li>
-<li><code>sudo systemctl enable --now docker</code>：设置 Docker 服务开机自启并立即启动；<code>enable</code> 设置开机启动；<code>--now</code> 表示同时立刻启动服务。</li>
-<li><code>sudo systemctl status docker</code>：查看 Docker 服务状态，重点看 <code>active (running)</code>。</li>
-<li><code>sudo docker version</code>：查看 Docker 客户端和服务端版本，验证 Docker 可用。</li>
+<li><code>sudo</code>：以管理员权限执行命令。</li>
+<li><code>yum install -y docker</code>：使用 yum 安装 Docker；<code>install</code> 表示安装软件包；<code>-y</code> 自动确认。</li>
+<li><code>|| sudo dnf install -y docker</code>：如果 yum 安装失败，则尝试 dnf 安装，兼容不同 Kylin 环境。</li>
+<li><code>systemctl enable --now docker</code>：设置 Docker 开机自启并立即启动；<code>enable</code> 表示加入开机启动；<code>--now</code> 表示同时立刻启动服务。</li>
+<li><code>systemctl status docker</code>：查看 Docker 服务状态。</li>
+<li><code>docker version</code>：查看 Docker 客户端与服务端版本，验证 Docker 能正常工作。</li>
 </ul>
-<h3>阶段二：准备基础镜像</h3>
-<pre><code>sudo docker pull cr.kylinos.cn/kylin/kylin-server-init:v10sp1
-sudo docker tag cr.kylinos.cn/kylin/kylin-server-init:v10sp1 kylin-base:v10sp1
-sudo docker run --rm kylin-base:v10sp1 uname -m
-sudo docker images</code></pre>
+<h3>阶段三：部署完整项目</h3>
+<pre><code>cd ~/os-labs/course-9.6-lb-project
+bash scripts/deploy.sh
+sudo docker images --format &#x27;table {{.Repository}}\t{{.Tag}}\t{{.Size}}&#x27; | grep -E &#x27;kylin-base|kylin-nginx|kylin-tomcat&#x27;
+sudo docker ps --format &#x27;table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}&#x27;</code></pre>
+<p>截图内容：截取部署完成后的镜像列表和容器列表。镜像列表中应包含 <code>kylin-base:v10sp1</code>、<code>kylin-nginx:861</code>、<code>kylin-tomcat:861</code>；容器列表中应包含 <code>nginx-lb</code>、<code>tomcat1</code>、<code>tomcat2</code>，并能看到端口映射。</p>
 <p>命令与参数解释：</p>
 <ul>
-<li><code>sudo docker pull cr.kylinos.cn/kylin/kylin-server-init:v10sp1</code>：从镜像仓库拉取 Kylin 基础镜像；冒号后的 <code>v10sp1</code> 是镜像标签。</li>
-<li><code>sudo docker tag cr.kylinos.cn/kylin/kylin-server-init:v10sp1 kylin-base:v10sp1</code>：给原镜像打本地标签；<code>tag</code> 不复制镜像内容，只新增一个便于引用的名字。</li>
-<li><code>sudo docker run --rm kylin-base:v10sp1 uname -m</code>：运行临时容器执行 <code>uname -m</code>；<code>--rm</code> 表示容器退出后自动删除；<code>uname -m</code> 输出 CPU 架构。</li>
-<li><code>sudo docker images</code>：列出本地镜像，确认 <code>kylin-base:v10sp1</code> 存在。</li>
-</ul>
-<h3>阶段三：构建 Nginx 镜像</h3>
-<pre><code>mkdir -p ~/kylin861/nginx
-cd ~/kylin861/nginx
-curl -LO http://nginx.org/download/nginx-1.15.2.tar.gz
-cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27;
-FROM kylin-base:v10sp1
-RUN yum -y install gcc make pcre-devel zlib-devel tar zlib
-ADD nginx-1.15.2.tar.gz /usr/src/
-RUN cd /usr/src/nginx-1.15.2 &amp;&amp; \
-    mkdir -p /usr/local/nginx &amp;&amp; \
-    ./configure --prefix=/usr/local/nginx &amp;&amp; \
-    make &amp;&amp; make install &amp;&amp; \
-    ln -sf /usr/local/nginx/sbin/nginx /usr/local/sbin/nginx
-CMD [&quot;/bin/bash&quot;]
-EOF
-sudo docker build -t kylin-nginx:861 .
-sudo docker images | grep kylin-nginx</code></pre>
-<p>命令与参数解释：</p>
-<ul>
-<li><code>mkdir -p ~/kylin861/nginx</code>：创建 Nginx 镜像构建目录；<code>-p</code> 允许递归创建。</li>
-<li><code>cd ~/kylin861/nginx</code>：进入 Nginx 构建目录。</li>
-<li><code>curl -LO http://nginx.org/download/nginx-1.15.2.tar.gz</code>：下载 Nginx 源码包；<code>-L</code> 跟随重定向；<code>-O</code> 使用远端文件名保存。</li>
-<li><code>cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27; ... EOF</code>：创建 Dockerfile。</li>
-<li><code>FROM kylin-base:v10sp1</code>：Dockerfile 指令，指定基础镜像。</li>
-<li><code>RUN yum -y install gcc make pcre-devel zlib-devel tar zlib</code>：在镜像构建时安装编译依赖；<code>RUN</code> 表示构建阶段执行命令；<code>-y</code> 自动确认安装。</li>
-<li><code>ADD nginx-1.15.2.tar.gz /usr/src/</code>：把源码压缩包加入镜像；<code>ADD</code> 会把本地文件复制到镜像中，tar 包通常会自动解压。</li>
-<li><code>RUN cd ... &amp;&amp; ...</code>：进入源码目录并编译安装；<code>&amp;&amp;</code> 保证前一步成功才继续；<code>\</code> 表示 Dockerfile 中命令换行。</li>
-<li><code>./configure --prefix=/usr/local/nginx</code>：配置 Nginx 编译参数；<code>--prefix</code> 指定安装目录。</li>
-<li><code>make &amp;&amp; make install</code>：编译并安装。</li>
-<li><code>ln -sf /usr/local/nginx/sbin/nginx /usr/local/sbin/nginx</code>：创建软链接；<code>-s</code> 表示 symbolic link；<code>-f</code> 表示覆盖已有目标。</li>
-<li><code>CMD [&quot;/bin/bash&quot;]</code>：容器默认启动命令为 bash。</li>
-<li><code>sudo docker build -t kylin-nginx:861 .</code>：构建镜像；<code>-t</code> 指定镜像名和标签；<code>.</code> 表示当前目录作为构建上下文。</li>
-<li><code>sudo docker images | grep kylin-nginx</code>：列出镜像并筛选 Nginx 镜像；<code>grep</code> 用于文本过滤。</li>
-</ul>
-<h3>阶段四：构建 Tomcat 镜像</h3>
-<pre><code>mkdir -p ~/kylin861/tomcat
-cd ~/kylin861/tomcat
-curl -LO https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.68/bin/apache-tomcat-9.0.68.zip
-cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27;
-FROM kylin-base:v10sp1
-ADD apache-tomcat-9.0.68.zip /usr/local/
-RUN yum -y install zip unzip java-1.8.0-openjdk
-RUN unzip -q /usr/local/apache-tomcat-9.0.68.zip -d /usr/local/
-ENV JAVA_HOME=/usr/lib/jvm/jre
-ENV CATALINA_HOME=/usr/local/apache-tomcat-9.0.68
-ENV PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin
-RUN chmod +x /usr/local/apache-tomcat-9.0.68/bin/catalina.sh
-CMD [&quot;/usr/local/apache-tomcat-9.0.68/bin/catalina.sh&quot;,&quot;run&quot;]
-EOF
-sudo docker build -t kylin-tomcat:861 .
-sudo docker images | grep kylin-tomcat</code></pre>
-<p>命令与参数解释：</p>
-<ul>
-<li><code>mkdir -p ~/kylin861/tomcat</code>：创建 Tomcat 构建目录；<code>-p</code> 递归创建。</li>
-<li><code>cd ~/kylin861/tomcat</code>：进入 Tomcat 构建目录。</li>
-<li><code>curl -LO ...apache-tomcat-9.0.68.zip</code>：下载 Tomcat 安装包；<code>-L</code> 跟随重定向；<code>-O</code> 按远端文件名保存。</li>
-<li><code>cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27; ... EOF</code>：创建 Tomcat 镜像的 Dockerfile。</li>
-<li><code>FROM kylin-base:v10sp1</code>：使用 Kylin 基础镜像。</li>
-<li><code>ADD apache-tomcat-9.0.68.zip /usr/local/</code>：把 Tomcat 压缩包复制进镜像。</li>
-<li><code>RUN yum -y install zip unzip java-1.8.0-openjdk</code>：安装解压工具和 Java 运行环境；<code>-y</code> 自动确认。</li>
-<li><code>RUN unzip -q ... -d /usr/local/</code>：解压 Tomcat；<code>-q</code> 静默输出；<code>-d</code> 指定解压目录。</li>
-<li><code>ENV JAVA_HOME=...</code>：设置 Java 环境变量。</li>
-<li><code>ENV CATALINA_HOME=...</code>：设置 Tomcat 主目录环境变量。</li>
-<li><code>ENV PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin</code>：把 Java 和 Tomcat 命令目录加入 PATH。</li>
-<li><code>RUN chmod +x .../catalina.sh</code>：给启动脚本增加执行权限；<code>+x</code> 表示可执行。</li>
-<li><code>CMD [&quot;/usr/local/apache-tomcat-9.0.68/bin/catalina.sh&quot;,&quot;run&quot;]</code>：容器启动时以前台方式运行 Tomcat；<code>run</code> 表示不放到后台，便于 Docker 管理进程。</li>
-<li><code>sudo docker build -t kylin-tomcat:861 .</code>：构建 Tomcat 镜像；<code>-t</code> 指定标签；<code>.</code> 表示当前目录构建上下文。</li>
-<li><code>sudo docker images | grep kylin-tomcat</code>：确认 Tomcat 镜像存在。</li>
-</ul>
-<h3>阶段五：启动并验证两个 Tomcat 后端</h3>
-<pre><code>sudo docker network create kylin-lb-net 2&gt;/dev/null || true
-sudo docker rm -f tomcat1 tomcat2 nginx-lb 2&gt;/dev/null || true
-sudo docker run -d --network kylin-lb-net -p 8080:8080 --name tomcat1 kylin-tomcat:861
-sudo docker run -d --network kylin-lb-net -p 8081:8080 --name tomcat2 kylin-tomcat:861
-sleep 15
-sudo docker exec tomcat1 bash -c &#x27;echo KYLIN-TOMCAT-1 &gt; /usr/local/apache-tomcat-9.0.68/webapps/ROOT/index.jsp&#x27;
-sudo docker exec tomcat2 bash -c &#x27;echo KYLIN-TOMCAT-2 &gt; /usr/local/apache-tomcat-9.0.68/webapps/ROOT/index.jsp&#x27;
-curl http://127.0.0.1:8080
-curl http://127.0.0.1:8081</code></pre>
-<p>命令与参数解释：</p>
-<ul>
-<li><code>sudo docker network create kylin-lb-net 2&gt;/dev/null || true</code>：创建自定义 Docker 网络；同一网络中的容器可通过容器名互相访问；<code>2&gt;/dev/null || true</code> 便于重复执行。</li>
-<li><code>sudo docker rm -f tomcat1 tomcat2 nginx-lb 2&gt;/dev/null || true</code>：删除历史同名容器；<code>rm</code> 删除容器；<code>-f</code> 强制停止并删除；<code>2&gt;/dev/null || true</code> 忽略容器不存在的情况。</li>
-<li><code>sudo docker run -d --network kylin-lb-net -p 8080:8080 --name tomcat1 kylin-tomcat:861</code>：启动第一个 Tomcat 容器；<code>run</code> 创建并运行容器；<code>-d</code> 后台运行；<code>--network</code> 指定加入的网络；<code>-p 8080:8080</code> 表示宿主机 8080 映射到容器 8080；<code>--name tomcat1</code> 指定容器名；最后是镜像名。</li>
-<li><code>sudo docker run -d --network kylin-lb-net -p 8081:8080 --name tomcat2 kylin-tomcat:861</code>：启动第二个 Tomcat；宿主机 8081 映射到容器 8080，避免端口冲突。</li>
-<li><code>sleep 15</code>：等待 15 秒，让 Tomcat 完成启动。</li>
-<li><code>sudo docker exec tomcat1 bash -c &#x27;echo KYLIN-TOMCAT-1 &gt; .../index.jsp&#x27;</code>：在 <code>tomcat1</code> 容器内执行命令；<code>exec</code> 进入运行中容器执行命令；<code>bash -c</code> 执行字符串；<code>echo</code> 写入节点标识；<code>&gt;</code> 重定向到 Tomcat 首页文件。</li>
-<li><code>sudo docker exec tomcat2 bash -c &#x27;echo KYLIN-TOMCAT-2 &gt; .../index.jsp&#x27;</code>：给第二个后端写入不同标识，便于观察负载均衡轮询。</li>
-<li><code>curl http://127.0.0.1:8080</code>：访问宿主机 8080 端口，验证 <code>tomcat1</code>。</li>
-<li><code>curl http://127.0.0.1:8081</code>：访问宿主机 8081 端口，验证 <code>tomcat2</code>。</li>
-</ul>
-<h3>阶段六：配置并启动 Nginx 负载均衡</h3>
-<pre><code>sudo docker run -itd --network kylin-lb-net -p 80:80 --name nginx-lb kylin-nginx:861
-sudo docker exec -i nginx-lb tee /usr/local/nginx/conf/nginx.conf &gt; /dev/null &lt;&lt;&#x27;EOF&#x27;
-worker_processes 1;
-
-events {
-    worker_connections 1024;
-}
-
-http {
-    include       mime.types;
-    default_type  application/octet-stream;
-
-    upstream web {
-        server tomcat1:8080;
-        server tomcat2:8080;
-    }
-
-    server {
-        listen 80;
-        server_name localhost;
-
-        location / {
-            proxy_pass http://web;
-        }
-    }
-}
-EOF
-sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx -t
-sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx
-sudo docker ps
-for i in {1..8}; do curl -s http://127.0.0.1; echo; done</code></pre>
-<p>命令与参数解释：</p>
-<ul>
-<li><code>sudo docker run -itd --network kylin-lb-net -p 80:80 --name nginx-lb kylin-nginx:861</code>：启动 Nginx 容器；<code>-i</code> 保持标准输入打开；<code>-t</code> 分配伪终端；<code>-d</code> 后台运行；<code>--network</code> 加入容器网络；<code>-p 80:80</code> 映射宿主机 80 到容器 80；<code>--name</code> 指定容器名。</li>
-<li><code>sudo docker exec -i nginx-lb tee /usr/local/nginx/conf/nginx.conf &gt; /dev/null &lt;&lt;&#x27;EOF&#x27; ... EOF</code>：把本机 here document 内容写入容器内 Nginx 配置文件；<code>exec -i</code> 让容器命令接收标准输入；<code>tee</code> 把输入写到指定文件；本机的 <code>&gt; /dev/null</code> 用来隐藏 tee 回显；<code>&lt;&lt;&#x27;EOF&#x27;</code> 提供多行配置文本。</li>
-<li><code>worker_processes 1;</code>：Nginx 配置，设置 1 个 worker 进程。</li>
-<li><code>events { worker_connections 1024; }</code>：每个 worker 最多处理 1024 个连接。</li>
-<li><code>http { ... }</code>：HTTP 服务配置块。</li>
-<li><code>include mime.types;</code>：加载 MIME 类型映射。</li>
-<li><code>default_type application/octet-stream;</code>：默认响应类型。</li>
-<li><code>upstream web { server tomcat1:8080; server tomcat2:8080; }</code>：定义后端服务器组 <code>web</code>；Docker 自定义网络支持用容器名 <code>tomcat1</code>、<code>tomcat2</code> 解析到容器 IP。</li>
-<li><code>listen 80;</code>：Nginx 在 80 端口监听。</li>
-<li><code>location / { proxy_pass http://web; }</code>：把根路径请求反向代理到 upstream <code>web</code>。</li>
-<li><code>sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx -t</code>：在 Nginx 容器内检查配置；<code>nginx -t</code> 表示 test configuration。</li>
-<li><code>sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx</code>：启动 Nginx 服务。</li>
-<li><code>sudo docker ps</code>：查看正在运行的容器。</li>
-<li><code>for i in {1..8}; do curl -s http://127.0.0.1; echo; done</code>：循环访问 8 次；<code>for ... do ... done</code> 是 shell 循环；<code>{1..8}</code> 生成 1 到 8；<code>curl -s</code> 静默模式，不显示进度条；<code>echo</code> 输出换行。</li>
+<li><code>cd ~/os-labs/course-9.6-lb-project</code>：进入课程设计项目目录，确保脚本能找到 Dockerfile、Nginx 配置和 Web 应用源码。</li>
+<li><code>bash scripts/deploy.sh</code>：使用 bash 执行部署脚本。该脚本会下载 Nginx/Tomcat 安装包、拉取 Kylin 基础镜像、构建 Tomcat 应用镜像、构建 Nginx 负载均衡镜像、创建 Docker 网络并启动三个容器。</li>
+<li><code>docker images</code>：查看本地镜像。</li>
+<li><code>--format &#x27;table {{.Repository}}\t{{.Tag}}\t{{.Size}}&#x27;</code>：指定镜像输出为表格格式；<code>.Repository</code> 是镜像名；<code>.Tag</code> 是标签；<code>.Size</code> 是镜像大小；<code>\t</code> 表示制表符。</li>
+<li><code>grep -E &#x27;kylin-base|kylin-nginx|kylin-tomcat&#x27;</code>：用扩展正则筛选项目相关镜像；<code>-E</code> 启用扩展正则；<code>|</code> 在正则中表示“或”。</li>
+<li><code>docker ps</code>：查看正在运行的容器。</li>
+<li><code>--format &#x27;table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}&#x27;</code>：按容器名、镜像、运行状态和端口映射输出。</li>
 </ul>
 <p>答辩说明：</p>
 <ul>
-<li>Nginx 默认 upstream 轮询会把请求分发给 <code>tomcat1</code> 和 <code>tomcat2</code>。</li>
-<li>连续访问出现两个不同后端标识，说明负载均衡配置生效。</li>
+<li><code>kylin-tomcat:861</code> 镜像内置课程服务门户应用。</li>
+<li><code>kylin-nginx:861</code> 镜像内置 Nginx 负载均衡配置。</li>
+<li><code>tomcat1</code> 和 <code>tomcat2</code> 是两个业务后端，<code>nginx-lb</code> 是统一入口。</li>
 </ul>
-<h3>阶段七：容错验证</h3>
+<h3>阶段四：验证应用页面与 API</h3>
+<pre><code>curl -s http://127.0.0.1/ | grep &#x27;操作系统实验课程服务门户&#x27;
+curl -s http://127.0.0.1/resources.jsp | grep &#x27;实验资料索引&#x27;
+curl -s http://127.0.0.1/checklist.jsp | grep &#x27;项目验收清单&#x27;
+curl -s http://127.0.0.1/api/status.jsp</code></pre>
+<p>截图内容：截取命令输出，证明首页、资料索引页、验收清单页和状态 API 均可通过 Nginx 入口访问。也可以在浏览器中分别打开 <code>http://127.0.0.1/</code>、<code>http://127.0.0.1/resources.jsp</code>、<code>http://127.0.0.1/checklist.jsp</code> 截图，报告中优先放浏览器页面截图。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>curl -s http://127.0.0.1/</code>：访问宿主机本地 80 端口，也就是 Nginx 负载均衡入口；<code>-s</code> 表示静默模式，不显示下载进度。</li>
+<li><code>grep &#x27;操作系统实验课程服务门户&#x27;</code>：筛选首页标题，验证访问到的是课程门户应用。</li>
+<li><code>resources.jsp</code>：实验资料索引页面，用于展示实验与课程设计材料分类。</li>
+<li><code>checklist.jsp</code>：项目验收清单页面，用于展示部署与验证项。</li>
+<li><code>api/status.jsp</code>：状态 API，返回应用版本、节点名称、服务角色和主机信息。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>本阶段证明系统运行的是一个具体 Web 应用，而不是空白容器或单行测试页面。</li>
+<li>页面访问经过 Nginx，再由 Nginx 转发到 Tomcat 后端。</li>
+</ul>
+<h3>阶段五：验证负载均衡轮询</h3>
+<pre><code>for i in {1..8}; do curl -s http://127.0.0.1/health.jsp; echo; done</code></pre>
+<p>截图内容：截取 8 次健康检查输出，重点观察 JSON 中的 <code>node</code> 字段在 <code>KYLIN-TOMCAT-1</code> 与 <code>KYLIN-TOMCAT-2</code> 之间变化。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>for i in {1..8}; do ... done</code>：shell 循环结构，连续执行 8 次访问。</li>
+<li><code>{1..8}</code>：生成数字 1 到 8。</li>
+<li><code>curl -s http://127.0.0.1/health.jsp</code>：通过 Nginx 入口访问健康检查接口。</li>
+<li><code>echo</code>：每次请求后输出换行，便于观察多次结果。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>Nginx upstream 默认使用轮询策略。</li>
+<li>多次访问返回不同节点名称，说明请求被分发到两个 Tomcat 后端。</li>
+</ul>
+<h3>阶段六：验证单节点故障恢复</h3>
 <pre><code>sudo docker stop tomcat1
-for i in {1..5}; do curl -s http://127.0.0.1; echo; done
+for i in {1..5}; do curl -s http://127.0.0.1/health.jsp; echo; done
 sudo docker start tomcat1
-sudo docker ps</code></pre>
+sleep 8
+sudo docker ps --format &#x27;table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}&#x27;</code></pre>
+<p>截图内容：截取停止 <code>tomcat1</code> 后仍能访问 <code>health.jsp</code> 的输出，以及恢复后 <code>docker ps</code> 显示三个容器重新运行的结果。</p>
 <p>命令与参数解释：</p>
 <ul>
-<li><code>sudo docker stop tomcat1</code>：停止 <code>tomcat1</code> 容器，用于模拟一个后端故障。</li>
-<li><code>for i in {1..5}; do curl -s http://127.0.0.1; echo; done</code>：连续访问负载均衡入口；<code>curl -s</code> 不显示进度信息，只显示响应内容。</li>
-<li><code>sudo docker start tomcat1</code>：重新启动 <code>tomcat1</code> 容器。</li>
-<li><code>sudo docker ps</code>：确认 <code>nginx-lb</code>、<code>tomcat1</code>、<code>tomcat2</code> 都处于运行状态。</li>
+<li><code>docker stop tomcat1</code>：停止第一个 Tomcat 后端，用于模拟单节点故障。</li>
+<li><code>for i in {1..5}; do curl -s http://127.0.0.1/health.jsp; echo; done</code>：连续访问负载均衡入口，观察服务是否仍能由另一个后端响应。</li>
+<li><code>docker start tomcat1</code>：重新启动 <code>tomcat1</code> 容器。</li>
+<li><code>sleep 8</code>：等待 8 秒，让 Tomcat 有时间完成启动。</li>
+<li><code>docker ps --format ...</code>：查看容器恢复后的运行状态。</li>
 </ul>
 <p>答辩说明：</p>
 <ul>
-<li>停止 <code>tomcat1</code> 后，如果服务仍能返回 <code>KYLIN-TOMCAT-2</code>，说明负载均衡系统具有基本容错能力。</li>
-<li>恢复 <code>tomcat1</code> 后再次查看容器状态，证明系统可恢复到双后端运行状态。</li>
+<li>停止一个后端后，系统仍能由另一个后端继续提供服务，说明具备基本容错能力。</li>
+<li>恢复 <code>tomcat1</code> 后再次查看容器状态，证明系统能恢复到双后端运行。</li>
+</ul>
+<h3>阶段七：保存项目级验收证据</h3>
+<pre><code>sudo docker network inspect kylin-lb-net --format &#x27;{{range $id,$c := .Containers}}{{$c.Name}} {{end}}&#x27;
+sudo docker inspect nginx-lb --format &#x27;Name={{.Name}} Image={{.Config.Image}} Ports={{json .NetworkSettings.Ports}}&#x27;
+sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx -T | grep -E &#x27;upstream|server tomcat|proxy_pass&#x27;
+sudo docker logs --tail 20 tomcat1
+sudo docker logs --tail 20 tomcat2
+bash scripts/verify.sh</code></pre>
+<p>截图内容：截取 Docker 网络包含 <code>nginx-lb</code>、<code>tomcat1</code>、<code>tomcat2</code> 的结果；截取 Nginx 配置中 <code>upstream web</code>、<code>server tomcat1:8080</code>、<code>server tomcat2:8080</code>、<code>proxy_pass http://web</code>；截取 Tomcat 日志和 <code>verify.sh</code> 的综合验收输出。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>docker network inspect kylin-lb-net</code>：查看 Docker 自定义网络详情。</li>
+<li><code>--format &#x27;{{range $id,$c := .Containers}}{{$c.Name}} {{end}}&#x27;</code>：使用 Go 模板遍历网络内的容器并只输出容器名称；<code>range</code> 表示遍历。</li>
+<li><code>docker inspect nginx-lb</code>：查看 Nginx 容器详细信息。</li>
+<li><code>Ports={{json .NetworkSettings.Ports}}</code>：以 JSON 形式输出端口映射。</li>
+<li><code>docker exec nginx-lb /usr/local/nginx/sbin/nginx -T</code>：在 Nginx 容器中输出完整配置；<code>exec</code> 表示在运行中的容器内执行命令；<code>-T</code> 表示测试并打印配置。</li>
+<li><code>grep -E &#x27;upstream|server tomcat|proxy_pass&#x27;</code>：筛选负载均衡关键配置。</li>
+<li><code>docker logs --tail 20 tomcat1</code>：查看 <code>tomcat1</code> 最近 20 行日志；<code>--tail 20</code> 限制输出行数。</li>
+<li><code>docker logs --tail 20 tomcat2</code>：查看 <code>tomcat2</code> 最近 20 行日志。</li>
+<li><code>bash scripts/verify.sh</code>：执行项目综合验收脚本，集中输出镜像、容器、网络、配置、页面接口和日志证据。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li><code>docker network inspect</code> 证明三个容器位于同一自定义网络。</li>
+<li><code>nginx -T</code> 证明 Nginx 配置确实指向两个 Tomcat 后端。</li>
+<li><code>docker logs</code> 证明后端服务具备运行日志和排查依据。</li>
+<li><code>verify.sh</code> 用于复核项目整体状态，适合提交前自查。</li>
+</ul>
+<h3>阶段八：实验结束后的清理</h3>
+<pre><code>cd ~/os-labs/course-9.6-lb-project
+bash scripts/clean.sh</code></pre>
+<p>本阶段用于停止并删除课程设计容器和网络，不作为报告截图重点。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>cd ~/os-labs/course-9.6-lb-project</code>：进入项目目录。</li>
+<li><code>bash scripts/clean.sh</code>：执行清理脚本，停止并删除 <code>nginx-lb</code>、<code>tomcat1</code>、<code>tomcat2</code>，并删除 <code>kylin-lb-net</code> 网络。</li>
 </ul>
   </main>
 </body>

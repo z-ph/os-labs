@@ -1407,102 +1407,80 @@ sudo rpm -e hello</code></pre>
 
     <div class="card">
         <div class="card-subtitle">9.6.1 容器化负载均衡部署实践</div>
+        <div class="note">本课程设计按完整项目验收。项目应用为“操作系统实验课程服务门户”，包含首页、实验资料索引、验收清单、健康检查接口和状态 API；Nginx 负责把请求轮询转发到两个 Tomcat 后端。完整参数解释以 quick-submit 页面为准。</div>
         
         <div class="step">
             <div class="step-num">1</div>
             <div class="step-content">
-                <div class="step-title">部署 Docker 服务</div>
-                <pre><code>sudo yum install -y docker
-sudo systemctl restart docker
-sudo systemctl enable docker
-sudo systemctl status docker</code></pre>
-                <div class="note">按 "q" 退出 status 查看。</div>
+                <div class="step-title">取得项目源码并查看结构</div>
+                <pre><code>cd ~
+git clone https://github.com/z-ph/os-labs.git 2&gt;/dev/null || (cd os-labs &amp;&amp; git pull)
+cd ~/os-labs/course-9.6-lb-project
+find . -maxdepth 3 -type f | sort</code></pre>
+                <div class="note">截图重点：能看到 nginx/、tomcat/、tomcat-app/ROOT/、scripts/，证明项目包含应用源码、镜像构建材料和部署脚本。</div>
             </div>
         </div>
         
         <div class="step">
             <div class="step-num">2</div>
             <div class="step-content">
-                <div class="step-title">导入基础镜像</div>
-                <pre><code>sudo docker pull cr.kylinos.cn/kylin/kylin-server-init:v10sp1
-sudo docker tag cr.kylinos.cn/kylin/kylin-server-init:v10sp1 kylin-base:v10sp1
-sudo docker run --rm -it kylin-base:v10sp1 uname -m</code></pre>
-                <div class="note">应显示 x86_64。验证成功后查看镜像：<code>sudo docker images</code></div>
+                <div class="step-title">启动 Docker 服务</div>
+                <pre><code>sudo yum install -y docker || sudo dnf install -y docker
+sudo systemctl enable --now docker
+sudo systemctl status docker
+sudo docker version</code></pre>
+                <div class="note">截图重点：Docker 服务为 active (running)，docker version 能显示 Client 和 Server 信息。</div>
             </div>
         </div>
         
         <div class="step">
             <div class="step-num">3</div>
             <div class="step-content">
-                <div class="step-title">编写 Dockerfile 构建 Nginx</div>
-                <div class="step-desc">创建 Dockerfile 目录：</div>
-                <pre><code>mkdir ~/docker-nginx && cd ~/docker-nginx
-vim Dockerfile</code></pre>
-                <pre><code>FROM kylin-base:v10sp1
-RUN yum -y install gcc make pcre-devel zlib-devel tar zlib
-ADD nginx-1.15.2.tar.gz /usr/src/
-RUN cd /usr/src/nginx-1.15.2 && mkdir -p /usr/local/nginx && \
-    ./configure --prefix=/usr/local/nginx && \
-    make && make install && \
-    ln -s /usr/local/nginx/sbin/nginx /usr/local/sbin/
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]</code></pre>
-                <div class="step-desc">构建镜像：</div>
-                <pre><code>sudo docker build -t nginx-kylin:v1 .</code></pre>
+                <div class="step-title">部署完整课程门户项目</div>
+                <pre><code>cd ~/os-labs/course-9.6-lb-project
+bash scripts/deploy.sh
+sudo docker images --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}' | grep -E 'kylin-base|kylin-nginx|kylin-tomcat'
+sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'</code></pre>
+                <div class="note">deploy.sh 会构建 Tomcat 应用镜像、Nginx 负载均衡镜像，创建 kylin-lb-net 网络，并启动 nginx-lb、tomcat1、tomcat2。</div>
             </div>
         </div>
         
         <div class="step">
             <div class="step-num">4</div>
             <div class="step-content">
-                <div class="step-title">构建 Tomcat 镜像</div>
-                <div class="step-desc">类似地，编写 Dockerfile 安装 JDK 和 Tomcat，构建 tomcat-kylin:v1 镜像。</div>
+                <div class="step-title">验证应用页面和状态 API</div>
+                <pre><code>curl -s http://127.0.0.1/ | grep '操作系统实验课程服务门户'
+curl -s http://127.0.0.1/resources.jsp | grep '实验资料索引'
+curl -s http://127.0.0.1/checklist.jsp | grep '项目验收清单'
+curl -s http://127.0.0.1/api/status.jsp</code></pre>
+                <div class="note">截图重点：浏览器首页、实验资料索引页、项目验收清单页，以及 api/status.jsp 返回 JSON。</div>
             </div>
         </div>
         
         <div class="step">
             <div class="step-num">5</div>
             <div class="step-content">
-                <div class="step-title">创建容器</div>
-                <pre><code># 创建 Nginx 容器（负载均衡器）
-sudo docker run -d --name nginx-lb -p 80:80 nginx-kylin:v1
-
-# 创建两个 Tomcat 容器（后端服务）
-sudo docker run -d --name tomcat-1 tomcat-kylin:v1
-sudo docker run -d --name tomcat-2 tomcat-kylin:v1</code></pre>
+                <div class="step-title">验证负载均衡与容错</div>
+                <pre><code>for i in {1..8}; do curl -s http://127.0.0.1/health.jsp; echo; done
+sudo docker stop tomcat1
+for i in {1..5}; do curl -s http://127.0.0.1/health.jsp; echo; done
+sudo docker start tomcat1
+sleep 8
+sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'</code></pre>
+                <div class="note">截图重点：health.jsp 的 node 字段出现 KYLIN-TOMCAT-1 和 KYLIN-TOMCAT-2；停止 tomcat1 后仍能由 tomcat2 响应；恢复后三个容器均运行。</div>
             </div>
         </div>
         
         <div class="step">
             <div class="step-num">6</div>
             <div class="step-content">
-                <div class="step-title">配置 Nginx 负载均衡</div>
-                <div class="step-desc">进入 Nginx 容器，修改 nginx.conf：</div>
-                <pre><code>sudo docker exec -it nginx-lb /bin/bash
-vim /usr/local/nginx/conf/nginx.conf</code></pre>
-                <pre><code>http {
-    upstream tomcat_backend {
-        server tomcat-1:8080;
-        server tomcat-2:8080;
-    }
-    server {
-        listen 80;
-        location / {
-            proxy_pass http://tomcat_backend;
-        }
-    }
-}</code></pre>
-                <div class="step-desc">重启 Nginx：</div>
-                <pre><code>/usr/local/nginx/sbin/nginx -s reload</code></pre>
-            </div>
-        </div>
-        
-        <div class="step">
-            <div class="step-num">7</div>
-            <div class="step-content">
-                <div class="step-title">验证负载均衡</div>
-                <div class="step-desc">在宿主机浏览器访问 <code>http://宿主机IP</code>，多次刷新，观察请求被分发到不同 Tomcat 容器。</div>
-                <div class="note">也可使用 curl 命令多次请求：<code>curl http://localhost</code></div>
+                <div class="step-title">保存项目级验收证据</div>
+                <pre><code>sudo docker network inspect kylin-lb-net --format '{{range $id,$c := .Containers}}{{$c.Name}} {{end}}'
+sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx -T | grep -E 'upstream|server tomcat|proxy_pass'
+sudo docker logs --tail 20 tomcat1
+sudo docker logs --tail 20 tomcat2
+bash scripts/verify.sh</code></pre>
+                <div class="note">截图重点：Docker 网络包含三个容器，Nginx 配置包含两个 Tomcat 后端，Tomcat 有日志输出，verify.sh 综合验收通过。</div>
             </div>
         </div>
     </div>
