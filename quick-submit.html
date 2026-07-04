@@ -234,45 +234,35 @@ free -m</code></pre>
 <li>关闭 swap 是为了让物理内存压力更快、更明显地触发 OOM。</li>
 <li><code>free -m</code> 中重点观察 <code>available</code>，它表示系统可用内存估计值。</li>
 </ul>
-<h3>阶段三：启动程序并观察内存下降</h3>
+<h3>阶段三：启动程序并自动观察到 OOM 结束</h3>
 <pre><code>cd ~/labs/oom_experiment
 ./oom &gt; oom.log 2&gt;&amp;1 &amp;
 OOM_PID=$!
-echo &quot;OOM_PID=$OOM_PID&quot;</code></pre>
-<p>本阶段用于启动内存压力程序。程序输出被写入 <code>oom.log</code>，不会继续刷在终端上，便于后续观察和截图。</p>
+clear
+while kill -0 $OOM_PID 2&gt;/dev/null; do
+    free -m | awk &#x27;/Mem:/ {print &quot;available_MB=&quot; $7}&#x27;
+    sleep 1
+done
+echo &quot;oom process exited&quot;</code></pre>
+<p>截图内容：截取本阶段输出即可，画面中只需要出现多行 <code>available_MB=数值</code>，并在最后出现 <code>oom process exited</code>。这张图用于证明内存可用量持续下降，直到测试进程被系统终止。</p>
 <p>命令与参数解释：</p>
 <ul>
 <li><code>cd ~/labs/oom_experiment</code>：进入 <code>oom</code> 程序所在目录。</li>
 <li><code>./oom &gt; oom.log 2&gt;&amp;1 &amp;</code>：后台运行当前目录下的 <code>oom</code> 程序；<code>&gt;</code> 把标准输出写入 <code>oom.log</code>；<code>2&gt;&amp;1</code> 把错误输出也合并到同一个日志文件；<code>&amp;</code> 表示后台运行。</li>
 <li><code>OOM_PID=$!</code>：把最近一个后台进程的 PID 保存到变量 <code>OOM_PID</code>。</li>
-<li><code>echo &quot;OOM_PID=$OOM_PID&quot;</code>：打印 OOM 测试进程号，便于后续用 <code>ps</code> 查看。</li>
-</ul>
-<h3>阶段四：观察内存变化和进程状态</h3>
-<pre><code>for i in {1..8}; do
-    date
-    free -m
-    ps -o pid,comm,rss,vsz,stat -p $OOM_PID 2&gt;/dev/null || echo &quot;oom process has exited&quot;
-    sleep 1
-done
-tail -n 5 oom.log</code></pre>
-<p>截图内容：截取循环输出中 <code>free -m</code> 的 <code>available</code> 逐步下降、<code>ps</code> 中 <code>oom</code> 进程的内存占用变化，以及 <code>tail -n 5 oom.log</code> 中的分配记录。</p>
-<p>命令与参数解释：</p>
-<ul>
-<li><code>for i in {1..8}; do ... done</code>：循环执行 8 次观察命令。</li>
-<li><code>date</code>：输出当前时间，方便说明内存变化的观察时刻。</li>
-<li><code>free -m</code>：以 MB 为单位查看内存使用情况，重点观察 <code>available</code>。</li>
-<li><code>ps -o pid,comm,rss,vsz,stat -p $OOM_PID</code>：查看 OOM 测试进程状态；<code>rss</code> 是实际驻留内存；<code>vsz</code> 是虚拟内存；<code>stat</code> 是进程状态；<code>-p</code> 指定 PID。</li>
-<li><code>2&gt;/dev/null || echo &quot;oom process has exited&quot;</code>：如果进程已被 OOM Killer 终止，隐藏 <code>ps</code> 错误并输出进程已退出提示。</li>
-<li><code>sleep 1</code>：每次观察间隔 1 秒。</li>
-<li><code>tail -n 5 oom.log</code>：查看程序日志最后 5 行，验证程序持续申请内存。</li>
+<li><code>clear</code>：清空终端中后台任务启动时产生的作业号等杂项输出，便于截图只保留内存数值。</li>
+<li><code>while kill -0 $OOM_PID 2&gt;/dev/null; do ... done</code>：只要 <code>oom</code> 进程还存在，就继续循环观察；<code>kill -0</code> 不会真正结束进程，只用于检测进程是否存在。</li>
+<li><code>free -m | awk &#x27;/Mem:/ {print &quot;available_MB=&quot; $7}&#x27;</code>：只输出 <code>free -m</code> 中 Mem 行的 available 数值；<code>$7</code> 是 available 列；最终输出格式简化为 <code>available_MB=数值</code>。</li>
+<li><code>sleep 1</code>：每隔 1 秒输出一次内存可用量。</li>
+<li><code>echo &quot;oom process exited&quot;</code>：当 <code>oom</code> 进程被终止后输出结束标记。</li>
 </ul>
 <p>答辩说明：</p>
 <ul>
-<li>程序输出重定向到日志文件后，不会干扰终端中的内存观察结果。</li>
-<li>随着 <code>oom</code> 持续申请并写入内存，<code>available</code> 会下降，<code>rss/vsz</code> 会增大。</li>
-<li>当系统无法继续满足内存申请时，内核会触发 OOM Killer 选择进程终止。</li>
+<li>程序输出重定向到 <code>oom.log</code>，终端只显示可用内存大小，便于截图。</li>
+<li><code>available_MB</code> 持续下降说明测试程序不断申请并写入内存。</li>
+<li>循环自动结束说明 <code>oom</code> 进程已经退出，通常是被 OOM Killer 终止。</li>
 </ul>
-<h3>阶段五：查看 OOM 日志并恢复 swap</h3>
+<h3>阶段四：查看 OOM 日志并恢复 swap</h3>
 <pre><code>dmesg | tail -n 30
 sudo swapon -a
 free -m</code></pre>

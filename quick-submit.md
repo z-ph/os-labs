@@ -246,55 +246,40 @@ free -m
 - 关闭 swap 是为了让物理内存压力更快、更明显地触发 OOM。
 - `free -m` 中重点观察 `available`，它表示系统可用内存估计值。
 
-### 阶段三：启动程序并观察内存下降
+### 阶段三：启动程序并自动观察到 OOM 结束
 
 ```bash
 cd ~/labs/oom_experiment
 ./oom > oom.log 2>&1 &
 OOM_PID=$!
-echo "OOM_PID=$OOM_PID"
+clear
+while kill -0 $OOM_PID 2>/dev/null; do
+    free -m | awk '/Mem:/ {print "available_MB=" $7}'
+    sleep 1
+done
+echo "oom process exited"
 ```
 
-本阶段用于启动内存压力程序。程序输出被写入 `oom.log`，不会继续刷在终端上，便于后续观察和截图。
+截图内容：截取本阶段输出即可，画面中只需要出现多行 `available_MB=数值`，并在最后出现 `oom process exited`。这张图用于证明内存可用量持续下降，直到测试进程被系统终止。
 
 命令与参数解释：
 
 - `cd ~/labs/oom_experiment`：进入 `oom` 程序所在目录。
 - `./oom > oom.log 2>&1 &`：后台运行当前目录下的 `oom` 程序；`>` 把标准输出写入 `oom.log`；`2>&1` 把错误输出也合并到同一个日志文件；`&` 表示后台运行。
 - `OOM_PID=$!`：把最近一个后台进程的 PID 保存到变量 `OOM_PID`。
-- `echo "OOM_PID=$OOM_PID"`：打印 OOM 测试进程号，便于后续用 `ps` 查看。
-
-### 阶段四：观察内存变化和进程状态
-
-```bash
-for i in {1..8}; do
-    date
-    free -m
-    ps -o pid,comm,rss,vsz,stat -p $OOM_PID 2>/dev/null || echo "oom process has exited"
-    sleep 1
-done
-tail -n 5 oom.log
-```
-
-截图内容：截取循环输出中 `free -m` 的 `available` 逐步下降、`ps` 中 `oom` 进程的内存占用变化，以及 `tail -n 5 oom.log` 中的分配记录。
-
-命令与参数解释：
-
-- `for i in {1..8}; do ... done`：循环执行 8 次观察命令。
-- `date`：输出当前时间，方便说明内存变化的观察时刻。
-- `free -m`：以 MB 为单位查看内存使用情况，重点观察 `available`。
-- `ps -o pid,comm,rss,vsz,stat -p $OOM_PID`：查看 OOM 测试进程状态；`rss` 是实际驻留内存；`vsz` 是虚拟内存；`stat` 是进程状态；`-p` 指定 PID。
-- `2>/dev/null || echo "oom process has exited"`：如果进程已被 OOM Killer 终止，隐藏 `ps` 错误并输出进程已退出提示。
-- `sleep 1`：每次观察间隔 1 秒。
-- `tail -n 5 oom.log`：查看程序日志最后 5 行，验证程序持续申请内存。
+- `clear`：清空终端中后台任务启动时产生的作业号等杂项输出，便于截图只保留内存数值。
+- `while kill -0 $OOM_PID 2>/dev/null; do ... done`：只要 `oom` 进程还存在，就继续循环观察；`kill -0` 不会真正结束进程，只用于检测进程是否存在。
+- `free -m | awk '/Mem:/ {print "available_MB=" $7}'`：只输出 `free -m` 中 Mem 行的 available 数值；`$7` 是 available 列；最终输出格式简化为 `available_MB=数值`。
+- `sleep 1`：每隔 1 秒输出一次内存可用量。
+- `echo "oom process exited"`：当 `oom` 进程被终止后输出结束标记。
 
 答辩说明：
 
-- 程序输出重定向到日志文件后，不会干扰终端中的内存观察结果。
-- 随着 `oom` 持续申请并写入内存，`available` 会下降，`rss/vsz` 会增大。
-- 当系统无法继续满足内存申请时，内核会触发 OOM Killer 选择进程终止。
+- 程序输出重定向到 `oom.log`，终端只显示可用内存大小，便于截图。
+- `available_MB` 持续下降说明测试程序不断申请并写入内存。
+- 循环自动结束说明 `oom` 进程已经退出，通常是被 OOM Killer 终止。
 
-### 阶段五：查看 OOM 日志并恢复 swap
+### 阶段四：查看 OOM 日志并恢复 swap
 
 ```bash
 dmesg | tail -n 30

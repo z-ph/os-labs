@@ -831,32 +831,22 @@ free -m</code></pre>
         <div class="step">
             <div class="step-num">3</div>
             <div class="step-content">
-                <div class="step-title">后台运行程序并重定向日志</div>
+                <div class="step-title">启动程序并自动观察到 OOM 结束</div>
                 <pre><code>cd ~/labs/oom_experiment
 ./oom &gt; oom.log 2&gt;&amp;1 &amp;
 OOM_PID=$!
-echo "OOM_PID=$OOM_PID"</code></pre>
-                <div class="note">程序输出会进入 oom.log，不会继续刷在终端上，便于观察内存变化。</div>
+clear
+while kill -0 $OOM_PID 2&gt;/dev/null; do
+    free -m | awk '/Mem:/ {print "available_MB=" $7}'
+    sleep 1
+done
+echo "oom process exited"</code></pre>
+                <div class="note">截图重点：只需要多行 available_MB=数值，以及最后的 oom process exited。</div>
             </div>
         </div>
         
         <div class="step">
             <div class="step-num">4</div>
-            <div class="step-content">
-                <div class="step-title">观察内存变化和进程状态</div>
-                <pre><code>for i in {1..8}; do
-    date
-    free -m
-    ps -o pid,comm,rss,vsz,stat -p $OOM_PID 2&gt;/dev/null || echo "oom process has exited"
-    sleep 1
-done
-tail -n 5 oom.log</code></pre>
-                <div class="note">截图重点：available 下降、oom 进程 rss/vsz 变化、oom.log 中出现持续分配记录。</div>
-            </div>
-        </div>
-        
-        <div class="step">
-            <div class="step-num">5</div>
             <div class="step-content">
                 <div class="step-title">查看 OOM 日志并恢复 swap</div>
                 <pre><code>dmesg | tail -n 30
@@ -872,9 +862,8 @@ free -m</code></pre>
         <table>
             <tr><th>观察项</th><th>命令/方法</th><th>预期结果</th></tr>
             <tr><td>初始状态</td><td>swapon --show、free -m</td><td>记录 swap 和 available 初始值</td></tr>
-            <tr><td>程序日志</td><td>tail -n 5 oom.log</td><td>能看到 allocated about ... MB</td></tr>
-            <tr><td>内存变化</td><td>for 循环中的 free -m</td><td>available 逐步下降</td></tr>
-            <tr><td>进程状态</td><td>ps -o pid,comm,rss,vsz,stat</td><td>rss/vsz 随内存申请增大，或进程被终止</td></tr>
+            <tr><td>内存变化</td><td>available_MB 输出</td><td>available_MB 数值逐步下降</td></tr>
+            <tr><td>自动结束</td><td>while kill -0 循环</td><td>进程退出后出现 oom process exited</td></tr>
             <tr><td>OOM 日志</td><td>dmesg | tail -n 30</td><td>出现 Out of memory 或 Killed process</td></tr>
         </table>
     </div>
