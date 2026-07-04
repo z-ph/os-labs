@@ -212,7 +212,7 @@ which rpmbuild || true</code></pre>
     <div class="result">报告结论：本项目已完成基础环境确认，系统架构与包管理工具满足 cc switch 适配打包验证要求。</div>
 
     <h2 id="source">三、准备 cc switch 源文件</h2>
-    <p>本课设使用开源项目 <a href="https://github.com/SaladDay/cc-switch-cli" target="_blank" rel="noopener">SaladDay/cc-switch-cli</a> 的 Linux Release 包作为真实打包对象。你的 WSL Ubuntu 截图中 <code>uname -m</code> 输出为 <code>x86_64</code>，因此选择 <strong>linux-x64</strong> 包；如果在 ARM64/aarch64 的 Kylin 或 Linux 环境中操作，才选择 <strong>linux-arm64</strong> 包。一般不要选 <code>musl</code> 包，除非系统是 Alpine 这类 musl libc 环境。</p>
+    <p>本课设使用开源项目 <a href="https://github.com/SaladDay/cc-switch-cli" target="_blank" rel="noopener">SaladDay/cc-switch-cli</a> 的 Linux Release 包作为真实打包对象。WSL Ubuntu 截图中 <code>uname -m</code> 输出为 <code>x86_64</code>，DEB 部分可使用 <strong>linux-x64</strong> 包。Kylin V10 运行库版本较低，普通 linux-x64 包可能缺少 <code>libssl.so.3</code>，因此 RPM/Kylin 部分建议使用 <strong>linux-x64-musl</strong> 包降低动态库依赖。如果在 ARM64/aarch64 环境中操作，才选择对应 arm64 包。</p>
     <pre><code>cd ~/os-course/cc-switch-packaging
 mkdir -p source
 cd source
@@ -221,7 +221,11 @@ cd source
 curl -LO https://github.com/SaladDay/cc-switch-cli/releases/download/v5.8.7/cc-switch-cli-v5.8.7-linux-x64.tar.gz
 tar -zxvf cc-switch-cli-v5.8.7-linux-x64.tar.gz
 
-# 如果 uname -m 显示 aarch64，再改用下面的 arm64 包：
+# Kylin V10 若遇到 libssl.so.3 缺失，改用 x64 musl 包：
+# curl -LO https://github.com/SaladDay/cc-switch-cli/releases/download/v5.8.7/cc-switch-cli-v5.8.7-linux-x64-musl.tar.gz
+# tar -zxvf cc-switch-cli-v5.8.7-linux-x64-musl.tar.gz
+
+# 如果 uname -m 显示 aarch64，再改用 arm64 包：
 # curl -LO https://github.com/SaladDay/cc-switch-cli/releases/download/v5.8.7/cc-switch-cli-v5.8.7-linux-arm64.tar.gz
 # tar -zxvf cc-switch-cli-v5.8.7-linux-arm64.tar.gz
 
@@ -236,6 +240,7 @@ cd ..</code></pre>
     <p>命令与参数解释：</p>
     <ul>
       <li><code>cc-switch-cli-v5.8.7-linux-x64.tar.gz</code> 适用于 <code>x86_64</code> / <code>amd64</code> Linux 环境，例如你的 WSL Ubuntu。</li>
+      <li><code>cc-switch-cli-v5.8.7-linux-x64-musl.tar.gz</code> 适用于 Kylin V10 这类运行库较旧、普通 x64 包提示 <code>libssl.so.3</code> 缺失的场景。</li>
       <li><code>cc-switch-cli-v5.8.7-linux-arm64.tar.gz</code> 适用于 <code>aarch64</code> / ARM64 环境。</li>
       <li><code>find . -maxdepth 3 -type f -perm -111</code> 查找解压目录中的可执行文件。</li>
       <li><code>cp ... cc-switch</code> 将真实 Release 可执行文件统一命名为 <code>source/cc-switch</code>，便于后续 DEB/RPM 打包流程复用。</li>
@@ -323,6 +328,48 @@ which cc-switch || echo "cc-switch command removed from PATH"</code></pre>
     <div class="result">报告结论：DEB 包卸载后，包管理记录和系统命令入口均已清除，说明安装与卸载流程完整可控。</div>
 
     <h2 id="rpm">五、9.5.2 基于 RPM 格式的适配打包</h2>
+    <h3>阶段 0：清理旧包并确认 Kylin 运行环境</h3>
+    <p>如果系统里曾经安装过其他来源的 <code>cc-switch</code>，需要先清理，否则 <code>rpm -qa</code>、<code>rpm -ql</code>、<code>which cc-switch</code> 可能查到旧包。你截图里的 <code>cc-switch-3.16.5-1.x86_64</code> 就是旧包，它依赖 <code>libssl.so.3</code>，在 Kylin V10 上会运行失败。</p>
+    <pre><code>cat /etc/os-release
+rpm -qa | grep cc-switch || true
+sudo rpm -e cc-switch 2&gt;/dev/null || true
+rpm -qa | grep cc-switch || echo "old cc-switch removed"
+which cc-switch || echo "old cc-switch command removed"</code></pre>
+    <p>命令与参数解释：</p>
+    <ul>
+      <li><code>cat /etc/os-release</code>：确认当前为 Kylin Linux Advanced Server Industry V10。</li>
+      <li><code>rpm -qa | grep cc-switch</code>：查看系统中是否已有 cc-switch 包。</li>
+      <li><code>sudo rpm -e cc-switch</code>：卸载旧包；这里加 <code>2&gt;/dev/null || true</code> 是为了旧包不存在时不中断后续操作。</li>
+    </ul>
+    <div class="shot">截图内容：截取 Kylin V10 系统信息、旧 cc-switch 包查询和清理结果。</div>
+    <div class="placeholder">图片占位符：Kylin 环境与旧包清理截图<br>需要看到 /etc/os-release、rpm -qa 查询和 old cc-switch removed 输出</div>
+    <div class="result">报告结论：RPM 验证环境为 Kylin Linux Advanced Server Industry V10，已清理旧 cc-switch 包，避免后续验证结果被旧安装影响。</div>
+
+    <h3>阶段 0.5：在 Kylin 中准备 musl 版 cc-switch</h3>
+    <p>Kylin V10 缺少 <code>libssl.so.3</code> 时，普通 <code>linux-x64</code> 版本会报共享库加载错误。此时应改用 <code>linux-x64-musl</code> 版本，并用 <code>file</code>、<code>ldd</code>、<code>--help</code> 验证该二进制在 Kylin 中可运行。</p>
+    <pre><code>cd ~/os-course/cc-switch-packaging
+rm -rf source
+mkdir -p source
+cd source
+curl -LO https://github.com/SaladDay/cc-switch-cli/releases/download/v5.8.7/cc-switch-cli-v5.8.7-linux-x64-musl.tar.gz
+tar -zxvf cc-switch-cli-v5.8.7-linux-x64-musl.tar.gz
+chmod +x cc-switch
+file cc-switch
+ldd cc-switch || true
+./cc-switch --version
+./cc-switch --help
+cd ..</code></pre>
+    <p>命令与参数解释：</p>
+    <ul>
+      <li><code>linux-x64-musl</code>：用于降低对 Kylin V10 本机 OpenSSL/glibc 等动态库版本的依赖。</li>
+      <li><code>file cc-switch</code>：查看可执行文件类型和架构。</li>
+      <li><code>ldd cc-switch || true</code>：检查动态库依赖；即使命令返回非零也继续执行。</li>
+      <li><code>./cc-switch --help</code>：证明 musl 版 cc-switch 可以在 Kylin 中正常启动。</li>
+    </ul>
+    <div class="shot">截图内容：截取 linux-x64-musl 包下载、解压、chmod、file/ldd 检查和 --help 输出。</div>
+    <div class="placeholder">图片占位符：Kylin 中 musl 版 cc-switch 运行验证截图<br>需要看到 linux-x64-musl 文件名、chmod +x、./cc-switch --help 成功输出</div>
+    <div class="result">报告结论：由于 Kylin V10 缺少 libssl.so.3，RPM 侧改用 linux-x64-musl 版本，降低运行库依赖并通过 --help 验证可执行文件可运行。</div>
+
     <h3>阶段 1：安装工具并初始化 rpmbuild 目录</h3>
     <pre><code>sudo yum install -y rpm-build rpmdevtools || sudo dnf install -y rpm-build rpmdevtools
 rpmdev-setuptree || mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
@@ -406,7 +453,9 @@ cat ~/rpmbuild/SPECS/cc-switch.spec</code></pre>
     <h3>阶段 4：构建、安装与验证 RPM 包</h3>
     <pre><code>rpmbuild -ba ~/rpmbuild/SPECS/cc-switch.spec
 find ~/rpmbuild/RPMS -name 'cc-switch-*.rpm' -print
-sudo rpm -ivh ~/rpmbuild/RPMS/x86_64/cc-switch-1.0.0-1*.rpm
+RPM_FILE="$(find ~/rpmbuild/RPMS -name 'cc-switch-1.0.0-1*.rpm' | head -n 1)"
+echo "$RPM_FILE"
+sudo rpm -ivh "$RPM_FILE"
 rpm -qa | grep cc-switch
 rpm -ql cc-switch
 which cc-switch
@@ -416,6 +465,7 @@ cc-switch env tools</code></pre>
     <p>命令与参数解释：</p>
     <ul>
       <li><code>rpmbuild -ba</code> 同时构建二进制 RPM 和源码 RPM。</li>
+      <li><code>RPM_FILE="$(find ...)"</code> 使用实际构建出的 RPM 路径安装，避免手写路径与真实输出目录不一致。</li>
       <li><code>rpm -ivh</code> 安装 RPM 包；<code>-i</code> 安装，<code>-v</code> 显示详细过程，<code>-h</code> 显示进度。</li>
       <li><code>rpm -ql cc-switch</code> 查看包安装了哪些文件。</li>
     </ul>
