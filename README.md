@@ -1,4 +1,4 @@
-# 操作系统实验与课设 · 完成路径规划
+# 操作系统实验与课设 · 执行路径
 
 > 广东工业大学 2026 操作系统基础与工业应用实验与课程设计
 
@@ -6,7 +6,7 @@
 
 GitHub Pages: [https://z-ph.github.io/os-labs/](https://z-ph.github.io/os-labs/)
 
-快速提交清单: [https://z-ph.github.io/os-labs/quick-submit.html](https://z-ph.github.io/os-labs/quick-submit.html)
+分阶段执行清单: [https://z-ph.github.io/os-labs/quick-submit.html](https://z-ph.github.io/os-labs/quick-submit.html)
 
 ## 文件说明
 
@@ -15,10 +15,10 @@ GitHub Pages: [https://z-ph.github.io/os-labs/](https://z-ph.github.io/os-labs/)
 | `index.html` | 交互式要求解析与路径规划器（主页面） |
 | `实验与课设要求及路径规划.html` | 同上（备用） |
 | `实验详细执行步骤.html` | 每个实验的详细命令、代码与预期现象 |
-| `quick-submit.html` | 明天提交用的最短实验路线、命令、代码和截图清单 |
-| `quick-submit.md` | 快速提交清单的英文文件名 Markdown 版，方便在 Kylin 终端打开 |
+| `quick-submit.html` | 分阶段实验路线、命令、代码和截图清单 |
+| `quick-submit.md` | 分阶段执行清单的英文文件名 Markdown 版，方便在 Kylin 终端打开 |
 | `exp-9.1.1-step-by-step.md` | 9.1.1 进程调度实验分步操作与 renice 现象排查 |
-| `明天提交-操作系统实验与课设速查清单.md` | 快速提交清单的 Markdown 版 |
+| `操作系统实验与课设执行清单.md` | 分阶段执行清单的 Markdown 版 |
 
 ## 总体要求
 

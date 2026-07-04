@@ -1,64 +1,60 @@
-# 明天提交速查清单
+# 操作系统实验与课设执行清单
 
-## 总路线
+本清单用于在 Kylin 系统中按阶段完成实验与课程设计验证。涉及“调整前/调整后”“正常/异常”“计数对比”的内容均拆成独立阶段，先完成当前阶段并记录结果，再进入下一阶段。
 
-优良最快路径：
+## 实验选择
 
-1. 9.4.2 文件快速定位与管理，10-15 分钟。
-2. 9.4.3 数据检索与处理，10-15 分钟。
-3. 9.4.1 多用户与权限管理，15-20 分钟。
-4. 9.1.1 基于 Kylin OS 的进程调度与优先级实验，20-30 分钟。
-5. 9.2.4 内存回收实验，15-25 分钟。
-6. 课程设计选 9.6.1 容器化负载均衡部署实践。
+建议完成以下 5 个实验，覆盖 9.1、9.2、9.4 三类内容：
 
-前 4 个小实验用于保良，第 5 个小实验用于冲优。它们覆盖 9.1、9.2、9.4 三个不同大类，满足“至少 3 个且属于不同大类”的基本要求。
+1. 9.1.1 基于 Kylin OS 的进程调度与优先级实验
+2. 9.2.4 内存回收实验
+3. 9.4.1 多用户与权限管理
+4. 9.4.2 文件快速定位与管理
+5. 9.4.3 数据检索与处理
 
-报告骨架已经生成：
-
-- `C:\Users\30513\Desktop\操作系统实验报告-快速完成骨架.docx`
-- `C:\Users\30513\Desktop\操作系统课程设计报告-9.6容器化负载均衡骨架.docx`
-
-提交前只需要：
-
-1. 填封面：学院、班级、学号、姓名、日期。
-2. 按下面顺序执行命令。
-3. 把截图贴到 Word 里对应的黄色“截图占位”处。
-4. 系统测试表里的“实际结果”改成“通过”或贴自己的输出。
+课程设计选择 9.6.1 容器化负载均衡部署实践。
 
 ## 截图原则
 
-每个实验截图不求多，关键是能证明你做过：
-
-- 命令和输出要在同一张图里。
-- 终端里最好先执行 `hostname; date; whoami`，让截图更像自己的环境。
-- 截图文件可以命名为 `9.4.2-1.png`、`9.1.1-3.png` 这种，方便贴图。
+- 每个截图应同时包含命令和输出。
+- 对比实验分别保留调整前、调整后两类结果。
+- 截图可按 `9.1.1-1.png`、`9.2.4-2.png`、`9.6.1-5.png` 命名，便于整理到报告中。
 
 ## 9.4.2 文件快速定位与管理
 
-复制执行：
+### 阶段一：文件定位
 
 ```bash
 hostname; date; whoami
 find /usr -name "*pass*" | head -n 20
+find /usr -name "kmod-protect.list" | head -n 5
 find /dev \( -name "vd*" -o -name "sd*" \) -type b
 sudo find /etc -type f -size 0 -exec ls -l {} \; | head -n 20
+```
+
+截图内容：`find /usr`、`find /dev`、`find /etc` 的输出。
+
+### 阶段二：账号文本与日志查看
+
+```bash
 grep "nologin$" /etc/passwd
 sudo tail -n 20 /var/log/messages || sudo journalctl -n 20
+```
+
+截图内容：`nologin` 账号筛选结果和系统日志末尾内容。
+
+### 阶段三：文件类型与元数据
+
+```bash
 file /etc/passwd
 stat /etc/passwd
 ```
 
-截图：
-
-1. `find /usr`、`find /dev`、`find /etc` 的输出。
-2. `grep "nologin$"` 和日志输出。
-3. `file /etc/passwd`、`stat /etc/passwd` 输出。
-
-贴到实验报告第 4 个实验的“7、程序运行结果”。
+截图内容：`file` 判断结果和 `stat` 元数据输出。
 
 ## 9.4.3 数据检索与处理
 
-复制执行：
+### 阶段一：上下文检索
 
 ```bash
 hostname; date; whoami
@@ -66,14 +62,33 @@ grep -A 2 root /etc/passwd
 grep -B 1 daemon /etc/passwd
 grep -C 1 daemon /etc/passwd
 grep --color=always -n -A 2 root /etc/passwd
+```
+
+截图内容：匹配行前后内容和带行号的匹配结果。
+
+### 阶段二：计数结果对比
+
+```bash
 grep -c root /etc/passwd
 grep root /etc/passwd | wc -l
+```
 
+截图内容：`grep -c` 与 `wc -l` 的统计结果。
+
+### 阶段三：扩展正则表达式
+
+```bash
 mkdir -p /tmp/grep_lab
 cd /tmp/grep_lab
 touch file{1..10}
 ls -l | grep -E 'file1{1,}'
+```
 
+截图内容：`grep -E` 对文件名的匹配结果。
+
+### 阶段四：普通字符串与忽略大小写
+
+```bash
 cd ~
 printf 'a?b\na\\?b\n' > test
 cat test
@@ -82,17 +97,11 @@ fgrep --color=always '\?' test
 echo 'AaBbCc' | grep --color=always -i -E 'A|b|c'
 ```
 
-截图：
-
-1. `grep -A/-B/-C` 和 `-n` 输出。
-2. `grep -c` 与 `wc -l` 计数输出。
-3. `grep -E`、`egrep`、`fgrep`、`-i` 输出。
-
-贴到实验报告第 5 个实验的“7、程序运行结果”。
+截图内容：`egrep`、`fgrep` 和 `grep -i` 的输出。
 
 ## 9.4.1 多用户与权限管理
 
-复制执行：
+### 阶段一：创建用户和用户组
 
 ```bash
 hostname; date; whoami
@@ -101,58 +110,68 @@ sudo useradd -m yinhe 2>/dev/null || true
 sudo useradd -m kylin 2>/dev/null || true
 sudo usermod -aG school yinhe
 sudo usermod -aG school kylin
+```
 
+截图内容：命令执行过程无错误即可，后续阶段会通过 `id` 验证。
+
+### 阶段二：配置共享目录和 ACL
+
+```bash
 sudo mkdir -p /root/network
 sudo chown yinhe:school /root/network
 sudo chmod 3770 /root/network
 sudo setfacl -m g:school:x /root
 sudo setfacl -m d:g:school:rwx /root/network
-
 sudo touch /root/network/file1
 sudo chown yinhe:school /root/network/file1
 sudo setfacl -m u:kylin:rw /root/network/file1
+```
 
+截图内容：目录和 ACL 配置命令执行完成。
+
+### 阶段三：查看权限配置结果
+
+```bash
 id yinhe
 id kylin
 ls -ld /root /root/network
 getfacl /root/network/file1
+```
 
+截图内容：`yinhe`、`kylin` 属于 `school` 组，`getfacl` 中出现 `user:kylin:rw-`。
+
+### 阶段四：验证 sticky 位限制
+
+```bash
 sudo -u yinhe bash -c 'echo yinhe-file > /root/network/yinhe.txt'
 sudo -u kylin bash -c 'rm /root/network/yinhe.txt'
 ls -l /root/network
 ```
 
-截图：
-
-1. `id yinhe`、`id kylin`、`ls -ld /root /root/network`。
-2. `getfacl /root/network/file1` 中有 `user:kylin:rw-`。
-3. kylin 删除 yinhe 文件失败，出现 `Operation not permitted`。
-
-贴到实验报告第 3 个实验的“7、程序运行结果”。
+截图内容：`kylin` 删除 `yinhe.txt` 失败，终端出现权限不足相关提示。
 
 ## 9.1.1 进程调度与优先级
 
-这个实验严格按教材的 pthread 多线程程序做。请打开单独的分步版，按步骤确认现象后再继续：
+该实验需要分步观察“调整前”和“调整后”的 CPU 分配现象，使用单独分步说明：
 
 ```bash
 curl -L https://raw.githubusercontent.com/z-ph/os-labs/main/exp-9.1.1-step-by-step.md | less
 ```
 
-浏览器链接：
+浏览器查看：
 
 https://github.com/z-ph/os-labs/blob/main/exp-9.1.1-step-by-step.md
 
-截图放入实验报告第 1 个实验的“7、程序运行结果”：
+截图内容：
 
-1. 编译成功和 `nice-exp` 文件，编译命令包含 `-pthread`。
-2. 两个 `nice-exp` 进程绑定在同一个 CPU 核心上竞争，CPU 占比接近。
-3. `sudo renice -n -5` 后其中一个进程 `NI=-5`，`top` 中 CPU 占比更高。
+1. `gcc nice-exp.c -o nice-exp -pthread` 编译成功。
+2. 两个 `nice-exp` 进程绑定到同一 CPU 核心后，调整前 `NI` 相同。
+3. `sudo renice -n -5 -p $PID_A` 后，`PID_A` 的 `NI=-5`。
+4. `top` 中 `NI=-5` 的进程 CPU 占用高于 `NI=0` 的进程。
 
 ## 9.2.4 内存回收实验
 
-只在虚拟机做，做之前保存其它东西。
-
-复制执行：
+### 阶段一：创建并编译测试程序
 
 ```bash
 mkdir -p ~/labs/oom_experiment
@@ -187,37 +206,44 @@ int main(void)
 }
 EOF
 gcc oom.c -o oom
+ls -l oom
 ```
 
-复制执行：
+截图内容：`oom` 程序编译成功。
+
+### 阶段二：记录初始内存并关闭 swap
 
 ```bash
 hostname; date; whoami
 sudo swapon --show
 sudo swapoff -a
 free -m
+```
+
+截图内容：`swapon` 与 `free -m` 的初始状态。
+
+### 阶段三：运行程序并观察内存下降
+
+```bash
+cd ~/labs/oom_experiment
 ./oom &
 watch -n 1 free -m
 ```
 
-看到 `available` 明显下降后截图。进程被杀后按 `Ctrl+C` 退出 watch，再执行：
+截图内容：`available` 内存持续下降。
+
+### 阶段四：查看 OOM 日志并恢复 swap
 
 ```bash
 dmesg | tail -n 30
 sudo swapon -a
 ```
 
-截图：
-
-1. `swapon/free` 输出。
-2. `watch free -m` 中内存下降。
-3. `dmesg` 有 `Out of memory: Killed process`。
-
-贴到实验报告第 2 个实验的“7、程序运行结果”。
+截图内容：内核日志中出现 `Out of memory` 或 `Killed process`。
 
 ## 9.6.1 课程设计：容器化负载均衡
 
-### 1. Docker 服务
+### 阶段一：启动 Docker 服务
 
 ```bash
 sudo yum install -y docker || sudo dnf install -y docker
@@ -226,9 +252,9 @@ sudo systemctl status docker
 sudo docker version
 ```
 
-截图：Docker active/running 和 version。
+截图内容：Docker 服务为 `active/running`，且能显示版本信息。
 
-### 2. 基础镜像
+### 阶段二：准备基础镜像
 
 ```bash
 sudo docker pull cr.kylinos.cn/kylin/kylin-server-init:v10sp1
@@ -237,9 +263,9 @@ sudo docker run --rm kylin-base:v10sp1 uname -m
 sudo docker images
 ```
 
-截图：`kylin-base:v10sp1` 存在，`uname -m` 输出 `x86_64`。
+截图内容：`kylin-base:v10sp1` 存在，`uname -m` 输出 `x86_64`。
 
-### 3. Nginx 镜像
+### 阶段三：构建 Nginx 镜像
 
 ```bash
 mkdir -p ~/kylin861/nginx
@@ -260,9 +286,9 @@ sudo docker build -t kylin-nginx:861 .
 sudo docker images | grep kylin-nginx
 ```
 
-截图：构建成功。
+截图内容：`kylin-nginx:861` 构建成功。
 
-### 4. Tomcat 镜像
+### 阶段四：构建 Tomcat 镜像
 
 ```bash
 mkdir -p ~/kylin861/tomcat
@@ -283,32 +309,32 @@ sudo docker build -t kylin-tomcat:861 .
 sudo docker images | grep kylin-tomcat
 ```
 
-截图：构建成功。
+截图内容：`kylin-tomcat:861` 构建成功。
 
-### 5. 启动 Tomcat 后端
+### 阶段五：启动并验证两个 Tomcat 后端
 
 ```bash
 sudo docker network create kylin-lb-net 2>/dev/null || true
 sudo docker rm -f tomcat1 tomcat2 nginx-lb 2>/dev/null || true
-
 sudo docker run -d --network kylin-lb-net -p 8080:8080 --name tomcat1 kylin-tomcat:861
 sudo docker run -d --network kylin-lb-net -p 8081:8080 --name tomcat2 kylin-tomcat:861
 sleep 15
+```
+
+```bash
 sudo docker exec tomcat1 bash -c 'echo KYLIN-TOMCAT-1 > /usr/local/apache-tomcat-9.0.68/webapps/ROOT/index.jsp'
 sudo docker exec tomcat2 bash -c 'echo KYLIN-TOMCAT-2 > /usr/local/apache-tomcat-9.0.68/webapps/ROOT/index.jsp'
-
 curl http://127.0.0.1:8080
 curl http://127.0.0.1:8081
 ```
 
-截图：8080 返回 `KYLIN-TOMCAT-1`，8081 返回 `KYLIN-TOMCAT-2`。
+截图内容：8080 返回 `KYLIN-TOMCAT-1`，8081 返回 `KYLIN-TOMCAT-2`。
 
-### 6. 启动 Nginx 负载均衡
+### 阶段六：配置并启动 Nginx 负载均衡
 
 ```bash
 sudo docker run -itd --network kylin-lb-net -p 80:80 --name nginx-lb kylin-nginx:861
-sudo docker exec -i nginx-lb bash <<'EOF'
-cat > /usr/local/nginx/conf/nginx.conf <<'NGINX'
+sudo docker exec -i nginx-lb tee /usr/local/nginx/conf/nginx.conf > /dev/null <<'EOF'
 worker_processes 1;
 
 events {
@@ -333,37 +359,38 @@ http {
         }
     }
 }
-NGINX
-/usr/local/nginx/sbin/nginx -t
-/usr/local/nginx/sbin/nginx
 EOF
+```
 
+```bash
+sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx -t
+sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx
 sudo docker ps
 for i in {1..8}; do curl -s http://127.0.0.1; echo; done
 ```
 
-截图：
+截图内容：`nginx -t` 成功，连续访问 80 端口时出现两个 Tomcat 的不同响应。
 
-1. `nginx -t` 成功，`docker ps` 有三个容器。
-2. 连续 curl 后出现 `KYLIN-TOMCAT-1` 和 `KYLIN-TOMCAT-2`。
-
-### 7. 容错测试
+### 阶段七：容错验证
 
 ```bash
 sudo docker stop tomcat1
 for i in {1..5}; do curl -s http://127.0.0.1; echo; done
+```
+
+截图内容：停止 `tomcat1` 后，服务仍可由 `tomcat2` 响应。
+
+```bash
 sudo docker start tomcat1
 sudo docker ps
 ```
 
-截图：停止 tomcat1 后仍能访问 tomcat2，恢复后三个容器都运行。
+截图内容：`tomcat1` 恢复后三个容器均处于运行状态。
 
-## 最后 30 分钟提交检查
+## 提交前自查
 
-1. 两份 Word 封面信息填好。
-2. 实验报告至少有 4 个实验截图，最好 5 个都贴。
-3. 课程设计报告 9.6 至少贴 Docker、镜像、Tomcat、Nginx 轮询、容错测试截图。
-4. 模板最后“此页只是提交要求”不要保留；当前骨架已删除。
-5. 文件名建议：
-   - `学号-姓名-操作系统实验报告.docx`
-   - `学号-姓名-操作系统课程设计报告.docx`
+1. 实验报告包含 5 个实验：9.1.1、9.2.4、9.4.1、9.4.2、9.4.3。
+2. 进程调度实验至少保留编译、调整前、调整后、`top` 观察四类截图。
+3. 内存回收实验至少保留初始内存、内存下降、OOM 日志三类截图。
+4. 课程设计至少保留 Docker 服务、镜像构建、Tomcat 后端、Nginx 轮询、容错测试截图。
+5. Word 封面信息、红色待替换内容和截图位置全部处理完成后再导出提交。

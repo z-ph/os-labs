@@ -45,7 +45,7 @@ gcc nice-exp.c -o nice-exp -pthread
 ls -l nice-exp
 ```
 
-截图：能看到 `nice-exp` 文件生成。
+记录内容：能看到 `nice-exp` 文件生成。
 
 ## 第 2 步：启动两个 nice-exp 进程并绑定到同一 CPU
 
@@ -81,7 +81,7 @@ ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B
 - `taskset -cp` 输出里两个进程的 CPU affinity 都是 `0`。
 - `ps` 输出里两个进程的 `PSR` 都是 `0`，说明两个进程在同一个 CPU 核心竞争。
 
-截图：这一张证明两个进程绑定到了同一个 CPU 核心。
+记录内容：这一阶段证明两个进程绑定到了同一个 CPU 核心。
 
 ## 第 4 步：把其中一个进程 nice 值调为 -5
 
@@ -117,11 +117,11 @@ top -p $PID_A,$PID_B
 
 如果刚进入 `top` 还是差不多，就再等几秒；也可以按 `f` 打开字段选择，显示 `P = Last Used Cpu (SMP)`，确认两个进程在同一个 CPU 核心。
 
-截图：这一张证明 nice 值改变后 CPU 分配发生变化。
+记录内容：这一阶段证明 nice 值改变后 CPU 分配发生变化。
 
 ## 第 6 步：结束实验进程
 
-截图完成后执行：
+实验结束处理：
 
 ```bash
 kill $PID_A $PID_B

@@ -839,7 +839,7 @@ int main() {
             <div class="step-content">
                 <div class="step-title">观察内存下降（另开终端）</div>
                 <pre><code>watch -n 1 free -m</code></pre>
-                <div class="note">现象：available 栏位数值疯狂下降。按 Ctrl+C 退出观察。</div>
+                <div class="note">现象：available 栏位数值持续下降；记录该阶段结果后结束观察。</div>
             </div>
         </div>
         
@@ -969,7 +969,7 @@ echo "KylinOS filesystem lab: inode -> block -> sector -> content" > fs_test.txt
                 <div class="step-desc">在一个终端执行监控命令：</div>
                 <pre><code>sudo blktrace -d /dev/mapper/klasi-root -o - | blkparse -i -</code></pre>
                 <div class="step-desc">在另一个终端对文件进行操作（如读写），观察 blkparse 输出的 I/O 事件。</div>
-                <div class="note">按 Ctrl+C 停止监控。</div>
+                <div class="note">记录监控结果后结束观察。</div>
             </div>
         </div>
     </div>

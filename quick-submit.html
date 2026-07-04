@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>操作系统实验与课设快速提交清单</title>
+  <title>操作系统实验与课设执行清单</title>
   <style>
     :root {
       color-scheme: light;
-      --bg: #f7f9fc;
+      --bg: #f6f8fb;
       --panel: #ffffff;
       --ink: #1f2937;
-      --muted: #5b6472;
-      --line: #d8dee9;
+      --muted: #5f6b7a;
+      --line: #d9e0ea;
       --blue: #1f5fbf;
-      --green: #16794c;
+      --green: #166a4f;
       --code-bg: #111827;
       --code-ink: #e5e7eb;
     }
@@ -23,257 +23,140 @@
       font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
       background: var(--bg);
       color: var(--ink);
-      line-height: 1.65;
+      line-height: 1.68;
     }
-    header {
-      background: var(--panel);
-      border-bottom: 1px solid var(--line);
-      padding: 28px 18px;
-    }
-    main {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 24px 18px 56px;
-    }
+    header { background: var(--panel); border-bottom: 1px solid var(--line); padding: 30px 18px; }
+    header .inner, main { max-width: 980px; margin: 0 auto; }
+    main { padding: 24px 18px 56px; }
     h1, h2, h3 { line-height: 1.25; }
-    h1 {
-      max-width: 980px;
-      margin: 0 auto 8px;
-      font-size: 28px;
-      color: var(--blue);
-    }
-    header p {
-      max-width: 980px;
-      margin: 0 auto;
-      color: var(--muted);
-    }
-    h2 {
-      margin-top: 30px;
-      padding-top: 18px;
-      border-top: 1px solid var(--line);
-      font-size: 22px;
-      color: var(--blue);
-    }
-    h3 {
-      margin-top: 22px;
-      font-size: 18px;
-      color: var(--green);
-    }
+    h1 { margin: 0 0 8px; font-size: 28px; color: var(--blue); }
+    header p { margin: 0; color: var(--muted); }
+    h2 { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 22px; color: var(--blue); }
+    h3 { margin-top: 20px; font-size: 18px; color: var(--green); }
+    p { margin: 10px 0; }
+    .lead { background: #eef5ff; border-left: 4px solid var(--blue); padding: 12px 14px; }
+    .bullet { margin-left: 6px; }
     a { color: var(--blue); }
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 16px;
-      margin: 16px 0;
-    }
-    .todo li { margin: 4px 0; }
-    .note {
-      border-left: 4px solid var(--green);
-      background: #eefaf4;
-      padding: 10px 12px;
-      margin: 14px 0;
-    }
-    code {
-      font-family: Consolas, "Courier New", monospace;
-      font-size: 0.94em;
-    }
-    pre {
-      background: var(--code-bg);
-      color: var(--code-ink);
-      border-radius: 8px;
-      overflow-x: auto;
-      padding: 14px;
-      margin: 12px 0;
-      line-height: 1.45;
-      white-space: pre;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--panel);
-      margin: 14px 0;
-    }
-    th, td {
-      border: 1px solid var(--line);
-      padding: 8px 10px;
-      vertical-align: top;
-    }
-    th { background: #eef3fb; }
+    code { font-family: Consolas, "Courier New", monospace; font-size: 0.94em; }
+    pre { background: var(--code-bg); color: var(--code-ink); padding: 14px 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0 16px; border: 1px solid #253145; }
+    pre code { color: inherit; font-size: 13px; line-height: 1.55; }
+    ol { padding-left: 24px; }
+    li { margin: 5px 0; }
+    @media (max-width: 640px) { h1 { font-size: 23px; } h2 { font-size: 20px; } main { padding-inline: 14px; } }
   </style>
 </head>
 <body>
   <header>
-    <h1>操作系统实验与课设快速提交清单</h1>
-    <p>目标：明天能交，优先完成最短路径。复制命令到 Kylin 终端执行，把截图贴到报告骨架对应位置。</p>
+    <div class="inner">
+      <h1>操作系统实验与课设执行清单</h1>
+      <p>按阶段完成实验验证，对比类内容分开执行、分开记录。</p>
+    </div>
   </header>
-
   <main>
-    <section class="card">
-      <h2>总路线</h2>
-      <ol>
-        <li>9.4.2 文件快速定位与管理，10-15 分钟。</li>
-        <li>9.4.3 数据检索与处理，10-15 分钟。</li>
-        <li>9.4.1 多用户与权限管理，15-20 分钟。</li>
-        <li>9.1.1 基于 Kylin OS 的进程调度与优先级实验，20-30 分钟。</li>
-        <li>9.2.4 内存回收实验，15-25 分钟。</li>
-        <li>课程设计：9.6.1 容器化负载均衡部署实践。</li>
-      </ol>
-      <p>前 4 个小实验用于保良，第 5 个小实验用于冲优。它们覆盖 9.1、9.2、9.4 三个不同大类，满足“至少 3 个且属于不同大类”的基本要求。</p>
-      <p>Markdown 版：<a href="./quick-submit.md">quick-submit.md</a> ｜ <a href="./明天提交-操作系统实验与课设速查清单.md">中文文件名版本</a></p>
-    </section>
-
-    <section class="card">
-      <h2>截图原则</h2>
-      <ul>
-        <li>命令和输出尽量放在同一张截图里。</li>
-        <li>每组截图前可以先执行 <code>hostname; date; whoami</code>。</li>
-        <li>截图文件建议命名为 <code>9.4.2-1.png</code>、<code>9.1.1-3.png</code>。</li>
-      </ul>
-    </section>
-
-    <h2>9.4.2 文件快速定位与管理</h2>
-    <pre><code>hostname; date; whoami
-find /usr -name "*pass*" | head -n 20
-find /dev \( -name "vd*" -o -name "sd*" \) -type b
-sudo find /etc -type f -size 0 -exec ls -l {} \; | head -n 20
-grep "nologin$" /etc/passwd
-sudo tail -n 20 /var/log/messages || sudo journalctl -n 20
-file /etc/passwd
+<p class="lead">本清单用于在 Kylin 系统中按阶段完成实验与课程设计验证。涉及“调整前/调整后”“正常/异常”“计数对比”的内容均拆成独立阶段，先完成当前阶段并记录结果，再进入下一阶段。</p>
+<h2>实验选择</h2>
+<p>建议完成以下 5 个实验，覆盖 9.1、9.2、9.4 三类内容：</p>
+<ol>
+<li>9.1.1 基于 Kylin OS 的进程调度与优先级实验</li>
+<li>9.2.4 内存回收实验</li>
+<li>9.4.1 多用户与权限管理</li>
+<li>9.4.2 文件快速定位与管理</li>
+<li>9.4.3 数据检索与处理</li>
+</ol>
+<p>课程设计选择 9.6.1 容器化负载均衡部署实践。</p>
+<h2>截图原则</h2>
+<p class="bullet">• 每个截图应同时包含命令和输出。</p>
+<p class="bullet">• 对比实验分别保留调整前、调整后两类结果。</p>
+<p class="bullet">• 截图可按 <code>9.1.1-1.png</code>、<code>9.2.4-2.png</code>、<code>9.6.1-5.png</code> 命名，便于整理到报告中。</p>
+<h2>9.4.2 文件快速定位与管理</h2>
+<h3>阶段一：文件定位</h3>
+<pre><code>hostname; date; whoami
+find /usr -name &quot;*pass*&quot; | head -n 20
+find /usr -name &quot;kmod-protect.list&quot; | head -n 5
+find /dev \( -name &quot;vd*&quot; -o -name &quot;sd*&quot; \) -type b
+sudo find /etc -type f -size 0 -exec ls -l {} \; | head -n 20</code></pre>
+<p>截图内容：<code>find /usr</code>、<code>find /dev</code>、<code>find /etc</code> 的输出。</p>
+<h3>阶段二：账号文本与日志查看</h3>
+<pre><code>grep &quot;nologin$&quot; /etc/passwd
+sudo tail -n 20 /var/log/messages || sudo journalctl -n 20</code></pre>
+<p>截图内容：<code>nologin</code> 账号筛选结果和系统日志末尾内容。</p>
+<h3>阶段三：文件类型与元数据</h3>
+<pre><code>file /etc/passwd
 stat /etc/passwd</code></pre>
-    <ul class="todo">
-      <li>截图 1：<code>find /usr</code>、<code>find /dev</code>、<code>find /etc</code> 输出。</li>
-      <li>截图 2：<code>grep "nologin$"</code> 和日志输出。</li>
-      <li>截图 3：<code>file /etc/passwd</code>、<code>stat /etc/passwd</code> 输出。</li>
-      <li>贴到实验报告第 4 个实验的“7、程序运行结果”。</li>
-    </ul>
-
-    <h2>9.4.3 数据检索与处理</h2>
-    <pre><code>hostname; date; whoami
+<p>截图内容：<code>file</code> 判断结果和 <code>stat</code> 元数据输出。</p>
+<h2>9.4.3 数据检索与处理</h2>
+<h3>阶段一：上下文检索</h3>
+<pre><code>hostname; date; whoami
 grep -A 2 root /etc/passwd
 grep -B 1 daemon /etc/passwd
 grep -C 1 daemon /etc/passwd
-grep --color=always -n -A 2 root /etc/passwd
-grep -c root /etc/passwd
-grep root /etc/passwd | wc -l
-
-mkdir -p /tmp/grep_lab
+grep --color=always -n -A 2 root /etc/passwd</code></pre>
+<p>截图内容：匹配行前后内容和带行号的匹配结果。</p>
+<h3>阶段二：计数结果对比</h3>
+<pre><code>grep -c root /etc/passwd
+grep root /etc/passwd | wc -l</code></pre>
+<p>截图内容：<code>grep -c</code> 与 <code>wc -l</code> 的统计结果。</p>
+<h3>阶段三：扩展正则表达式</h3>
+<pre><code>mkdir -p /tmp/grep_lab
 cd /tmp/grep_lab
 touch file{1..10}
-ls -l | grep -E 'file1{1,}'
-
-cd ~
-printf 'a?b\na\\?b\n' > test
+ls -l | grep -E &#x27;file1{1,}&#x27;</code></pre>
+<p>截图内容：<code>grep -E</code> 对文件名的匹配结果。</p>
+<h3>阶段四：普通字符串与忽略大小写</h3>
+<pre><code>cd ~
+printf &#x27;a?b\na\\?b\n&#x27; &gt; test
 cat test
-egrep --color=always '\?' test
-fgrep --color=always '\?' test
-echo 'AaBbCc' | grep --color=always -i -E 'A|b|c'</code></pre>
-    <ul class="todo">
-      <li>截图 1：<code>grep -A/-B/-C</code> 和 <code>-n</code> 输出。</li>
-      <li>截图 2：<code>grep -c</code> 与 <code>wc -l</code> 计数输出。</li>
-      <li>截图 3：<code>grep -E</code>、<code>egrep</code>、<code>fgrep</code>、<code>-i</code> 输出。</li>
-      <li>贴到实验报告第 5 个实验的“7、程序运行结果”。</li>
-    </ul>
-
-    <h2>9.4.1 多用户与权限管理</h2>
-    <pre><code>hostname; date; whoami
+egrep --color=always &#x27;\?&#x27; test
+fgrep --color=always &#x27;\?&#x27; test
+echo &#x27;AaBbCc&#x27; | grep --color=always -i -E &#x27;A|b|c&#x27;</code></pre>
+<p>截图内容：<code>egrep</code>、<code>fgrep</code> 和 <code>grep -i</code> 的输出。</p>
+<h2>9.4.1 多用户与权限管理</h2>
+<h3>阶段一：创建用户和用户组</h3>
+<pre><code>hostname; date; whoami
 sudo groupadd school 2&gt;/dev/null || true
 sudo useradd -m yinhe 2&gt;/dev/null || true
 sudo useradd -m kylin 2&gt;/dev/null || true
 sudo usermod -aG school yinhe
-sudo usermod -aG school kylin
-
-sudo mkdir -p /root/network
+sudo usermod -aG school kylin</code></pre>
+<p>截图内容：命令执行过程无错误即可，后续阶段会通过 <code>id</code> 验证。</p>
+<h3>阶段二：配置共享目录和 ACL</h3>
+<pre><code>sudo mkdir -p /root/network
 sudo chown yinhe:school /root/network
 sudo chmod 3770 /root/network
 sudo setfacl -m g:school:x /root
 sudo setfacl -m d:g:school:rwx /root/network
-
 sudo touch /root/network/file1
 sudo chown yinhe:school /root/network/file1
-sudo setfacl -m u:kylin:rw /root/network/file1
-
-id yinhe
+sudo setfacl -m u:kylin:rw /root/network/file1</code></pre>
+<p>截图内容：目录和 ACL 配置命令执行完成。</p>
+<h3>阶段三：查看权限配置结果</h3>
+<pre><code>id yinhe
 id kylin
 ls -ld /root /root/network
-getfacl /root/network/file1
-
-sudo -u yinhe bash -c 'echo yinhe-file &gt; /root/network/yinhe.txt'
-sudo -u kylin bash -c 'rm /root/network/yinhe.txt'
+getfacl /root/network/file1</code></pre>
+<p>截图内容：<code>yinhe</code>、<code>kylin</code> 属于 <code>school</code> 组，<code>getfacl</code> 中出现 <code>user:kylin:rw-</code>。</p>
+<h3>阶段四：验证 sticky 位限制</h3>
+<pre><code>sudo -u yinhe bash -c &#x27;echo yinhe-file &gt; /root/network/yinhe.txt&#x27;
+sudo -u kylin bash -c &#x27;rm /root/network/yinhe.txt&#x27;
 ls -l /root/network</code></pre>
-    <ul class="todo">
-      <li>截图 1：<code>id yinhe</code>、<code>id kylin</code>、<code>ls -ld /root /root/network</code>。</li>
-      <li>截图 2：<code>getfacl /root/network/file1</code> 中有 <code>user:kylin:rw-</code>。</li>
-      <li>截图 3：kylin 删除 yinhe 文件失败，出现 <code>Operation not permitted</code>。</li>
-      <li>贴到实验报告第 3 个实验的“7、程序运行结果”。</li>
-    </ul>
-
-    <h2>9.1.1 进程调度与优先级</h2>
-    <p>这个实验严格按教材使用 pthread 多线程测试程序，启动两个 nice-exp 进程并绑定到同一个 CPU 核心。</p>
-    <h3>创建并编译程序</h3>
-    <pre><code>mkdir -p ~/labs/cfs_experiment
-cd ~/labs/cfs_experiment
-cat &gt; nice-exp.c &lt;&lt;'EOF'
-#include &lt;stdio.h&gt;
-#include &lt;pthread.h&gt;
-#include &lt;sys/types.h&gt;
-#include &lt;unistd.h&gt;
-
-void *thread_fun(void *param)
-{
-    printf("thread pid:%d, tid:%lu\n", getpid(), pthread_self());
-    while (1) ;
-    return NULL;
-}
-
-int main(void)
-{
-    pthread_t tid;
-    int ret;
-    printf("main pid:%d, tid:%lu\n", getpid(), pthread_self());
-    ret = pthread_create(&amp;tid, NULL, thread_fun, NULL);
-    if (ret == -1) {
-        perror("cannot create new thread");
-        return 1;
-    }
-    if (pthread_join(tid, NULL) != 0) {
-        perror("call pthread_join function fail");
-        return 1;
-    }
-    return 0;
-}
-EOF
-gcc nice-exp.c -o nice-exp -pthread
-ls -l nice-exp</code></pre>
-    <p>截图 1：编译成功和 <code>nice-exp</code> 文件。</p>
-    <h3>运行与观察</h3>
-    <pre><code>cd ~/labs/cfs_experiment
-pkill nice-exp 2&gt;/dev/null
-taskset -c 0 ./nice-exp &gt;/dev/null &amp;
-PID_A=$!
-taskset -c 0 ./nice-exp &gt;/dev/null &amp;
-PID_B=$!
-echo "PID_A=$PID_A PID_B=$PID_B"
-taskset -cp $PID_A
-taskset -cp $PID_B
-ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B
-sudo renice -n -5 -p $PID_A
-sleep 8
-ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B
-top -p $PID_A,$PID_B</code></pre>
-    <ul class="todo">
-      <li>截图 2：两个进程 <code>PSR</code> 相同，说明绑定在同一个 CPU 核心上竞争，CPU 占比接近。</li>
-      <li>截图 3：<code>sudo renice -n -5</code> 后其中一个进程 <code>NI=-5</code>，<code>top</code> 中 CPU 占比更高。</li>
-      <li>结束进程：<code>kill $PID_A $PID_B; pkill nice-exp</code>。</li>
-      <li>贴到实验报告第 1 个实验的“7、程序运行结果”。</li>
-    </ul>
-
-    <h2>9.2.4 内存回收实验</h2>
-    <div class="note">只在虚拟机做，做之前保存其它工作。实验结束后执行 <code>sudo swapon -a</code> 恢复 swap。</div>
-    <h3>创建程序</h3>
-    <pre><code>mkdir -p ~/labs/oom_experiment
+<p>截图内容：<code>kylin</code> 删除 <code>yinhe.txt</code> 失败，终端出现权限不足相关提示。</p>
+<h2>9.1.1 进程调度与优先级</h2>
+<p>该实验需要分步观察“调整前”和“调整后”的 CPU 分配现象，使用单独分步说明：</p>
+<pre><code>curl -L https://raw.githubusercontent.com/z-ph/os-labs/main/exp-9.1.1-step-by-step.md | less</code></pre>
+<p>浏览器查看：</p>
+<p><a href="https://github.com/z-ph/os-labs/blob/main/exp-9.1.1-step-by-step.md">https://github.com/z-ph/os-labs/blob/main/exp-9.1.1-step-by-step.md</a></p>
+<p>截图内容：</p>
+<ol>
+<li><code>gcc nice-exp.c -o nice-exp -pthread</code> 编译成功。</li>
+<li>两个 <code>nice-exp</code> 进程绑定到同一 CPU 核心后，调整前 <code>NI</code> 相同。</li>
+<li><code>sudo renice -n -5 -p $PID_A</code> 后，<code>PID_A</code> 的 <code>NI=-5</code>。</li>
+<li><code>top</code> 中 <code>NI=-5</code> 的进程 CPU 占用高于 <code>NI=0</code> 的进程。</li>
+</ol>
+<h2>9.2.4 内存回收实验</h2>
+<h3>阶段一：创建并编译测试程序</h3>
+<pre><code>mkdir -p ~/labs/oom_experiment
 cd ~/labs/oom_experiment
-cat &gt; oom.c &lt;&lt;'EOF'
+cat &gt; oom.c &lt;&lt;&#x27;EOF&#x27;
 #include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;string.h&gt;
@@ -287,14 +170,14 @@ int main(void)
     for (;;) {
         char *memory = (char *)malloc(STEP_SIZE);
         if (!memory) {
-            perror("malloc");
+            perror(&quot;malloc&quot;);
             sleep(1);
             continue;
         }
         memset(memory, 0, STEP_SIZE);
         count++;
         if (count % 25 == 0) {
-            printf("allocated about %ld MB\n", count * 4);
+            printf(&quot;allocated about %ld MB\n&quot;, count * 4);
             fflush(stdout);
         }
         usleep(10000);
@@ -302,44 +185,42 @@ int main(void)
     return 0;
 }
 EOF
-gcc oom.c -o oom</code></pre>
-    <h3>触发 OOM</h3>
-    <pre><code>hostname; date; whoami
+gcc oom.c -o oom
+ls -l oom</code></pre>
+<p>截图内容：<code>oom</code> 程序编译成功。</p>
+<h3>阶段二：记录初始内存并关闭 swap</h3>
+<pre><code>hostname; date; whoami
 sudo swapon --show
 sudo swapoff -a
-free -m
+free -m</code></pre>
+<p>截图内容：<code>swapon</code> 与 <code>free -m</code> 的初始状态。</p>
+<h3>阶段三：运行程序并观察内存下降</h3>
+<pre><code>cd ~/labs/oom_experiment
 ./oom &amp;
 watch -n 1 free -m</code></pre>
-    <p>看到 <code>available</code> 明显下降后截图。进程被杀后按 <code>Ctrl+C</code> 退出 watch，再执行：</p>
-    <pre><code>dmesg | tail -n 30
+<p>截图内容：<code>available</code> 内存持续下降。</p>
+<h3>阶段四：查看 OOM 日志并恢复 swap</h3>
+<pre><code>dmesg | tail -n 30
 sudo swapon -a</code></pre>
-    <ul class="todo">
-      <li>截图 1：<code>swapon/free</code> 输出。</li>
-      <li>截图 2：<code>watch free -m</code> 中内存下降。</li>
-      <li>截图 3：<code>dmesg</code> 有 <code>Out of memory: Killed process</code>。</li>
-      <li>贴到实验报告第 2 个实验的“7、程序运行结果”。</li>
-    </ul>
-
-    <h2>9.6.1 课程设计：容器化负载均衡</h2>
-    <h3>1. Docker 服务</h3>
-    <pre><code>sudo yum install -y docker || sudo dnf install -y docker
+<p>截图内容：内核日志中出现 <code>Out of memory</code> 或 <code>Killed process</code>。</p>
+<h2>9.6.1 课程设计：容器化负载均衡</h2>
+<h3>阶段一：启动 Docker 服务</h3>
+<pre><code>sudo yum install -y docker || sudo dnf install -y docker
 sudo systemctl enable --now docker
 sudo systemctl status docker
 sudo docker version</code></pre>
-    <p>截图：Docker active/running 和 version。</p>
-
-    <h3>2. 基础镜像</h3>
-    <pre><code>sudo docker pull cr.kylinos.cn/kylin/kylin-server-init:v10sp1
+<p>截图内容：Docker 服务为 <code>active/running</code>，且能显示版本信息。</p>
+<h3>阶段二：准备基础镜像</h3>
+<pre><code>sudo docker pull cr.kylinos.cn/kylin/kylin-server-init:v10sp1
 sudo docker tag cr.kylinos.cn/kylin/kylin-server-init:v10sp1 kylin-base:v10sp1
 sudo docker run --rm kylin-base:v10sp1 uname -m
 sudo docker images</code></pre>
-    <p>截图：<code>kylin-base:v10sp1</code> 存在，<code>uname -m</code> 输出 <code>x86_64</code>。</p>
-
-    <h3>3. Nginx 镜像</h3>
-    <pre><code>mkdir -p ~/kylin861/nginx
+<p>截图内容：<code>kylin-base:v10sp1</code> 存在，<code>uname -m</code> 输出 <code>x86_64</code>。</p>
+<h3>阶段三：构建 Nginx 镜像</h3>
+<pre><code>mkdir -p ~/kylin861/nginx
 cd ~/kylin861/nginx
 curl -LO http://nginx.org/download/nginx-1.15.2.tar.gz
-cat &gt; Dockerfile &lt;&lt;'EOF'
+cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27;
 FROM kylin-base:v10sp1
 RUN yum -y install gcc make pcre-devel zlib-devel tar zlib
 ADD nginx-1.15.2.tar.gz /usr/src/
@@ -348,17 +229,16 @@ RUN cd /usr/src/nginx-1.15.2 &amp;&amp; \
     ./configure --prefix=/usr/local/nginx &amp;&amp; \
     make &amp;&amp; make install &amp;&amp; \
     ln -sf /usr/local/nginx/sbin/nginx /usr/local/sbin/nginx
-CMD ["/bin/bash"]
+CMD [&quot;/bin/bash&quot;]
 EOF
 sudo docker build -t kylin-nginx:861 .
 sudo docker images | grep kylin-nginx</code></pre>
-    <p>截图：构建成功。</p>
-
-    <h3>4. Tomcat 镜像</h3>
-    <pre><code>mkdir -p ~/kylin861/tomcat
+<p>截图内容：<code>kylin-nginx:861</code> 构建成功。</p>
+<h3>阶段四：构建 Tomcat 镜像</h3>
+<pre><code>mkdir -p ~/kylin861/tomcat
 cd ~/kylin861/tomcat
 curl -LO https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.68/bin/apache-tomcat-9.0.68.zip
-cat &gt; Dockerfile &lt;&lt;'EOF'
+cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27;
 FROM kylin-base:v10sp1
 ADD apache-tomcat-9.0.68.zip /usr/local/
 RUN yum -y install zip unzip java-1.8.0-openjdk
@@ -367,30 +247,25 @@ ENV JAVA_HOME=/usr/lib/jvm/jre
 ENV CATALINA_HOME=/usr/local/apache-tomcat-9.0.68
 ENV PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin
 RUN chmod +x /usr/local/apache-tomcat-9.0.68/bin/catalina.sh
-CMD ["/usr/local/apache-tomcat-9.0.68/bin/catalina.sh","run"]
+CMD [&quot;/usr/local/apache-tomcat-9.0.68/bin/catalina.sh&quot;,&quot;run&quot;]
 EOF
 sudo docker build -t kylin-tomcat:861 .
 sudo docker images | grep kylin-tomcat</code></pre>
-    <p>截图：构建成功。</p>
-
-    <h3>5. 启动 Tomcat 后端</h3>
-    <pre><code>sudo docker network create kylin-lb-net 2&gt;/dev/null || true
+<p>截图内容：<code>kylin-tomcat:861</code> 构建成功。</p>
+<h3>阶段五：启动并验证两个 Tomcat 后端</h3>
+<pre><code>sudo docker network create kylin-lb-net 2&gt;/dev/null || true
 sudo docker rm -f tomcat1 tomcat2 nginx-lb 2&gt;/dev/null || true
-
 sudo docker run -d --network kylin-lb-net -p 8080:8080 --name tomcat1 kylin-tomcat:861
 sudo docker run -d --network kylin-lb-net -p 8081:8080 --name tomcat2 kylin-tomcat:861
-sleep 15
-sudo docker exec tomcat1 bash -c 'echo KYLIN-TOMCAT-1 &gt; /usr/local/apache-tomcat-9.0.68/webapps/ROOT/index.jsp'
-sudo docker exec tomcat2 bash -c 'echo KYLIN-TOMCAT-2 &gt; /usr/local/apache-tomcat-9.0.68/webapps/ROOT/index.jsp'
-
+sleep 15</code></pre>
+<pre><code>sudo docker exec tomcat1 bash -c &#x27;echo KYLIN-TOMCAT-1 &gt; /usr/local/apache-tomcat-9.0.68/webapps/ROOT/index.jsp&#x27;
+sudo docker exec tomcat2 bash -c &#x27;echo KYLIN-TOMCAT-2 &gt; /usr/local/apache-tomcat-9.0.68/webapps/ROOT/index.jsp&#x27;
 curl http://127.0.0.1:8080
 curl http://127.0.0.1:8081</code></pre>
-    <p>截图：8080 返回 <code>KYLIN-TOMCAT-1</code>，8081 返回 <code>KYLIN-TOMCAT-2</code>。</p>
-
-    <h3>6. 启动 Nginx 负载均衡</h3>
-    <pre><code>sudo docker run -itd --network kylin-lb-net -p 80:80 --name nginx-lb kylin-nginx:861
-sudo docker exec -i nginx-lb bash &lt;&lt;'EOF'
-cat &gt; /usr/local/nginx/conf/nginx.conf &lt;&lt;'NGINX'
+<p>截图内容：8080 返回 <code>KYLIN-TOMCAT-1</code>，8081 返回 <code>KYLIN-TOMCAT-2</code>。</p>
+<h3>阶段六：配置并启动 Nginx 负载均衡</h3>
+<pre><code>sudo docker run -itd --network kylin-lb-net -p 80:80 --name nginx-lb kylin-nginx:861
+sudo docker exec -i nginx-lb tee /usr/local/nginx/conf/nginx.conf &gt; /dev/null &lt;&lt;&#x27;EOF&#x27;
 worker_processes 1;
 
 events {
@@ -415,35 +290,27 @@ http {
         }
     }
 }
-NGINX
-/usr/local/nginx/sbin/nginx -t
-/usr/local/nginx/sbin/nginx
-EOF
-
+EOF</code></pre>
+<pre><code>sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx -t
+sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx
 sudo docker ps
 for i in {1..8}; do curl -s http://127.0.0.1; echo; done</code></pre>
-    <ul class="todo">
-      <li>截图 1：<code>nginx -t</code> 成功，<code>docker ps</code> 有三个容器。</li>
-      <li>截图 2：连续 curl 后出现 <code>KYLIN-TOMCAT-1</code> 和 <code>KYLIN-TOMCAT-2</code>。</li>
-    </ul>
-
-    <h3>7. 容错测试</h3>
-    <pre><code>sudo docker stop tomcat1
-for i in {1..5}; do curl -s http://127.0.0.1; echo; done
-sudo docker start tomcat1
+<p>截图内容：<code>nginx -t</code> 成功，连续访问 80 端口时出现两个 Tomcat 的不同响应。</p>
+<h3>阶段七：容错验证</h3>
+<pre><code>sudo docker stop tomcat1
+for i in {1..5}; do curl -s http://127.0.0.1; echo; done</code></pre>
+<p>截图内容：停止 <code>tomcat1</code> 后，服务仍可由 <code>tomcat2</code> 响应。</p>
+<pre><code>sudo docker start tomcat1
 sudo docker ps</code></pre>
-    <p>截图：停止 tomcat1 后仍能访问 tomcat2，恢复后三个容器都运行。</p>
-
-    <section class="card">
-      <h2>最后 30 分钟提交检查</h2>
-      <ol>
-        <li>两份 Word 封面信息填好。</li>
-        <li>实验报告至少有 4 个实验截图，最好 5 个都贴。</li>
-        <li>课程设计报告至少贴 Docker、镜像、Tomcat、Nginx 轮询、容错测试截图。</li>
-        <li>模板最后“此页只是提交要求”不要保留；当前骨架已删除。</li>
-        <li>文件名建议：<code>学号-姓名-操作系统实验报告.docx</code>、<code>学号-姓名-操作系统课程设计报告.docx</code>。</li>
-      </ol>
-    </section>
+<p>截图内容：<code>tomcat1</code> 恢复后三个容器均处于运行状态。</p>
+<h2>提交前自查</h2>
+<ol>
+<li>实验报告包含 5 个实验：9.1.1、9.2.4、9.4.1、9.4.2、9.4.3。</li>
+<li>进程调度实验至少保留编译、调整前、调整后、<code>top</code> 观察四类截图。</li>
+<li>内存回收实验至少保留初始内存、内存下降、OOM 日志三类截图。</li>
+<li>课程设计至少保留 Docker 服务、镜像构建、Tomcat 后端、Nginx 轮询、容错测试截图。</li>
+<li>Word 封面信息、红色待替换内容和截图位置全部处理完成后再导出提交。</li>
+</ol>
   </main>
 </body>
 </html>
