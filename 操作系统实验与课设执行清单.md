@@ -2,6 +2,8 @@
 
 本清单用于在 Kylin 系统中按阶段完成实验与课程设计验证。每个命令块后均补充“命令与参数解释”，答辩时可直接说明命令作用、关键参数含义和实验现象。
 
+截图原则：配置类命令成功时可能没有输出，不要求截图；截图优先截验证命令的输出，例如 `id`、`ls`、`getfacl`、`ps`、`free`、`docker ps`、`curl` 等。
+
 ## 通用符号说明
 
 - `sudo`：以管理员权限执行命令，涉及系统服务、用户管理、Docker、ACL、swap 等操作时需要使用。
@@ -261,7 +263,11 @@ sudo swapon -a
 
 ## 9.4.1 多用户与权限管理
 
+本实验中，`groupadd`、`useradd`、`usermod`、`mkdir`、`chown`、`chmod`、`setfacl` 等配置命令成功时通常没有输出，不适合作为截图重点。截图应放在验证命令上，也就是能显示用户、用户组、目录权限、ACL 和删除失败结果的命令。
+
 ### 阶段一：创建用户和用户组
+
+执行命令：
 
 ```bash
 hostname; date; whoami
@@ -272,14 +278,27 @@ sudo usermod -aG school yinhe
 sudo usermod -aG school kylin
 ```
 
+验证/截图命令：
+
+```bash
+getent group school
+id yinhe
+id kylin
+```
+
+截图内容：`getent group school` 能看到 `school` 组，`id yinhe` 和 `id kylin` 能看到两个用户属于 `school` 组。
+
 命令与参数解释：
 
-- `hostname; date; whoami`：输出环境信息，便于截图证明实验环境。
-- `sudo groupadd school 2>/dev/null || true`：创建 `school` 用户组；`2>/dev/null` 隐藏组已存在等错误；`|| true` 表示即使命令失败也让整体返回成功，便于重复实验。
+- `hostname; date; whoami`：输出环境信息；`;` 表示顺序执行多个命令。
+- `sudo groupadd school 2>/dev/null || true`：创建 `school` 用户组；`2>/dev/null` 隐藏组已存在等错误；`|| true` 让重复执行时不中断。
 - `sudo useradd -m yinhe 2>/dev/null || true`：创建 `yinhe` 用户；`-m` 自动创建用户主目录。
 - `sudo useradd -m kylin 2>/dev/null || true`：创建 `kylin` 用户；`-m` 同样表示创建主目录。
-- `sudo usermod -aG school yinhe`：把 `yinhe` 加入 `school` 组；`-G school` 指定附加组；`-a` 表示 append，保留原有附加组。
+- `sudo usermod -aG school yinhe`：把 `yinhe` 加入 `school` 组；`-G school` 指定附加组；`-a` 表示追加，不覆盖原有附加组。
 - `sudo usermod -aG school kylin`：把 `kylin` 加入 `school` 组，参数含义同上。
+- `getent group school`：从系统数据库查询 `school` 组，能验证组是否存在以及组成员信息。
+- `id yinhe`：查看 `yinhe` 的 UID、GID 和所属用户组。
+- `id kylin`：查看 `kylin` 的 UID、GID 和所属用户组。
 
 答辩说明：
 
@@ -287,6 +306,8 @@ sudo usermod -aG school kylin
 - `usermod -aG` 必须带 `-a`，否则可能覆盖用户原来的附加组。
 
 ### 阶段二：配置共享目录和 ACL
+
+执行命令：
 
 ```bash
 sudo mkdir -p /root/network
@@ -299,6 +320,17 @@ sudo chown yinhe:school /root/network/file1
 sudo setfacl -m u:kylin:rw /root/network/file1
 ```
 
+验证/截图命令：
+
+```bash
+ls -ld /root /root/network
+stat -c '%A %a %U %G %n' /root/network /root/network/file1
+getfacl /root/network
+getfacl /root/network/file1
+```
+
+截图内容：`ls -ld` 和 `stat` 能显示 `/root/network` 的权限、属主和属组；`getfacl` 能显示默认 ACL 和 `user:kylin:rw-`。
+
 命令与参数解释：
 
 - `sudo mkdir -p /root/network`：创建共享目录；`-p` 允许父目录存在时继续执行。
@@ -309,6 +341,10 @@ sudo setfacl -m u:kylin:rw /root/network/file1
 - `sudo touch /root/network/file1`：创建测试文件 `file1`，如果文件已存在则更新其时间戳。
 - `sudo chown yinhe:school /root/network/file1`：设置 `file1` 属主为 `yinhe`，属组为 `school`。
 - `sudo setfacl -m u:kylin:rw /root/network/file1`：给用户 `kylin` 单独设置 ACL；`u:kylin:rw` 表示用户 `kylin` 对该文件有读写权限。
+- `ls -ld /root /root/network`：查看目录本身权限；`-l` 长格式显示；`-d` 显示目录本身而不是目录内容。
+- `stat -c '%A %a %U %G %n' ...`：按指定格式输出权限和属主信息；`-c` 指定输出格式；`%A` 是符号权限；`%a` 是八进制权限；`%U` 是属主；`%G` 是属组；`%n` 是文件名。
+- `getfacl /root/network`：查看共享目录 ACL，重点看默认 ACL。
+- `getfacl /root/network/file1`：查看文件 ACL，重点看 `user:kylin:rw-`。
 
 答辩说明：
 
@@ -316,23 +352,29 @@ sudo setfacl -m u:kylin:rw /root/network/file1
 - `sticky` 限制普通用户删除他人文件，常见于 `/tmp` 目录。
 - ACL 可以在传统属主、属组、其他用户三类权限之外，为指定用户或组单独授权。
 
-### 阶段三：查看权限配置结果
+### 阶段三：验证用户读写权限
+
+执行并截图命令：
 
 ```bash
-id yinhe
-id kylin
-ls -ld /root /root/network
+sudo -u kylin bash -c 'echo kylin-write-test >> /root/network/file1'
+sudo -u kylin cat /root/network/file1
+ls -l /root/network/file1
 getfacl /root/network/file1
 ```
 
+截图内容：`cat` 能看到 `kylin-write-test` 写入成功，`getfacl` 能看到 `kylin` 对 `file1` 有读写权限。
+
 命令与参数解释：
 
-- `id yinhe`：查看 `yinhe` 的 UID、GID 和所属用户组。
-- `id kylin`：查看 `kylin` 的 UID、GID 和所属用户组。
-- `ls -ld /root /root/network`：查看目录本身权限；`-l` 长格式显示；`-d` 表示显示目录本身而不是目录内容。
-- `getfacl /root/network/file1`：查看文件 ACL，确认 `kylin` 用户是否获得读写权限。
+- `sudo -u kylin bash -c 'echo kylin-write-test >> /root/network/file1'`：以 `kylin` 身份向文件追加内容；`-u kylin` 指定运行用户；`bash -c` 执行后面的字符串；`>>` 表示追加写入，不覆盖原内容。
+- `sudo -u kylin cat /root/network/file1`：以 `kylin` 身份读取文件内容，验证读权限。
+- `ls -l /root/network/file1`：查看文件属主、属组和传统权限。
+- `getfacl /root/network/file1`：再次查看文件 ACL，验证 `kylin` 的读写权限来自 ACL。
 
-### 阶段四：验证 sticky 位限制
+### 阶段四：验证 sticky 位限制删除他人文件
+
+执行并截图命令：
 
 ```bash
 sudo -u yinhe bash -c 'echo yinhe-file > /root/network/yinhe.txt'
@@ -340,15 +382,18 @@ sudo -u kylin bash -c 'rm /root/network/yinhe.txt'
 ls -l /root/network
 ```
 
+截图内容：`kylin` 删除 `yinhe.txt` 时出现权限不足或不允许操作的提示，`ls -l /root/network` 能看到 `yinhe.txt` 仍然存在。
+
 命令与参数解释：
 
-- `sudo -u yinhe bash -c 'echo yinhe-file > /root/network/yinhe.txt'`：以 `yinhe` 身份执行命令；`-u yinhe` 指定运行用户；`bash -c` 表示让 bash 执行后面的字符串；`echo` 输出文本；`>` 写入文件。
+- `sudo -u yinhe bash -c 'echo yinhe-file > /root/network/yinhe.txt'`：以 `yinhe` 身份创建文件；`>` 表示覆盖写入。
 - `sudo -u kylin bash -c 'rm /root/network/yinhe.txt'`：以 `kylin` 身份尝试删除 `yinhe` 创建的文件；`rm` 用于删除文件。
 - `ls -l /root/network`：查看共享目录中文件是否仍然存在；`-l` 显示详细信息。
 
 答辩说明：
 
 - 即使 `kylin` 属于同一用户组，也不能删除 `yinhe` 的文件，因为目录设置了 sticky 位。
+- 本实验截图重点是“验证输出”，不是没有输出的配置命令。
 
 ## 9.4.2 文件快速定位与管理
 
