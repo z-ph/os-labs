@@ -407,6 +407,9 @@ ls -lh ~/rpmbuild/SOURCES/cc-switch-1.0.0.tar.gz</code></pre>
 
     <h3>阶段 3：编写 RPM spec 文件</h3>
     <pre><code>cat &gt; ~/rpmbuild/SPECS/cc-switch.spec &lt;&lt'EOF'
+%global debug_package %{nil}
+%global __strip /bin/true
+
 Name:           cc-switch
 Version:        1.0.0
 Release:        1%{?dist}
@@ -444,6 +447,8 @@ cat ~/rpmbuild/SPECS/cc-switch.spec</code></pre>
     <ul>
       <li><code>Name</code>、<code>Version</code>、<code>Release</code> 定义 RPM 包身份。</li>
       <li>本 spec 不设置 <code>BuildArch: noarch</code>，因为这里打包的是 Linux x64 二进制文件，RPM 应按实际构建平台生成 <code>x86_64</code> 包。</li>
+      <li><code>%global debug_package %{nil}</code> 禁用 debuginfo/debugsource 子包生成。这里打包的是已经编译好的 Release 二进制，不是从源码编译，Kylin 的 rpmbuild 自动生成调试文件时可能得到空 <code>debugfiles.list</code> 并导致构建失败。</li>
+      <li><code>%global __strip /bin/true</code> 避免构建过程 strip 已发布二进制，减少对预编译文件的破坏风险。</li>
       <li><code>%prep</code> 解压源码，<code>%install</code> 将文件安装到构建根目录，<code>%files</code> 声明最终打入包内的文件。</li>
     </ul>
     <div class="shot">截图内容：截取 spec 文件，重点包含元数据、install 阶段和 files 清单。</div>
@@ -451,7 +456,9 @@ cat ~/rpmbuild/SPECS/cc-switch.spec</code></pre>
     <div class="result">报告结论：RPM spec 文件已完整描述 cc switch 的源码、安装路径、运行依赖和文件归属。</div>
 
     <h3>阶段 4：构建、安装与验证 RPM 包</h3>
-    <pre><code>rpmbuild -ba ~/rpmbuild/SPECS/cc-switch.spec
+    <pre><code>rm -rf ~/rpmbuild/BUILD/cc-switch-1.0.0 ~/rpmbuild/BUILDROOT/cc-switch-*
+rm -f ~/rpmbuild/RPMS/x86_64/cc-switch-1.0.0-1*.rpm
+rpmbuild -ba ~/rpmbuild/SPECS/cc-switch.spec
 find ~/rpmbuild/RPMS -name 'cc-switch-*.rpm' -print
 RPM_FILE="$(find ~/rpmbuild/RPMS -name 'cc-switch-1.0.0-1*.rpm' | head -n 1)"
 echo "$RPM_FILE"
