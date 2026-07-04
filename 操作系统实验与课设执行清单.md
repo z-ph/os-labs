@@ -246,36 +246,69 @@ free -m
 - 关闭 swap 是为了让物理内存压力更快、更明显地触发 OOM。
 - `free -m` 中重点观察 `available`，它表示系统可用内存估计值。
 
-### 阶段三：运行程序并观察内存下降
+### 阶段三：启动程序并观察内存下降
 
 ```bash
 cd ~/labs/oom_experiment
-./oom &
-watch -n 1 free -m
+./oom > oom.log 2>&1 &
+OOM_PID=$!
+echo "OOM_PID=$OOM_PID"
 ```
+
+本阶段用于启动内存压力程序。程序输出被写入 `oom.log`，不会继续刷在终端上，便于后续观察和截图。
 
 命令与参数解释：
 
 - `cd ~/labs/oom_experiment`：进入 `oom` 程序所在目录。
-- `./oom &`：运行当前目录下的 `oom` 程序；`./` 表示当前目录；`&` 表示后台运行。
-- `watch -n 1 free -m`：每隔 1 秒执行一次 `free -m`；`-n 1` 设置刷新间隔为 1 秒。
+- `./oom > oom.log 2>&1 &`：后台运行当前目录下的 `oom` 程序；`>` 把标准输出写入 `oom.log`；`2>&1` 把错误输出也合并到同一个日志文件；`&` 表示后台运行。
+- `OOM_PID=$!`：把最近一个后台进程的 PID 保存到变量 `OOM_PID`。
+- `echo "OOM_PID=$OOM_PID"`：打印 OOM 测试进程号，便于后续用 `ps` 查看。
+
+### 阶段四：观察内存变化和进程状态
+
+```bash
+for i in {1..8}; do
+    date
+    free -m
+    ps -o pid,comm,rss,vsz,stat -p $OOM_PID 2>/dev/null || echo "oom process has exited"
+    sleep 1
+done
+tail -n 5 oom.log
+```
+
+截图内容：截取循环输出中 `free -m` 的 `available` 逐步下降、`ps` 中 `oom` 进程的内存占用变化，以及 `tail -n 5 oom.log` 中的分配记录。
+
+命令与参数解释：
+
+- `for i in {1..8}; do ... done`：循环执行 8 次观察命令。
+- `date`：输出当前时间，方便说明内存变化的观察时刻。
+- `free -m`：以 MB 为单位查看内存使用情况，重点观察 `available`。
+- `ps -o pid,comm,rss,vsz,stat -p $OOM_PID`：查看 OOM 测试进程状态；`rss` 是实际驻留内存；`vsz` 是虚拟内存；`stat` 是进程状态；`-p` 指定 PID。
+- `2>/dev/null || echo "oom process has exited"`：如果进程已被 OOM Killer 终止，隐藏 `ps` 错误并输出进程已退出提示。
+- `sleep 1`：每次观察间隔 1 秒。
+- `tail -n 5 oom.log`：查看程序日志最后 5 行，验证程序持续申请内存。
 
 答辩说明：
 
-- 随着 `oom` 持续申请并写入内存，`available` 会下降。
+- 程序输出重定向到日志文件后，不会干扰终端中的内存观察结果。
+- 随着 `oom` 持续申请并写入内存，`available` 会下降，`rss/vsz` 会增大。
 - 当系统无法继续满足内存申请时，内核会触发 OOM Killer 选择进程终止。
 
-### 阶段四：查看 OOM 日志并恢复 swap
+### 阶段五：查看 OOM 日志并恢复 swap
 
 ```bash
 dmesg | tail -n 30
 sudo swapon -a
+free -m
 ```
+
+截图内容：截取 `dmesg` 中出现 `Out of memory` 或 `Killed process` 的日志，以及恢复 swap 后的 `free -m` 输出。
 
 命令与参数解释：
 
 - `dmesg | tail -n 30`：查看内核日志末尾 30 行；`dmesg` 输出内核环形缓冲区日志；`|` 把输出传给 `tail`；`tail -n 30` 只显示最后 30 行。
 - `sudo swapon -a`：重新启用所有 swap；`-a` 表示启用配置文件中的全部 swap 项。
+- `free -m`：再次查看内存和 swap 状态，确认 swap 已恢复。
 
 答辩说明：
 
