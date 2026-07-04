@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>操作系统实验与课设执行清单</title>
+  <title>操作系统实验与课设执行清单（答辩版）</title>
   <style>
     :root {
-      color-scheme: light;
       --bg: #f6f8fb;
       --panel: #ffffff;
       --ink: #1f2937;
@@ -14,46 +13,53 @@
       --line: #d9e0ea;
       --blue: #1f5fbf;
       --green: #166a4f;
-      --code-bg: #111827;
+      --code-bg: #101827;
       --code-ink: #e5e7eb;
     }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-      line-height: 1.68;
-    }
-    header { background: var(--panel); border-bottom: 1px solid var(--line); padding: 30px 18px; }
-    header .inner, main { max-width: 980px; margin: 0 auto; }
-    main { padding: 24px 18px 56px; }
-    h1, h2, h3 { line-height: 1.25; }
-    h1 { margin: 0 0 8px; font-size: 28px; color: var(--blue); }
+    body { margin: 0; font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.72; }
+    header { background: var(--panel); border-bottom: 1px solid var(--line); padding: 30px 18px; position: sticky; top: 0; z-index: 2; }
+    header .inner, main { max-width: 1040px; margin: 0 auto; }
+    main { padding: 22px 18px 60px; }
+    h1 { margin: 0 0 6px; font-size: 28px; color: var(--blue); line-height: 1.25; }
     header p { margin: 0; color: var(--muted); }
-    h2 { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 22px; color: var(--blue); }
-    h3 { margin-top: 20px; font-size: 18px; color: var(--green); }
+    h2 { margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 23px; color: var(--blue); line-height: 1.28; }
+    h3 { margin-top: 24px; font-size: 18px; color: var(--green); line-height: 1.3; }
     p { margin: 10px 0; }
     .lead { background: #eef5ff; border-left: 4px solid var(--blue); padding: 12px 14px; }
-    .bullet { margin-left: 6px; }
-    a { color: var(--blue); }
+    ul, ol { padding-left: 25px; }
+    li { margin: 5px 0; }
     code { font-family: Consolas, "Courier New", monospace; font-size: 0.94em; }
     pre { background: var(--code-bg); color: var(--code-ink); padding: 14px 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0 16px; border: 1px solid #253145; }
     pre code { color: inherit; font-size: 13px; line-height: 1.55; }
-    ol { padding-left: 24px; }
-    li { margin: 5px 0; }
-    @media (max-width: 640px) { h1 { font-size: 23px; } h2 { font-size: 20px; } main { padding-inline: 14px; } }
+    @media (max-width: 640px) { header { position: static; } h1 { font-size: 22px; } h2 { font-size: 20px; } main { padding-inline: 14px; } }
   </style>
 </head>
 <body>
   <header>
     <div class="inner">
-      <h1>操作系统实验与课设执行清单</h1>
-      <p>按阶段完成实验验证，对比类内容分开执行、分开记录。</p>
+      <h1>操作系统实验与课设执行清单（答辩版）</h1>
+      <p>按阶段执行，并解释每条命令、参数和关键实验现象。</p>
     </div>
   </header>
   <main>
-<p class="lead">本清单用于在 Kylin 系统中按阶段完成实验与课程设计验证。涉及“调整前/调整后”“正常/异常”“计数对比”的内容均拆成独立阶段，先完成当前阶段并记录结果，再进入下一阶段。</p>
+<p class="lead">本清单用于在 Kylin 系统中按阶段完成实验与课程设计验证。每个命令块后均补充“命令与参数解释”，答辩时可直接说明命令作用、关键参数含义和实验现象。</p>
+<h2>通用符号说明</h2>
+<ul>
+<li><code>sudo</code>：以管理员权限执行命令，涉及系统服务、用户管理、Docker、ACL、swap 等操作时需要使用。</li>
+<li><code>;</code>：顺序执行多个命令，不要求前一个命令成功。</li>
+<li><code>&amp;&amp;</code>：前一个命令成功后才执行后一个命令，常用于 Dockerfile 构建步骤。</li>
+<li><code>||</code>：前一个命令失败时执行后一个命令，常用于兼容不同系统命令或忽略非关键错误。</li>
+<li><code>|</code>：管道，把左边命令输出交给右边命令继续处理。</li>
+<li><code>&gt;</code>：输出重定向，把命令输出写入文件。</li>
+<li><code>2&gt;/dev/null</code>：把标准错误输出丢弃，常用于隐藏“文件不存在”“对象已存在”等非关键提示。</li>
+<li><code>&amp;</code>：把命令放到后台运行。</li>
+<li><code>$!</code>：最近一个后台进程的 PID。</li>
+<li><code>$变量名</code>：引用 shell 变量，例如 <code>$PID_A</code>。</li>
+<li><code>\</code>：在 shell 中转义特殊字符，或在 Dockerfile 中表示命令换行继续。</li>
+<li><code>&lt;&lt;&#x27;EOF&#x27; ... EOF</code>：here document，把中间多行内容原样写入前面的命令；单引号表示不展开变量。</li>
+<li><code>{1..8}</code>：shell 大括号展开，生成 1 到 8 的序列。</li>
+</ul>
 <h2>实验选择</h2>
 <p>建议完成以下 5 个实验，覆盖 9.1、9.2、9.4 三类内容：</p>
 <ol>
@@ -64,94 +70,107 @@
 <li>9.4.3 数据检索与处理</li>
 </ol>
 <p>课程设计选择 9.6.1 容器化负载均衡部署实践。</p>
-<h2>截图原则</h2>
-<p class="bullet">• 每个截图应同时包含命令和输出。</p>
-<p class="bullet">• 对比实验分别保留调整前、调整后两类结果。</p>
-<p class="bullet">• 截图可按 <code>9.1.1-1.png</code>、<code>9.2.4-2.png</code>、<code>9.6.1-5.png</code> 命名，便于整理到报告中。</p>
-<h2>9.4.2 文件快速定位与管理</h2>
-<h3>阶段一：文件定位</h3>
-<pre><code>hostname; date; whoami
-find /usr -name &quot;*pass*&quot; | head -n 20
-find /usr -name &quot;kmod-protect.list&quot; | head -n 5
-find /dev \( -name &quot;vd*&quot; -o -name &quot;sd*&quot; \) -type b
-sudo find /etc -type f -size 0 -exec ls -l {} \; | head -n 20</code></pre>
-<p>截图内容：<code>find /usr</code>、<code>find /dev</code>、<code>find /etc</code> 的输出。</p>
-<h3>阶段二：账号文本与日志查看</h3>
-<pre><code>grep &quot;nologin$&quot; /etc/passwd
-sudo tail -n 20 /var/log/messages || sudo journalctl -n 20</code></pre>
-<p>截图内容：<code>nologin</code> 账号筛选结果和系统日志末尾内容。</p>
-<h3>阶段三：文件类型与元数据</h3>
-<pre><code>file /etc/passwd
-stat /etc/passwd</code></pre>
-<p>截图内容：<code>file</code> 判断结果和 <code>stat</code> 元数据输出。</p>
-<h2>9.4.3 数据检索与处理</h2>
-<h3>阶段一：上下文检索</h3>
-<pre><code>hostname; date; whoami
-grep -A 2 root /etc/passwd
-grep -B 1 daemon /etc/passwd
-grep -C 1 daemon /etc/passwd
-grep --color=always -n -A 2 root /etc/passwd</code></pre>
-<p>截图内容：匹配行前后内容和带行号的匹配结果。</p>
-<h3>阶段二：计数结果对比</h3>
-<pre><code>grep -c root /etc/passwd
-grep root /etc/passwd | wc -l</code></pre>
-<p>截图内容：<code>grep -c</code> 与 <code>wc -l</code> 的统计结果。</p>
-<h3>阶段三：扩展正则表达式</h3>
-<pre><code>mkdir -p /tmp/grep_lab
-cd /tmp/grep_lab
-touch file{1..10}
-ls -l | grep -E &#x27;file1{1,}&#x27;</code></pre>
-<p>截图内容：<code>grep -E</code> 对文件名的匹配结果。</p>
-<h3>阶段四：普通字符串与忽略大小写</h3>
-<pre><code>cd ~
-printf &#x27;a?b\na\\?b\n&#x27; &gt; test
-cat test
-egrep --color=always &#x27;\?&#x27; test
-fgrep --color=always &#x27;\?&#x27; test
-echo &#x27;AaBbCc&#x27; | grep --color=always -i -E &#x27;A|b|c&#x27;</code></pre>
-<p>截图内容：<code>egrep</code>、<code>fgrep</code> 和 <code>grep -i</code> 的输出。</p>
-<h2>9.4.1 多用户与权限管理</h2>
-<h3>阶段一：创建用户和用户组</h3>
-<pre><code>hostname; date; whoami
-sudo groupadd school 2&gt;/dev/null || true
-sudo useradd -m yinhe 2&gt;/dev/null || true
-sudo useradd -m kylin 2&gt;/dev/null || true
-sudo usermod -aG school yinhe
-sudo usermod -aG school kylin</code></pre>
-<p>截图内容：命令执行过程无错误即可，后续阶段会通过 <code>id</code> 验证。</p>
-<h3>阶段二：配置共享目录和 ACL</h3>
-<pre><code>sudo mkdir -p /root/network
-sudo chown yinhe:school /root/network
-sudo chmod 3770 /root/network
-sudo setfacl -m g:school:x /root
-sudo setfacl -m d:g:school:rwx /root/network
-sudo touch /root/network/file1
-sudo chown yinhe:school /root/network/file1
-sudo setfacl -m u:kylin:rw /root/network/file1</code></pre>
-<p>截图内容：目录和 ACL 配置命令执行完成。</p>
-<h3>阶段三：查看权限配置结果</h3>
-<pre><code>id yinhe
-id kylin
-ls -ld /root /root/network
-getfacl /root/network/file1</code></pre>
-<p>截图内容：<code>yinhe</code>、<code>kylin</code> 属于 <code>school</code> 组，<code>getfacl</code> 中出现 <code>user:kylin:rw-</code>。</p>
-<h3>阶段四：验证 sticky 位限制</h3>
-<pre><code>sudo -u yinhe bash -c &#x27;echo yinhe-file &gt; /root/network/yinhe.txt&#x27;
-sudo -u kylin bash -c &#x27;rm /root/network/yinhe.txt&#x27;
-ls -l /root/network</code></pre>
-<p>截图内容：<code>kylin</code> 删除 <code>yinhe.txt</code> 失败，终端出现权限不足相关提示。</p>
 <h2>9.1.1 进程调度与优先级</h2>
-<p>该实验需要分步观察“调整前”和“调整后”的 CPU 分配现象，使用单独分步说明：</p>
-<pre><code>curl -L https://raw.githubusercontent.com/z-ph/os-labs/main/exp-9.1.1-step-by-step.md | less</code></pre>
-<p>浏览器查看：</p>
-<p><a href="https://github.com/z-ph/os-labs/blob/main/exp-9.1.1-step-by-step.md">https://github.com/z-ph/os-labs/blob/main/exp-9.1.1-step-by-step.md</a></p>
-<p>截图内容：</p>
-<ol>
-<li><code>gcc nice-exp.c -o nice-exp -pthread</code> 编译成功。</li>
-<li>两个 <code>nice-exp</code> 进程绑定到同一 CPU 核心后，调整前 <code>NI</code> 相同。</li>
-<li><code>sudo renice -n -5 -p $PID_A</code> 后，<code>PID_A</code> 的 <code>NI=-5</code>。</li>
-<li><code>top</code> 中 <code>NI=-5</code> 的进程 CPU 占用高于 <code>NI=0</code> 的进程。</li>
-</ol>
+<h3>阶段一：创建并编译 pthread 测试程序</h3>
+<pre><code>mkdir -p ~/labs/cfs_experiment
+cd ~/labs/cfs_experiment
+cat &gt; nice-exp.c &lt;&lt;&#x27;EOF&#x27;
+#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+
+void *thread_fun(void *param)
+{
+    printf(&quot;thread pid:%d, tid:%lu\n&quot;, getpid(), pthread_self());
+    while (1) ;
+    return NULL;
+}
+
+int main(void)
+{
+    pthread_t tid;
+    int ret;
+    printf(&quot;main pid:%d, tid:%lu\n&quot;, getpid(), pthread_self());
+    ret = pthread_create(&amp;tid, NULL, thread_fun, NULL);
+    if (ret == -1) {
+        perror(&quot;cannot create new thread&quot;);
+        return 1;
+    }
+    if (pthread_join(tid, NULL) != 0) {
+        perror(&quot;call pthread_join function fail&quot;);
+        return 1;
+    }
+    return 0;
+}
+EOF
+gcc nice-exp.c -o nice-exp -pthread
+ls -l nice-exp</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>mkdir -p ~/labs/cfs_experiment</code>：创建实验目录；<code>-p</code> 表示父目录不存在时一起创建，目录已存在也不报错；<code>~</code> 表示当前用户主目录。</li>
+<li><code>cd ~/labs/cfs_experiment</code>：进入实验目录，后续文件创建和编译都在该目录完成。</li>
+<li><code>cat &gt; nice-exp.c &lt;&lt;&#x27;EOF&#x27; ... EOF</code>：把多行 C 代码写入 <code>nice-exp.c</code>；<code>&gt;</code> 表示写入文件；<code>&lt;&lt;&#x27;EOF&#x27;</code> 表示从下一行开始读入，直到遇到 <code>EOF</code> 结束。</li>
+<li><code>gcc nice-exp.c -o nice-exp -pthread</code>：用 GCC 编译程序；<code>-o nice-exp</code> 指定输出可执行文件名；<code>-pthread</code> 启用 pthread 线程库并链接线程相关支持。</li>
+<li><code>ls -l nice-exp</code>：查看编译结果；<code>-l</code> 以长格式显示权限、属主、大小、时间等信息。</li>
+</ul>
+<p>代码要点：</p>
+<ul>
+<li><code>pthread_create</code> 创建一个新线程，说明实验程序符合教材的线程调度测试要求。</li>
+<li><code>while (1);</code> 让线程持续占用 CPU，形成 CPU 密集型负载，便于观察调度效果。</li>
+<li><code>pthread_join</code> 等待子线程结束；由于子线程死循环，程序会持续运行，适合作为调度观察对象。</li>
+</ul>
+<h3>阶段二：启动两个进程并绑定到同一 CPU 核心</h3>
+<pre><code>cd ~/labs/cfs_experiment
+pkill nice-exp 2&gt;/dev/null
+taskset -c 0 ./nice-exp &gt;/dev/null &amp;
+PID_A=$!
+taskset -c 0 ./nice-exp &gt;/dev/null &amp;
+PID_B=$!
+echo &quot;PID_A=$PID_A PID_B=$PID_B&quot;</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>cd ~/labs/cfs_experiment</code>：确保当前目录中存在 <code>nice-exp</code> 可执行文件。</li>
+<li><code>pkill nice-exp 2&gt;/dev/null</code>：结束历史遗留的 <code>nice-exp</code> 进程；<code>pkill</code> 按进程名匹配；<code>2&gt;/dev/null</code> 隐藏没有匹配进程时的错误信息。</li>
+<li><code>taskset -c 0 ./nice-exp &gt;/dev/null &amp;</code>：在 CPU 0 上运行 <code>nice-exp</code>；<code>taskset</code> 设置 CPU 亲和性；<code>-c 0</code> 表示使用 CPU 编号 0；<code>./nice-exp</code> 表示运行当前目录下程序；<code>&gt;/dev/null</code> 隐藏程序标准输出；<code>&amp;</code> 放到后台运行。</li>
+<li><code>PID_A=$!</code>：把上一个后台进程的 PID 保存到变量 <code>PID_A</code>，后续用它进行查询和调优。</li>
+<li><code>PID_B=$!</code>：同理，保存第二个后台进程的 PID。</li>
+<li><code>echo &quot;PID_A=$PID_A PID_B=$PID_B&quot;</code>：打印两个 PID，确认后续观察对象。</li>
+</ul>
+<h3>阶段三：观察调整前状态</h3>
+<pre><code>taskset -cp $PID_A
+taskset -cp $PID_B
+ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>taskset -cp $PID_A</code>：查看已有进程的 CPU 亲和性；<code>-c</code> 使用 CPU 编号列表格式；<code>-p</code> 表示目标是已经运行的进程；<code>$PID_A</code> 是进程号。</li>
+<li><code>taskset -cp $PID_B</code>：查看第二个进程的 CPU 亲和性，确认两个进程都绑定到 CPU 0。</li>
+<li><code>ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B</code>：查看两个进程的调度相关信息；<code>-o</code> 指定输出列；<code>pid</code> 是进程号；<code>ni</code> 是 nice 值；<code>psr</code> 是最近运行的 CPU 核心；<code>pcpu</code> 是 CPU 占用率；<code>comm</code> 是命令名；<code>-p</code> 指定查询的 PID 列表。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>调整前两个进程 <code>NI</code> 都是默认值，一般为 0。</li>
+<li>两个进程绑定在同一 CPU 核心上，才会产生明显竞争；如果不绑定，多核系统可能让两个进程分别跑在不同核心上，CPU 占用看起来接近。</li>
+</ul>
+<h3>阶段四：调整 nice 值并观察变化</h3>
+<pre><code>sudo renice -n -5 -p $PID_A
+sleep 8
+ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B
+top -p $PID_A,$PID_B
+pkill nice-exp 2&gt;/dev/null</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>sudo renice -n -5 -p $PID_A</code>：修改进程优先级；<code>renice</code> 调整已有进程 nice 值；<code>-n -5</code> 把 nice 值设为 <code>-5</code>；<code>-p</code> 表示后面跟的是进程 PID；nice 值越小，调度权重越高。</li>
+<li><code>sleep 8</code>：等待 8 秒，让调度器有时间重新分配 CPU 时间。</li>
+<li><code>ps -o pid,ni,psr,pcpu,comm -p $PID_A,$PID_B</code>：再次查看两个进程的 <code>NI</code> 和 CPU 占用。</li>
+<li><code>top -p $PID_A,$PID_B</code>：动态观察指定进程；<code>-p</code> 指定 PID 列表，只显示这两个进程。</li>
+<li><code>pkill nice-exp 2&gt;/dev/null</code>：实验结束后清理测试进程；<code>2&gt;/dev/null</code> 隐藏非关键错误提示。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>Linux CFS 调度器会根据进程权重分配 CPU 时间，nice 值越小权重越高。</li>
+<li><code>renice -n -5</code> 后，<code>PID_A</code> 的 <code>NI</code> 变为 <code>-5</code>，理论上会比 <code>NI=0</code> 的进程获得更多 CPU 时间。</li>
+</ul>
 <h2>9.2.4 内存回收实验</h2>
 <h3>阶段一：创建并编译测试程序</h3>
 <pre><code>mkdir -p ~/labs/oom_experiment
@@ -187,35 +206,251 @@ int main(void)
 EOF
 gcc oom.c -o oom
 ls -l oom</code></pre>
-<p>截图内容：<code>oom</code> 程序编译成功。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>mkdir -p ~/labs/oom_experiment</code>：创建内存实验目录；<code>-p</code> 允许递归创建并避免目录已存在时报错。</li>
+<li><code>cd ~/labs/oom_experiment</code>：进入实验目录。</li>
+<li><code>cat &gt; oom.c &lt;&lt;&#x27;EOF&#x27; ... EOF</code>：把 OOM 测试程序写入 <code>oom.c</code>。</li>
+<li><code>gcc oom.c -o oom</code>：编译 C 程序；<code>-o oom</code> 指定输出可执行文件名为 <code>oom</code>。</li>
+<li><code>ls -l oom</code>：确认可执行文件生成；<code>-l</code> 显示详细文件属性。</li>
+</ul>
+<p>代码要点：</p>
+<ul>
+<li><code>malloc(STEP_SIZE)</code> 每次申请 4 MB 虚拟内存。</li>
+<li><code>memset(memory, 0, STEP_SIZE)</code> 对内存写入，促使系统真正分配物理页。</li>
+<li>死循环持续申请内存，使系统内存压力不断增大，最终触发 OOM Killer。</li>
+</ul>
 <h3>阶段二：记录初始内存并关闭 swap</h3>
 <pre><code>hostname; date; whoami
 sudo swapon --show
 sudo swapoff -a
 free -m</code></pre>
-<p>截图内容：<code>swapon</code> 与 <code>free -m</code> 的初始状态。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>hostname; date; whoami</code>：依次输出主机名、当前时间、当前用户；<code>;</code> 表示顺序执行。</li>
+<li><code>sudo swapon --show</code>：查看当前 swap 分区或 swap 文件；<code>--show</code> 以表格形式显示 swap 状态。</li>
+<li><code>sudo swapoff -a</code>：关闭所有 swap；<code>-a</code> 表示 all，即处理 <code>/etc/fstab</code> 中的全部 swap 项。</li>
+<li><code>free -m</code>：查看内存使用情况；<code>-m</code> 表示以 MB 为单位显示。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>关闭 swap 是为了让物理内存压力更快、更明显地触发 OOM。</li>
+<li><code>free -m</code> 中重点观察 <code>available</code>，它表示系统可用内存估计值。</li>
+</ul>
 <h3>阶段三：运行程序并观察内存下降</h3>
 <pre><code>cd ~/labs/oom_experiment
 ./oom &amp;
 watch -n 1 free -m</code></pre>
-<p>截图内容：<code>available</code> 内存持续下降。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>cd ~/labs/oom_experiment</code>：进入 <code>oom</code> 程序所在目录。</li>
+<li><code>./oom &amp;</code>：运行当前目录下的 <code>oom</code> 程序；<code>./</code> 表示当前目录；<code>&amp;</code> 表示后台运行。</li>
+<li><code>watch -n 1 free -m</code>：每隔 1 秒执行一次 <code>free -m</code>；<code>-n 1</code> 设置刷新间隔为 1 秒。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>随着 <code>oom</code> 持续申请并写入内存，<code>available</code> 会下降。</li>
+<li>当系统无法继续满足内存申请时，内核会触发 OOM Killer 选择进程终止。</li>
+</ul>
 <h3>阶段四：查看 OOM 日志并恢复 swap</h3>
 <pre><code>dmesg | tail -n 30
 sudo swapon -a</code></pre>
-<p>截图内容：内核日志中出现 <code>Out of memory</code> 或 <code>Killed process</code>。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>dmesg | tail -n 30</code>：查看内核日志末尾 30 行；<code>dmesg</code> 输出内核环形缓冲区日志；<code>|</code> 把输出传给 <code>tail</code>；<code>tail -n 30</code> 只显示最后 30 行。</li>
+<li><code>sudo swapon -a</code>：重新启用所有 swap；<code>-a</code> 表示启用配置文件中的全部 swap 项。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>日志中出现 <code>Out of memory</code> 或 <code>Killed process</code>，说明 OOM Killer 已经触发。</li>
+<li>OOM Killer 是内核在内存严重不足时保护系统继续运行的一种机制。</li>
+</ul>
+<h2>9.4.1 多用户与权限管理</h2>
+<h3>阶段一：创建用户和用户组</h3>
+<pre><code>hostname; date; whoami
+sudo groupadd school 2&gt;/dev/null || true
+sudo useradd -m yinhe 2&gt;/dev/null || true
+sudo useradd -m kylin 2&gt;/dev/null || true
+sudo usermod -aG school yinhe
+sudo usermod -aG school kylin</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>hostname; date; whoami</code>：输出环境信息，便于截图证明实验环境。</li>
+<li><code>sudo groupadd school 2&gt;/dev/null || true</code>：创建 <code>school</code> 用户组；<code>2&gt;/dev/null</code> 隐藏组已存在等错误；<code>|| true</code> 表示即使命令失败也让整体返回成功，便于重复实验。</li>
+<li><code>sudo useradd -m yinhe 2&gt;/dev/null || true</code>：创建 <code>yinhe</code> 用户；<code>-m</code> 自动创建用户主目录。</li>
+<li><code>sudo useradd -m kylin 2&gt;/dev/null || true</code>：创建 <code>kylin</code> 用户；<code>-m</code> 同样表示创建主目录。</li>
+<li><code>sudo usermod -aG school yinhe</code>：把 <code>yinhe</code> 加入 <code>school</code> 组；<code>-G school</code> 指定附加组；<code>-a</code> 表示 append，保留原有附加组。</li>
+<li><code>sudo usermod -aG school kylin</code>：把 <code>kylin</code> 加入 <code>school</code> 组，参数含义同上。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>用户组用于统一管理多个用户的访问权限。</li>
+<li><code>usermod -aG</code> 必须带 <code>-a</code>，否则可能覆盖用户原来的附加组。</li>
+</ul>
+<h3>阶段二：配置共享目录和 ACL</h3>
+<pre><code>sudo mkdir -p /root/network
+sudo chown yinhe:school /root/network
+sudo chmod 3770 /root/network
+sudo setfacl -m g:school:x /root
+sudo setfacl -m d:g:school:rwx /root/network
+sudo touch /root/network/file1
+sudo chown yinhe:school /root/network/file1
+sudo setfacl -m u:kylin:rw /root/network/file1</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>sudo mkdir -p /root/network</code>：创建共享目录；<code>-p</code> 允许父目录存在时继续执行。</li>
+<li><code>sudo chown yinhe:school /root/network</code>：修改目录属主和属组；<code>yinhe:school</code> 表示属主为 <code>yinhe</code>，属组为 <code>school</code>。</li>
+<li><code>sudo chmod 3770 /root/network</code>：设置目录权限；第一位 <code>3</code> 表示特殊权限 <code>setgid(2)+sticky(1)</code>；第二位 <code>7</code> 表示属主 <code>rwx</code>；第三位 <code>7</code> 表示属组 <code>rwx</code>；第四位 <code>0</code> 表示其他用户无权限。</li>
+<li><code>sudo setfacl -m g:school:x /root</code>：修改 <code>/root</code> 的 ACL；<code>-m</code> 表示 modify；<code>g:school:x</code> 表示给 <code>school</code> 组增加进入目录所需的执行权限。</li>
+<li><code>sudo setfacl -m d:g:school:rwx /root/network</code>：设置默认 ACL；<code>d:</code> 表示 default，新建文件或目录会继承该默认权限；<code>g:school:rwx</code> 表示 <code>school</code> 组默认拥有读写执行权限。</li>
+<li><code>sudo touch /root/network/file1</code>：创建测试文件 <code>file1</code>，如果文件已存在则更新其时间戳。</li>
+<li><code>sudo chown yinhe:school /root/network/file1</code>：设置 <code>file1</code> 属主为 <code>yinhe</code>，属组为 <code>school</code>。</li>
+<li><code>sudo setfacl -m u:kylin:rw /root/network/file1</code>：给用户 <code>kylin</code> 单独设置 ACL；<code>u:kylin:rw</code> 表示用户 <code>kylin</code> 对该文件有读写权限。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li><code>setgid</code> 让目录中新建文件继承目录属组，适合共享目录。</li>
+<li><code>sticky</code> 限制普通用户删除他人文件，常见于 <code>/tmp</code> 目录。</li>
+<li>ACL 可以在传统属主、属组、其他用户三类权限之外，为指定用户或组单独授权。</li>
+</ul>
+<h3>阶段三：查看权限配置结果</h3>
+<pre><code>id yinhe
+id kylin
+ls -ld /root /root/network
+getfacl /root/network/file1</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>id yinhe</code>：查看 <code>yinhe</code> 的 UID、GID 和所属用户组。</li>
+<li><code>id kylin</code>：查看 <code>kylin</code> 的 UID、GID 和所属用户组。</li>
+<li><code>ls -ld /root /root/network</code>：查看目录本身权限；<code>-l</code> 长格式显示；<code>-d</code> 表示显示目录本身而不是目录内容。</li>
+<li><code>getfacl /root/network/file1</code>：查看文件 ACL，确认 <code>kylin</code> 用户是否获得读写权限。</li>
+</ul>
+<h3>阶段四：验证 sticky 位限制</h3>
+<pre><code>sudo -u yinhe bash -c &#x27;echo yinhe-file &gt; /root/network/yinhe.txt&#x27;
+sudo -u kylin bash -c &#x27;rm /root/network/yinhe.txt&#x27;
+ls -l /root/network</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>sudo -u yinhe bash -c &#x27;echo yinhe-file &gt; /root/network/yinhe.txt&#x27;</code>：以 <code>yinhe</code> 身份执行命令；<code>-u yinhe</code> 指定运行用户；<code>bash -c</code> 表示让 bash 执行后面的字符串；<code>echo</code> 输出文本；<code>&gt;</code> 写入文件。</li>
+<li><code>sudo -u kylin bash -c &#x27;rm /root/network/yinhe.txt&#x27;</code>：以 <code>kylin</code> 身份尝试删除 <code>yinhe</code> 创建的文件；<code>rm</code> 用于删除文件。</li>
+<li><code>ls -l /root/network</code>：查看共享目录中文件是否仍然存在；<code>-l</code> 显示详细信息。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>即使 <code>kylin</code> 属于同一用户组，也不能删除 <code>yinhe</code> 的文件，因为目录设置了 sticky 位。</li>
+</ul>
+<h2>9.4.2 文件快速定位与管理</h2>
+<h3>阶段一：文件定位</h3>
+<pre><code>hostname; date; whoami
+find /usr -name &quot;*pass*&quot; | head -n 20
+find /usr -name &quot;kmod-protect.list&quot; | head -n 5
+find /dev \( -name &quot;vd*&quot; -o -name &quot;sd*&quot; \) -type b
+sudo find /etc -type f -size 0 -exec ls -l {} \; | head -n 20</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>hostname; date; whoami</code>：输出主机名、时间和用户信息。</li>
+<li><code>find /usr -name &quot;*pass*&quot; | head -n 20</code>：在 <code>/usr</code> 下按文件名查找；<code>-name &quot;*pass*&quot;</code> 表示文件名包含 <code>pass</code>；<code>*</code> 是通配符；<code>|</code> 把结果交给 <code>head</code>；<code>head -n 20</code> 只显示前 20 行。</li>
+<li><code>find /usr -name &quot;kmod-protect.list&quot; | head -n 5</code>：在 <code>/usr</code> 下查找教材指定文件；<code>-name</code> 精确匹配文件名；<code>head -n 5</code> 限制显示前 5 行。</li>
+<li><code>find /dev \( -name &quot;vd*&quot; -o -name &quot;sd*&quot; \) -type b</code>：在 <code>/dev</code> 下查找块设备；<code>\(</code> 和 <code>\)</code> 用于分组条件；<code>-o</code> 表示 OR；<code>-name &quot;vd*&quot;</code> 匹配 virtio 磁盘设备；<code>-name &quot;sd*&quot;</code> 匹配 SCSI/SATA 磁盘设备；<code>-type b</code> 只匹配块设备文件。</li>
+<li><code>sudo find /etc -type f -size 0 -exec ls -l {} \; | head -n 20</code>：查找 <code>/etc</code> 下大小为 0 的普通文件；<code>-type f</code> 表示普通文件；<code>-size 0</code> 表示大小为 0；<code>-exec ls -l {} \;</code> 对每个结果执行 <code>ls -l</code>；<code>{}</code> 代表当前找到的文件；<code>\;</code> 表示 <code>-exec</code> 命令结束；<code>head -n 20</code> 限制输出前 20 行。</li>
+</ul>
+<h3>阶段二：账号文本与日志查看</h3>
+<pre><code>grep &quot;nologin$&quot; /etc/passwd
+sudo tail -n 20 /var/log/messages || sudo journalctl -n 20</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>grep &quot;nologin$&quot; /etc/passwd</code>：在 <code>/etc/passwd</code> 中筛选以 <code>nologin</code> 结尾的行；<code>grep</code> 按模式匹配文本；<code>$</code> 在正则表达式中表示行尾。</li>
+<li><code>sudo tail -n 20 /var/log/messages || sudo journalctl -n 20</code>：优先查看传统日志文件最后 20 行；<code>tail -n 20</code> 表示末尾 20 行；如果 <code>/var/log/messages</code> 不存在，则通过 <code>||</code> 执行 <code>journalctl -n 20</code>；<code>journalctl</code> 查看 systemd 日志；<code>-n 20</code> 显示最近 20 条。</li>
+</ul>
+<h3>阶段三：文件类型与元数据</h3>
+<pre><code>file /etc/passwd
+stat /etc/passwd</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>file /etc/passwd</code>：识别文件类型，判断它是文本、二进制、目录还是其他类型。</li>
+<li><code>stat /etc/passwd</code>：查看文件元数据，包括大小、inode、权限、访问时间、修改时间、状态改变时间等。</li>
+</ul>
+<h2>9.4.3 数据检索与处理</h2>
+<h3>阶段一：上下文检索</h3>
+<pre><code>hostname; date; whoami
+grep -A 2 root /etc/passwd
+grep -B 1 daemon /etc/passwd
+grep -C 1 daemon /etc/passwd
+grep --color=always -n -A 2 root /etc/passwd</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>hostname; date; whoami</code>：输出主机名、时间和当前用户。</li>
+<li><code>grep -A 2 root /etc/passwd</code>：查找包含 <code>root</code> 的行；<code>-A 2</code> 表示 after，额外显示匹配行后 2 行。</li>
+<li><code>grep -B 1 daemon /etc/passwd</code>：查找包含 <code>daemon</code> 的行；<code>-B 1</code> 表示 before，额外显示匹配行前 1 行。</li>
+<li><code>grep -C 1 daemon /etc/passwd</code>：<code>-C 1</code> 表示 context，额外显示匹配行前后各 1 行。</li>
+<li><code>grep --color=always -n -A 2 root /etc/passwd</code>：高亮显示匹配结果；<code>--color=always</code> 总是输出颜色标记；<code>-n</code> 显示行号；<code>-A 2</code> 显示匹配行后 2 行。</li>
+</ul>
+<h3>阶段二：计数结果对比</h3>
+<pre><code>grep -c root /etc/passwd
+grep root /etc/passwd | wc -l</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>grep -c root /etc/passwd</code>：统计匹配 <code>root</code> 的行数；<code>-c</code> 表示 count，只输出匹配行数量。</li>
+<li><code>grep root /etc/passwd | wc -l</code>：先输出匹配 <code>root</code> 的行，再通过管道交给 <code>wc</code>；<code>wc -l</code> 统计输入的行数。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>两种方法在本实验中通常结果一致。</li>
+<li><code>grep -c</code> 是 grep 自带计数；<code>wc -l</code> 是通过管道对 grep 输出再统计。</li>
+</ul>
+<h3>阶段三：扩展正则表达式</h3>
+<pre><code>mkdir -p /tmp/grep_lab
+cd /tmp/grep_lab
+touch file{1..10}
+ls -l | grep -E &#x27;file1{1,}&#x27;</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>mkdir -p /tmp/grep_lab</code>：创建临时实验目录；<code>-p</code> 防止目录已存在时报错。</li>
+<li><code>cd /tmp/grep_lab</code>：进入临时实验目录。</li>
+<li><code>touch file{1..10}</code>：创建 <code>file1</code> 到 <code>file10</code>；<code>{1..10}</code> 是 shell 大括号展开。</li>
+<li><code>ls -l | grep -E &#x27;file1{1,}&#x27;</code>：列出文件并用扩展正则筛选；<code>ls -l</code> 长格式列出；<code>|</code> 管道；<code>grep -E</code> 启用扩展正则；<code>1{1,}</code> 表示字符 <code>1</code> 出现至少 1 次。</li>
+</ul>
+<h3>阶段四：普通字符串与忽略大小写</h3>
+<pre><code>cd ~
+printf &#x27;a?b\na\\?b\n&#x27; &gt; test
+cat test
+egrep --color=always &#x27;\?&#x27; test
+fgrep --color=always &#x27;\?&#x27; test
+echo &#x27;AaBbCc&#x27; | grep --color=always -i -E &#x27;A|b|c&#x27;</code></pre>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>cd ~</code>：回到当前用户主目录；<code>~</code> 表示主目录。</li>
+<li><code>printf &#x27;a?b\na\\?b\n&#x27; &gt; test</code>：向 <code>test</code> 文件写入两行测试文本；<code>printf</code> 按格式输出；<code>\n</code> 表示换行；<code>\\</code> 表示输出一个反斜杠；<code>&gt;</code> 表示写入文件。</li>
+<li><code>cat test</code>：显示 <code>test</code> 文件内容。</li>
+<li><code>egrep --color=always &#x27;\?&#x27; test</code>：使用扩展正则匹配；<code>egrep</code> 等价于 <code>grep -E</code>；<code>--color=always</code> 高亮匹配部分；<code>\?</code> 表示把 <code>?</code> 当普通字符匹配。</li>
+<li><code>fgrep --color=always &#x27;\?&#x27; test</code>：使用固定字符串匹配；<code>fgrep</code> 等价于 <code>grep -F</code>；此时 <code>\?</code> 会按反斜杠加问号两个普通字符理解。</li>
+<li><code>echo &#x27;AaBbCc&#x27; | grep --color=always -i -E &#x27;A|b|c&#x27;</code>：输出字符串并匹配；<code>echo</code> 输出文本；<code>|</code> 管道；<code>-i</code> 忽略大小写；<code>-E</code> 启用扩展正则；<code>A|b|c</code> 表示匹配 <code>A</code> 或 <code>b</code> 或 <code>c</code>。</li>
+</ul>
 <h2>9.6.1 课程设计：容器化负载均衡</h2>
 <h3>阶段一：启动 Docker 服务</h3>
 <pre><code>sudo yum install -y docker || sudo dnf install -y docker
 sudo systemctl enable --now docker
 sudo systemctl status docker
 sudo docker version</code></pre>
-<p>截图内容：Docker 服务为 <code>active/running</code>，且能显示版本信息。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>sudo yum install -y docker || sudo dnf install -y docker</code>：安装 Docker；<code>yum install</code> 和 <code>dnf install</code> 都是包管理安装命令；<code>-y</code> 自动确认安装；<code>||</code> 表示如果 <code>yum</code> 不可用或失败，则尝试 <code>dnf</code>。</li>
+<li><code>sudo systemctl enable --now docker</code>：设置 Docker 服务开机自启并立即启动；<code>enable</code> 设置开机启动；<code>--now</code> 表示同时立刻启动服务。</li>
+<li><code>sudo systemctl status docker</code>：查看 Docker 服务状态，重点看 <code>active (running)</code>。</li>
+<li><code>sudo docker version</code>：查看 Docker 客户端和服务端版本，验证 Docker 可用。</li>
+</ul>
 <h3>阶段二：准备基础镜像</h3>
 <pre><code>sudo docker pull cr.kylinos.cn/kylin/kylin-server-init:v10sp1
 sudo docker tag cr.kylinos.cn/kylin/kylin-server-init:v10sp1 kylin-base:v10sp1
 sudo docker run --rm kylin-base:v10sp1 uname -m
 sudo docker images</code></pre>
-<p>截图内容：<code>kylin-base:v10sp1</code> 存在，<code>uname -m</code> 输出 <code>x86_64</code>。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>sudo docker pull cr.kylinos.cn/kylin/kylin-server-init:v10sp1</code>：从镜像仓库拉取 Kylin 基础镜像；冒号后的 <code>v10sp1</code> 是镜像标签。</li>
+<li><code>sudo docker tag cr.kylinos.cn/kylin/kylin-server-init:v10sp1 kylin-base:v10sp1</code>：给原镜像打本地标签；<code>tag</code> 不复制镜像内容，只新增一个便于引用的名字。</li>
+<li><code>sudo docker run --rm kylin-base:v10sp1 uname -m</code>：运行临时容器执行 <code>uname -m</code>；<code>--rm</code> 表示容器退出后自动删除；<code>uname -m</code> 输出 CPU 架构。</li>
+<li><code>sudo docker images</code>：列出本地镜像，确认 <code>kylin-base:v10sp1</code> 存在。</li>
+</ul>
 <h3>阶段三：构建 Nginx 镜像</h3>
 <pre><code>mkdir -p ~/kylin861/nginx
 cd ~/kylin861/nginx
@@ -233,7 +468,23 @@ CMD [&quot;/bin/bash&quot;]
 EOF
 sudo docker build -t kylin-nginx:861 .
 sudo docker images | grep kylin-nginx</code></pre>
-<p>截图内容：<code>kylin-nginx:861</code> 构建成功。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>mkdir -p ~/kylin861/nginx</code>：创建 Nginx 镜像构建目录；<code>-p</code> 允许递归创建。</li>
+<li><code>cd ~/kylin861/nginx</code>：进入 Nginx 构建目录。</li>
+<li><code>curl -LO http://nginx.org/download/nginx-1.15.2.tar.gz</code>：下载 Nginx 源码包；<code>-L</code> 跟随重定向；<code>-O</code> 使用远端文件名保存。</li>
+<li><code>cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27; ... EOF</code>：创建 Dockerfile。</li>
+<li><code>FROM kylin-base:v10sp1</code>：Dockerfile 指令，指定基础镜像。</li>
+<li><code>RUN yum -y install gcc make pcre-devel zlib-devel tar zlib</code>：在镜像构建时安装编译依赖；<code>RUN</code> 表示构建阶段执行命令；<code>-y</code> 自动确认安装。</li>
+<li><code>ADD nginx-1.15.2.tar.gz /usr/src/</code>：把源码压缩包加入镜像；<code>ADD</code> 会把本地文件复制到镜像中，tar 包通常会自动解压。</li>
+<li><code>RUN cd ... &amp;&amp; ...</code>：进入源码目录并编译安装；<code>&amp;&amp;</code> 保证前一步成功才继续；<code>\</code> 表示 Dockerfile 中命令换行。</li>
+<li><code>./configure --prefix=/usr/local/nginx</code>：配置 Nginx 编译参数；<code>--prefix</code> 指定安装目录。</li>
+<li><code>make &amp;&amp; make install</code>：编译并安装。</li>
+<li><code>ln -sf /usr/local/nginx/sbin/nginx /usr/local/sbin/nginx</code>：创建软链接；<code>-s</code> 表示 symbolic link；<code>-f</code> 表示覆盖已有目标。</li>
+<li><code>CMD [&quot;/bin/bash&quot;]</code>：容器默认启动命令为 bash。</li>
+<li><code>sudo docker build -t kylin-nginx:861 .</code>：构建镜像；<code>-t</code> 指定镜像名和标签；<code>.</code> 表示当前目录作为构建上下文。</li>
+<li><code>sudo docker images | grep kylin-nginx</code>：列出镜像并筛选 Nginx 镜像；<code>grep</code> 用于文本过滤。</li>
+</ul>
 <h3>阶段四：构建 Tomcat 镜像</h3>
 <pre><code>mkdir -p ~/kylin861/tomcat
 cd ~/kylin861/tomcat
@@ -251,18 +502,46 @@ CMD [&quot;/usr/local/apache-tomcat-9.0.68/bin/catalina.sh&quot;,&quot;run&quot;
 EOF
 sudo docker build -t kylin-tomcat:861 .
 sudo docker images | grep kylin-tomcat</code></pre>
-<p>截图内容：<code>kylin-tomcat:861</code> 构建成功。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>mkdir -p ~/kylin861/tomcat</code>：创建 Tomcat 构建目录；<code>-p</code> 递归创建。</li>
+<li><code>cd ~/kylin861/tomcat</code>：进入 Tomcat 构建目录。</li>
+<li><code>curl -LO ...apache-tomcat-9.0.68.zip</code>：下载 Tomcat 安装包；<code>-L</code> 跟随重定向；<code>-O</code> 按远端文件名保存。</li>
+<li><code>cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27; ... EOF</code>：创建 Tomcat 镜像的 Dockerfile。</li>
+<li><code>FROM kylin-base:v10sp1</code>：使用 Kylin 基础镜像。</li>
+<li><code>ADD apache-tomcat-9.0.68.zip /usr/local/</code>：把 Tomcat 压缩包复制进镜像。</li>
+<li><code>RUN yum -y install zip unzip java-1.8.0-openjdk</code>：安装解压工具和 Java 运行环境；<code>-y</code> 自动确认。</li>
+<li><code>RUN unzip -q ... -d /usr/local/</code>：解压 Tomcat；<code>-q</code> 静默输出；<code>-d</code> 指定解压目录。</li>
+<li><code>ENV JAVA_HOME=...</code>：设置 Java 环境变量。</li>
+<li><code>ENV CATALINA_HOME=...</code>：设置 Tomcat 主目录环境变量。</li>
+<li><code>ENV PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin</code>：把 Java 和 Tomcat 命令目录加入 PATH。</li>
+<li><code>RUN chmod +x .../catalina.sh</code>：给启动脚本增加执行权限；<code>+x</code> 表示可执行。</li>
+<li><code>CMD [&quot;/usr/local/apache-tomcat-9.0.68/bin/catalina.sh&quot;,&quot;run&quot;]</code>：容器启动时以前台方式运行 Tomcat；<code>run</code> 表示不放到后台，便于 Docker 管理进程。</li>
+<li><code>sudo docker build -t kylin-tomcat:861 .</code>：构建 Tomcat 镜像；<code>-t</code> 指定标签；<code>.</code> 表示当前目录构建上下文。</li>
+<li><code>sudo docker images | grep kylin-tomcat</code>：确认 Tomcat 镜像存在。</li>
+</ul>
 <h3>阶段五：启动并验证两个 Tomcat 后端</h3>
 <pre><code>sudo docker network create kylin-lb-net 2&gt;/dev/null || true
 sudo docker rm -f tomcat1 tomcat2 nginx-lb 2&gt;/dev/null || true
 sudo docker run -d --network kylin-lb-net -p 8080:8080 --name tomcat1 kylin-tomcat:861
 sudo docker run -d --network kylin-lb-net -p 8081:8080 --name tomcat2 kylin-tomcat:861
-sleep 15</code></pre>
-<pre><code>sudo docker exec tomcat1 bash -c &#x27;echo KYLIN-TOMCAT-1 &gt; /usr/local/apache-tomcat-9.0.68/webapps/ROOT/index.jsp&#x27;
+sleep 15
+sudo docker exec tomcat1 bash -c &#x27;echo KYLIN-TOMCAT-1 &gt; /usr/local/apache-tomcat-9.0.68/webapps/ROOT/index.jsp&#x27;
 sudo docker exec tomcat2 bash -c &#x27;echo KYLIN-TOMCAT-2 &gt; /usr/local/apache-tomcat-9.0.68/webapps/ROOT/index.jsp&#x27;
 curl http://127.0.0.1:8080
 curl http://127.0.0.1:8081</code></pre>
-<p>截图内容：8080 返回 <code>KYLIN-TOMCAT-1</code>，8081 返回 <code>KYLIN-TOMCAT-2</code>。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>sudo docker network create kylin-lb-net 2&gt;/dev/null || true</code>：创建自定义 Docker 网络；同一网络中的容器可通过容器名互相访问；<code>2&gt;/dev/null || true</code> 便于重复执行。</li>
+<li><code>sudo docker rm -f tomcat1 tomcat2 nginx-lb 2&gt;/dev/null || true</code>：删除历史同名容器；<code>rm</code> 删除容器；<code>-f</code> 强制停止并删除；<code>2&gt;/dev/null || true</code> 忽略容器不存在的情况。</li>
+<li><code>sudo docker run -d --network kylin-lb-net -p 8080:8080 --name tomcat1 kylin-tomcat:861</code>：启动第一个 Tomcat 容器；<code>run</code> 创建并运行容器；<code>-d</code> 后台运行；<code>--network</code> 指定加入的网络；<code>-p 8080:8080</code> 表示宿主机 8080 映射到容器 8080；<code>--name tomcat1</code> 指定容器名；最后是镜像名。</li>
+<li><code>sudo docker run -d --network kylin-lb-net -p 8081:8080 --name tomcat2 kylin-tomcat:861</code>：启动第二个 Tomcat；宿主机 8081 映射到容器 8080，避免端口冲突。</li>
+<li><code>sleep 15</code>：等待 15 秒，让 Tomcat 完成启动。</li>
+<li><code>sudo docker exec tomcat1 bash -c &#x27;echo KYLIN-TOMCAT-1 &gt; .../index.jsp&#x27;</code>：在 <code>tomcat1</code> 容器内执行命令；<code>exec</code> 进入运行中容器执行命令；<code>bash -c</code> 执行字符串；<code>echo</code> 写入节点标识；<code>&gt;</code> 重定向到 Tomcat 首页文件。</li>
+<li><code>sudo docker exec tomcat2 bash -c &#x27;echo KYLIN-TOMCAT-2 &gt; .../index.jsp&#x27;</code>：给第二个后端写入不同标识，便于观察负载均衡轮询。</li>
+<li><code>curl http://127.0.0.1:8080</code>：访问宿主机 8080 端口，验证 <code>tomcat1</code>。</li>
+<li><code>curl http://127.0.0.1:8081</code>：访问宿主机 8081 端口，验证 <code>tomcat2</code>。</li>
+</ul>
 <h3>阶段六：配置并启动 Nginx 负载均衡</h3>
 <pre><code>sudo docker run -itd --network kylin-lb-net -p 80:80 --name nginx-lb kylin-nginx:861
 sudo docker exec -i nginx-lb tee /usr/local/nginx/conf/nginx.conf &gt; /dev/null &lt;&lt;&#x27;EOF&#x27;
@@ -290,27 +569,50 @@ http {
         }
     }
 }
-EOF</code></pre>
-<pre><code>sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx -t
+EOF
+sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx -t
 sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx
 sudo docker ps
 for i in {1..8}; do curl -s http://127.0.0.1; echo; done</code></pre>
-<p>截图内容：<code>nginx -t</code> 成功，连续访问 80 端口时出现两个 Tomcat 的不同响应。</p>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>sudo docker run -itd --network kylin-lb-net -p 80:80 --name nginx-lb kylin-nginx:861</code>：启动 Nginx 容器；<code>-i</code> 保持标准输入打开；<code>-t</code> 分配伪终端；<code>-d</code> 后台运行；<code>--network</code> 加入容器网络；<code>-p 80:80</code> 映射宿主机 80 到容器 80；<code>--name</code> 指定容器名。</li>
+<li><code>sudo docker exec -i nginx-lb tee /usr/local/nginx/conf/nginx.conf &gt; /dev/null &lt;&lt;&#x27;EOF&#x27; ... EOF</code>：把本机 here document 内容写入容器内 Nginx 配置文件；<code>exec -i</code> 让容器命令接收标准输入；<code>tee</code> 把输入写到指定文件；本机的 <code>&gt; /dev/null</code> 用来隐藏 tee 回显；<code>&lt;&lt;&#x27;EOF&#x27;</code> 提供多行配置文本。</li>
+<li><code>worker_processes 1;</code>：Nginx 配置，设置 1 个 worker 进程。</li>
+<li><code>events { worker_connections 1024; }</code>：每个 worker 最多处理 1024 个连接。</li>
+<li><code>http { ... }</code>：HTTP 服务配置块。</li>
+<li><code>include mime.types;</code>：加载 MIME 类型映射。</li>
+<li><code>default_type application/octet-stream;</code>：默认响应类型。</li>
+<li><code>upstream web { server tomcat1:8080; server tomcat2:8080; }</code>：定义后端服务器组 <code>web</code>；Docker 自定义网络支持用容器名 <code>tomcat1</code>、<code>tomcat2</code> 解析到容器 IP。</li>
+<li><code>listen 80;</code>：Nginx 在 80 端口监听。</li>
+<li><code>location / { proxy_pass http://web; }</code>：把根路径请求反向代理到 upstream <code>web</code>。</li>
+<li><code>sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx -t</code>：在 Nginx 容器内检查配置；<code>nginx -t</code> 表示 test configuration。</li>
+<li><code>sudo docker exec nginx-lb /usr/local/nginx/sbin/nginx</code>：启动 Nginx 服务。</li>
+<li><code>sudo docker ps</code>：查看正在运行的容器。</li>
+<li><code>for i in {1..8}; do curl -s http://127.0.0.1; echo; done</code>：循环访问 8 次；<code>for ... do ... done</code> 是 shell 循环；<code>{1..8}</code> 生成 1 到 8；<code>curl -s</code> 静默模式，不显示进度条；<code>echo</code> 输出换行。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>Nginx 默认 upstream 轮询会把请求分发给 <code>tomcat1</code> 和 <code>tomcat2</code>。</li>
+<li>连续访问出现两个不同后端标识，说明负载均衡配置生效。</li>
+</ul>
 <h3>阶段七：容错验证</h3>
 <pre><code>sudo docker stop tomcat1
-for i in {1..5}; do curl -s http://127.0.0.1; echo; done</code></pre>
-<p>截图内容：停止 <code>tomcat1</code> 后，服务仍可由 <code>tomcat2</code> 响应。</p>
-<pre><code>sudo docker start tomcat1
+for i in {1..5}; do curl -s http://127.0.0.1; echo; done
+sudo docker start tomcat1
 sudo docker ps</code></pre>
-<p>截图内容：<code>tomcat1</code> 恢复后三个容器均处于运行状态。</p>
-<h2>提交前自查</h2>
-<ol>
-<li>实验报告包含 5 个实验：9.1.1、9.2.4、9.4.1、9.4.2、9.4.3。</li>
-<li>进程调度实验至少保留编译、调整前、调整后、<code>top</code> 观察四类截图。</li>
-<li>内存回收实验至少保留初始内存、内存下降、OOM 日志三类截图。</li>
-<li>课程设计至少保留 Docker 服务、镜像构建、Tomcat 后端、Nginx 轮询、容错测试截图。</li>
-<li>Word 封面信息、红色待替换内容和截图位置全部处理完成后再导出提交。</li>
-</ol>
+<p>命令与参数解释：</p>
+<ul>
+<li><code>sudo docker stop tomcat1</code>：停止 <code>tomcat1</code> 容器，用于模拟一个后端故障。</li>
+<li><code>for i in {1..5}; do curl -s http://127.0.0.1; echo; done</code>：连续访问负载均衡入口；<code>curl -s</code> 不显示进度信息，只显示响应内容。</li>
+<li><code>sudo docker start tomcat1</code>：重新启动 <code>tomcat1</code> 容器。</li>
+<li><code>sudo docker ps</code>：确认 <code>nginx-lb</code>、<code>tomcat1</code>、<code>tomcat2</code> 都处于运行状态。</li>
+</ul>
+<p>答辩说明：</p>
+<ul>
+<li>停止 <code>tomcat1</code> 后，如果服务仍能返回 <code>KYLIN-TOMCAT-2</code>，说明负载均衡系统具有基本容错能力。</li>
+<li>恢复 <code>tomcat1</code> 后再次查看容器状态，证明系统可恢复到双后端运行状态。</li>
+</ul>
   </main>
 </body>
 </html>
