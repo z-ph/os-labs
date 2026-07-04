@@ -300,14 +300,15 @@ sudo dpkg -i cc-switch_1.0.0_amd64.deb
 dpkg -l | grep cc-switch
 which cc-switch
 cc-switch --version
-cc-switch switch deb-test
-cc-switch current</code></pre>
+cc-switch --help
+cc-switch env tools</code></pre>
     <p>命令与参数解释：</p>
     <ul>
       <li><code>dpkg-deb --build</code> 将目录构建为 <code>.deb</code> 文件。</li>
       <li><code>sudo dpkg -i</code> 安装 DEB 包。</li>
       <li><code>dpkg -l | grep cc-switch</code> 查询包是否已安装。</li>
       <li><code>which cc-switch</code> 确认命令已进入系统 PATH。</li>
+      <li><code>cc-switch --help</code> 和 <code>cc-switch env tools</code> 是真实 cc-switch-cli 支持的验证命令，用于确认安装后的 CLI 可以正常解析参数并执行子命令。</li>
     </ul>
     <div class="shot">截图内容：截取构建成功、安装成功、包查询和命令运行输出。</div>
     <div class="placeholder">图片占位符：DEB 构建与安装验证截图<br>需要包含 .deb 文件、dpkg -i、dpkg -l、cc-switch --version 输出</div>
@@ -410,8 +411,8 @@ rpm -qa | grep cc-switch
 rpm -ql cc-switch
 which cc-switch
 cc-switch --version
-cc-switch switch rpm-test
-cc-switch current</code></pre>
+cc-switch --help
+cc-switch env tools</code></pre>
     <p>命令与参数解释：</p>
     <ul>
       <li><code>rpmbuild -ba</code> 同时构建二进制 RPM 和源码 RPM。</li>
