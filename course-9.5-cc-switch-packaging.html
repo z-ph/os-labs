@@ -212,44 +212,38 @@ which rpmbuild || true</code></pre>
     <div class="result">报告结论：本项目已完成基础环境确认，系统架构与包管理工具满足 cc switch 适配打包验证要求。</div>
 
     <h2 id="source">三、准备 cc switch 源文件</h2>
-    <p>如果你已经有真实的 <code>cc switch</code> 可执行文件，把它复制为 <code>source/cc-switch</code>。如果暂时没有，可以先用下面的脚本版命令行工具完成打包流程，后续再替换为真实二进制。</p>
+    <p>本课设使用开源项目 <a href="https://github.com/SaladDay/cc-switch-cli" target="_blank" rel="noopener">SaladDay/cc-switch-cli</a> 的 Linux Release 包作为真实打包对象。你的 WSL Ubuntu 截图中 <code>uname -m</code> 输出为 <code>x86_64</code>，因此选择 <strong>linux-x64</strong> 包；如果在 ARM64/aarch64 的 Kylin 或 Linux 环境中操作，才选择 <strong>linux-arm64</strong> 包。一般不要选 <code>musl</code> 包，除非系统是 Alpine 这类 musl libc 环境。</p>
     <pre><code>cd ~/os-course/cc-switch-packaging
 mkdir -p source
-cat &gt; source/cc-switch &lt;&lt;'EOF'
-#!/usr/bin/env bash
-set -e
+cd source
 
-case "${1:-}" in
-  --version)
-    echo "cc-switch 1.0.0"
-    ;;
-  current)
-    echo "current profile: default"
-    ;;
-  switch)
-    profile="${2:-default}"
-    mkdir -p "$HOME/.config/cc-switch"
-    echo "$profile" &gt; "$HOME/.config/cc-switch/profile"
-    echo "switched to profile: $profile"
-    ;;
-  *)
-    echo "Usage: cc-switch --version | current | switch &lt;profile&gt;"
-    ;;
-esac
-EOF
-chmod +x source/cc-switch
-./source/cc-switch --version
-./source/cc-switch switch kylin
-./source/cc-switch current</code></pre>
+# x86_64 / amd64 环境选择 linux-x64
+curl -LO https://github.com/SaladDay/cc-switch-cli/releases/download/v5.8.7/cc-switch-cli-v5.8.7-linux-x64.tar.gz
+tar -zxvf cc-switch-cli-v5.8.7-linux-x64.tar.gz
+
+# 如果 uname -m 显示 aarch64，再改用下面的 arm64 包：
+# curl -LO https://github.com/SaladDay/cc-switch-cli/releases/download/v5.8.7/cc-switch-cli-v5.8.7-linux-arm64.tar.gz
+# tar -zxvf cc-switch-cli-v5.8.7-linux-arm64.tar.gz
+
+find . -maxdepth 3 -type f -perm -111 -print
+if [ ! -f cc-switch ]; then
+    cp "$(find . -maxdepth 3 -type f -perm -111 | head -n 1)" cc-switch
+fi
+chmod +x cc-switch
+./cc-switch --version
+./cc-switch --help
+cd ..</code></pre>
     <p>命令与参数解释：</p>
     <ul>
-      <li><code>cat &gt; source/cc-switch &lt;&lt;'EOF'</code> 将脚本内容写入文件。</li>
-      <li><code>chmod +x</code> 增加可执行权限。</li>
-      <li><code>--version</code>、<code>switch</code>、<code>current</code> 是后续安装验证要使用的功能点。</li>
+      <li><code>cc-switch-cli-v5.8.7-linux-x64.tar.gz</code> 适用于 <code>x86_64</code> / <code>amd64</code> Linux 环境，例如你的 WSL Ubuntu。</li>
+      <li><code>cc-switch-cli-v5.8.7-linux-arm64.tar.gz</code> 适用于 <code>aarch64</code> / ARM64 环境。</li>
+      <li><code>find . -maxdepth 3 -type f -perm -111</code> 查找解压目录中的可执行文件。</li>
+      <li><code>cp ... cc-switch</code> 将真实 Release 可执行文件统一命名为 <code>source/cc-switch</code>，便于后续 DEB/RPM 打包流程复用。</li>
+      <li><code>--version</code> 和 <code>--help</code> 用于证明打包对象是真实可执行的开源 CLI 程序。</li>
     </ul>
-    <div class="shot">截图内容：截取 <code>source/cc-switch</code> 的执行结果，证明打包对象本身可运行。</div>
-    <div class="placeholder">图片占位符：cc switch 源文件验证截图<br>需要包含 --version、switch kylin、current 的输出</div>
-    <div class="result">报告结论：cc switch 在打包前能够正常执行，具备进入 DEB/RPM 适配打包流程的基础条件。</div>
+    <div class="shot">截图内容：截取下载链接、解压结果、<code>find</code> 找到的可执行文件，以及 <code>cc-switch --version</code> / <code>cc-switch --help</code> 的输出，证明打包对象来自真实开源 Release 且可运行。</div>
+    <div class="placeholder">图片占位符：cc switch 开源 Release 验证截图<br>需要包含 linux-x64 下载包、解压后的可执行文件、--version 和 --help 输出</div>
+    <div class="result">报告结论：本项目已从 cc-switch-cli 开源 Release 获取真实 Linux x64 可执行文件，并完成打包前运行验证，具备进入 DEB/RPM 适配打包流程的基础条件。</div>
 
     <h2 id="deb">四、9.5.1 基于 DEB 格式的适配打包</h2>
     <h3>阶段 1：创建 DEB 包目录结构</h3>
@@ -280,7 +274,7 @@ Package: cc-switch
 Version: 1.0.0
 Section: utils
 Priority: optional
-Architecture: all
+Architecture: amd64
 Maintainer: zph &lt;zph@example.com&gt;
 Depends: bash
 Description: cc switch command-line tool for Kylin adaptation packaging
@@ -292,7 +286,7 @@ cat deb-root/DEBIAN/control</code></pre>
     <ul>
       <li><code>Package</code> 是软件包名称，安装和卸载时使用。</li>
       <li><code>Version</code> 是版本号，报告中可用于说明适配版本。</li>
-      <li><code>Architecture: all</code> 表示脚本包与 CPU 架构无关；如果换成二进制文件，应改成对应架构。</li>
+      <li><code>Architecture: amd64</code> 对应 <code>x86_64</code> / <code>amd64</code> Linux 二进制；如果使用 ARM64 包，应改为 <code>arm64</code>。</li>
       <li><code>Depends: bash</code> 表示运行依赖。</li>
     </ul>
     <div class="shot">截图内容：截取 <code>control</code> 文件内容，证明 DEB 元数据完整。</div>
@@ -300,9 +294,9 @@ cat deb-root/DEBIAN/control</code></pre>
     <div class="result">报告结论：DEB 控制文件已定义软件包名称、版本、架构、依赖和说明信息，满足包管理器识别要求。</div>
 
     <h3>阶段 3：构建、安装与验证 DEB 包</h3>
-    <pre><code>dpkg-deb --build deb-root cc-switch_1.0.0_all.deb
-ls -lh cc-switch_1.0.0_all.deb
-sudo dpkg -i cc-switch_1.0.0_all.deb
+    <pre><code>dpkg-deb --build deb-root cc-switch_1.0.0_amd64.deb
+ls -lh cc-switch_1.0.0_amd64.deb
+sudo dpkg -i cc-switch_1.0.0_amd64.deb
 dpkg -l | grep cc-switch
 which cc-switch
 cc-switch --version
@@ -370,7 +364,6 @@ Version:        1.0.0
 Release:        1%{?dist}
 Summary:        cc switch command-line tool for Kylin adaptation packaging
 License:        MIT
-BuildArch:      noarch
 Source0:        %{name}-%{version}.tar.gz
 Requires:       bash
 
@@ -402,17 +395,17 @@ cat ~/rpmbuild/SPECS/cc-switch.spec</code></pre>
     <p>命令与参数解释：</p>
     <ul>
       <li><code>Name</code>、<code>Version</code>、<code>Release</code> 定义 RPM 包身份。</li>
-      <li><code>BuildArch: noarch</code> 表示脚本包不依赖特定 CPU 架构。</li>
+      <li>本 spec 不设置 <code>BuildArch: noarch</code>，因为这里打包的是 Linux x64 二进制文件，RPM 应按实际构建平台生成 <code>x86_64</code> 包。</li>
       <li><code>%prep</code> 解压源码，<code>%install</code> 将文件安装到构建根目录，<code>%files</code> 声明最终打入包内的文件。</li>
     </ul>
     <div class="shot">截图内容：截取 spec 文件，重点包含元数据、install 阶段和 files 清单。</div>
-    <div class="placeholder">图片占位符：RPM spec 文件截图<br>需要包含 Name、Version、BuildArch、%install、%files</div>
+    <div class="placeholder">图片占位符：RPM spec 文件截图<br>需要包含 Name、Version、Requires、%install、%files</div>
     <div class="result">报告结论：RPM spec 文件已完整描述 cc switch 的源码、安装路径、运行依赖和文件归属。</div>
 
     <h3>阶段 4：构建、安装与验证 RPM 包</h3>
     <pre><code>rpmbuild -ba ~/rpmbuild/SPECS/cc-switch.spec
 find ~/rpmbuild/RPMS -name 'cc-switch-*.rpm' -print
-sudo rpm -ivh ~/rpmbuild/RPMS/noarch/cc-switch-1.0.0-1*.rpm
+sudo rpm -ivh ~/rpmbuild/RPMS/x86_64/cc-switch-1.0.0-1*.rpm
 rpm -qa | grep cc-switch
 rpm -ql cc-switch
 which cc-switch
@@ -456,7 +449,7 @@ which cc-switch || echo "cc-switch command removed from PATH"</code></pre>
     <h2 id="report">七、课程设计报告可直接使用的项目描述</h2>
     <p>本课程设计以 cc switch 命令行工具为适配对象，围绕银河麒麟操作系统的软件迁移与打包规范，分别完成 DEB 与 RPM 两种格式的软件包制作、安装验证、命令运行验证和卸载验证。项目首先对运行环境、CPU 架构和打包工具进行确认，然后整理 cc switch 的可执行文件和说明文档；在 DEB 方向，按照 Debian 包目录规范编写 control 文件并构建软件包；在 RPM 方向，初始化 rpmbuild 构建目录，准备源码压缩包并编写 spec 文件。最终通过 dpkg、rpm、which 和 cc-switch 命令输出证明软件包能够被系统包管理器识别、安装、查询、运行和卸载，达到了国产操作系统软件适配迁移课程设计要求。</p>
 
-    <div class="warn">注意：如果你后续把示例脚本替换成真实 <code>cc switch</code> 二进制文件，需要同步修改 <code>Architecture</code> 或 <code>BuildArch</code>。脚本可用 <code>all/noarch</code>，二进制通常应按实际架构选择 <code>amd64/x86_64/aarch64</code>。</div>
+    <div class="warn">注意：本页现在使用真实 Release 二进制文件。若你选择 <code>linux-x64</code> 包，DEB 的 <code>Architecture</code> 建议改为 <code>amd64</code>，RPM 不建议继续使用 <code>BuildArch: noarch</code>，应按实际构建环境生成 <code>x86_64</code> 包；若选择 <code>linux-arm64</code> 包，则 DEB 架构应为 <code>arm64</code>，RPM 架构应对应 <code>aarch64</code>。</div>
   </main>
 </body>
 </html>
